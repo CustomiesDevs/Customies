@@ -3,26 +3,31 @@ declare(strict_types=1);
 
 namespace customies\world;
 
+use customies\block\CustomiesBlockFactory;
 use InvalidArgumentException;
 use LevelDBWriteBatch;
 use pocketmine\block\Block;
 use pocketmine\block\BlockLegacyIds;
 use pocketmine\nbt\LittleEndianNbtSerializer;
-use pocketmine\nbt\NbtException;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\TreeRoot;
 use pocketmine\utils\BinaryStream;
 use pocketmine\world\format\Chunk;
 use pocketmine\world\format\io\ChunkData;
 use pocketmine\world\format\io\exception\CorruptedChunkException;
-use pocketmine\world\format\io\leveldb\LevelDB as PMLevelDB;
 use pocketmine\world\format\PalettedBlockArray;
+use function array_flip;
 use function array_map;
+use function array_merge;
 use function chr;
 use function count;
+use function file_get_contents;
+use function json_decode;
 use function str_repeat;
+use const pocketmine\BEDROCK_DATA_PATH;
+use const pocketmine\RESOURCE_PATH;
 
-class LevelDB extends PMLevelDB {
+class LevelDB extends \pocketmine\world\format\io\leveldb\LevelDB {
 
 	/**
 	 * deserializePaletted is copied from pocketmine/world/format/io/leveldb/LevelDB.deserializePaletted() but changes
@@ -42,18 +47,14 @@ class LevelDB extends PMLevelDB {
 		$palette = [];
 		$idMap = LegacyBlockIdToStringIdMap::getInstance();
 		for($i = 0, $paletteSize = $stream->getLInt(); $i < $paletteSize; ++$i){
-			try {
-				$offset = $stream->getOffset();
+			$offset = $stream->getOffset();
 
-				$tag = $nbt->read($stream->getBuffer(), $offset)->mustGetCompoundTag();
-				$stream->setOffset($offset);
+			$tag = $nbt->read($stream->getBuffer(), $offset)->mustGetCompoundTag();
+			$stream->setOffset($offset);
 
-				$id = $idMap->stringToLegacy($tag->getString("name")) ?? BlockLegacyIds::INFO_UPDATE;
-				$data = $tag->getShort("val");
-				$palette[] = ($id << Block::INTERNAL_METADATA_BITS) | $data;
-			} catch(NbtException $e) {
-				throw new CorruptedChunkException("Invalid blockstate NBT at offset $i in paletted storage: " . $e->getMessage(), 0, $e);
-			}
+			$id = $idMap->stringToLegacy($tag->getString("name")) ?? BlockLegacyIds::INFO_UPDATE;
+			$data = $tag->getShort("val");
+			$palette[] = ($id << Block::INTERNAL_METADATA_BITS) | $data;
 		}
 
 		return PalettedBlockArray::fromData($bitsPerBlock, $words, $palette);
@@ -69,7 +70,7 @@ class LevelDB extends PMLevelDB {
 	 */
 	public function saveChunk(int $chunkX, int $chunkZ, ChunkData $chunkData): void {
 		$idMap = LegacyBlockIdToStringIdMap::getInstance();
-		$index = PMLevelDB::chunkIndex($chunkX, $chunkZ);
+		$index = \pocketmine\world\format\io\leveldb\LevelDB::chunkIndex($chunkX, $chunkZ);
 
 		$write = new LevelDBWriteBatch();
 		$write->put($index . self::TAG_VERSION, chr(self::CURRENT_LEVEL_CHUNK_VERSION));
@@ -88,13 +89,8 @@ class LevelDB extends PMLevelDB {
 					$layers = $subChunk->getBlockLayers();
 					$subStream->putByte(count($layers));
 					foreach($layers as $blocks){
-						if($blocks->getBitsPerBlock() !== 0) {
-							$subStream->putByte($blocks->getBitsPerBlock() << 1);
-							$subStream->put($blocks->getWordArray());
-						} else {
-							$subStream->putByte(1 << 1);
-							$subStream->put(str_repeat("\x00", PalettedBlockArray::getExpectedWordArraySize(1)));
-						}
+						$subStream->putByte($blocks->getBitsPerBlock() << 1);
+						$subStream->put($blocks->getWordArray());
 
 						$palette = $blocks->getPalette();
 						$subStream->putLInt(count($palette));
@@ -118,7 +114,7 @@ class LevelDB extends PMLevelDB {
 			$write->put($index . self::TAG_DATA_2D, str_repeat("\x00", 512) . $chunk->getBiomeIdArray());
 		}
 
-		$write->put($index . self::TAG_STATE_FINALISATION, chr($chunk->isPopulated() ? self::FINALISATION_DONE : self::FINALISATION_NEEDS_POPULATION));
+		$write->put($index . self::TAG_STATE_FINALISATION, chr(self::FINALISATION_DONE));
 
 		$this->writeTags($chunkData->getTileNBT(), $index . self::TAG_BLOCK_ENTITY, $write);
 		$this->writeTags($chunkData->getEntityNBT(), $index . self::TAG_ENTITY, $write);
@@ -133,7 +129,7 @@ class LevelDB extends PMLevelDB {
 	 * This method is copied from pocketmine/world/format/io/leveldb/LevelDB.writeTags() since it is private.
 	 * @param CompoundTag[] $targets
 	 */
-	private function writeTags(array $targets, string $index, LevelDBWriteBatch $write): void {
+	private function writeTags(array $targets, string $index, \LevelDBWriteBatch $write): void {
 		if(count($targets) > 0) {
 			$nbt = new LittleEndianNbtSerializer();
 			$write->put($index, $nbt->writeMultiple(array_map(fn(CompoundTag $tag) => new TreeRoot($tag), $targets)));

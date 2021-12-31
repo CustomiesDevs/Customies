@@ -11,9 +11,7 @@ use pocketmine\network\mcpe\protocol\BiomeDefinitionListPacket;
 use pocketmine\network\mcpe\protocol\ItemComponentPacket;
 use pocketmine\network\mcpe\protocol\ResourcePackStackPacket;
 use pocketmine\network\mcpe\protocol\StartGamePacket;
-use pocketmine\network\mcpe\protocol\types\BlockPaletteEntry;
 use pocketmine\network\mcpe\protocol\types\BoolGameRule;
-use pocketmine\network\mcpe\protocol\types\CacheableNbt;
 use pocketmine\network\mcpe\protocol\types\Experiments;
 use function array_merge;
 
@@ -25,7 +23,7 @@ class CustomiesListener implements Listener {
 	public function __construct() {
 		$this->experiments = new Experiments([
 			"data_driven_items" => true,
-			"data_driven_biomes" => true,
+			"experimental_molang_features" => true,
 			"scripting" => true
 		], true);
 	}

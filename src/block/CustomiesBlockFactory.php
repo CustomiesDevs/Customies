@@ -216,7 +216,7 @@ class CustomiesBlockFactory {
 			->setTag("minecraft:block_light_absorption", CompoundTag::create()
 				->setInt("value", $block->getLightFilter()))
 			->setTag("minecraft:block_light_emission", CompoundTag::create()
-				->setFloat("value", (float)$block->getLightLevel()))
+				->setFloat("value", (float)$block->getLightLevel() / 15))
 			->setTag("minecraft:destroy_time", CompoundTag::create()
 				->setFloat("value", $block->getBreakInfo()->getHardness()))
 			->setTag("minecraft:explosion_resistance", CompoundTag::create()
