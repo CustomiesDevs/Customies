@@ -213,10 +213,10 @@ class CustomiesBlockFactory {
 
 		$propertiesTag = CompoundTag::create();
 		$components = CompoundTag::create()
-			->setTag("minecraft:block_light_absorption", CompoundTag::create()
-				->setInt("value", $block->getLightFilter()))
 			->setTag("minecraft:block_light_emission", CompoundTag::create()
 				->setFloat("value", (float)$block->getLightLevel() / 15))
+			->setTag("minecraft:block_light_filter", CompoundTag::create()
+				->setInt("value", $block->getLightFilter()))
 			->setTag("minecraft:destroy_time", CompoundTag::create()
 				->setFloat("value", $block->getBreakInfo()->getHardness()))
 			->setTag("minecraft:explosion_resistance", CompoundTag::create()
@@ -302,7 +302,7 @@ class CustomiesBlockFactory {
 
 		$groupedStates = [];
 		array_map(static function (CompoundTag $tag) use (&$groupedStates): void {
-			$name = explode(":", $tag->getString("name", "minecraft:unknown"))[1];
+			$name = $tag->getString("name", "minecraft:unknown");
 			if(!isset($groupedStates[$name])) {
 				$groupedStates[$name] = [$tag];
 			} else {
