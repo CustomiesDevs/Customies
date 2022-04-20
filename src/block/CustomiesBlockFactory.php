@@ -311,7 +311,8 @@ class CustomiesBlockFactory {
 		}, $states);
 
 		$stateNames = array_keys($groupedStates);
-		usort($stateNames, static function (string $a, string $b): int {
+		usort($stateNames, static fn(string $a, string $b) => strcmp(hash("fnv164", $a), hash("fnv164", $b)));
+		/*usort($stateNames, static function (string $a, string $b): int {
 			$a = strtolower($a);
 			$b = strtolower($b);
 			for($i = 0, $length = strlen($a); $i < $length; ++$i){
@@ -325,7 +326,7 @@ class CustomiesBlockFactory {
 				}
 			}
 			return 0;
-		});
+		});*/ // This code is for when it was like fucking dumb as fucking fuck. Keeping in case they change
 
 		$sortedStates = [];
 
@@ -431,7 +432,7 @@ class CustomiesBlockFactory {
 
 		$groupedStates = [];
 		array_map(static function (CompoundTag $tag) use (&$groupedStates): void {
-			$name = explode(":", $tag->getString("name", "minecraft:unknown"))[1];
+			$name = $tag->getString("name", "minecraft:unknown");
 			if(!isset($groupedStates[$name])) {
 				$groupedStates[$name] = [$tag];
 			} else {

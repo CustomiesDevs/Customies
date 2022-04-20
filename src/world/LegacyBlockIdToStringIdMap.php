@@ -6,10 +6,6 @@ use customies\block\CustomiesBlockFactory;
 use pocketmine\utils\SingletonTrait;
 use const pocketmine\BEDROCK_DATA_PATH;
 
-/**
- * LegacyBlockIdToStringIdMap is copied from pocketmine/data/bedrock/LegacyBlockIdToStringIdMap but adds custom blocks
- * to the mappings.
- */
 class LegacyBlockIdToStringIdMap {
 	use SingletonTrait;
 
@@ -36,6 +32,14 @@ class LegacyBlockIdToStringIdMap {
 
 	public function stringToLegacy(string $string) : ?int{
 		return $this->stringToLegacy[$string] ?? null;
+	}
+
+	/**
+	 * @return string[]
+	 * @phpstan-return array<int, string>
+	 */
+	public function getLegacyToStringMap() : array{
+		return $this->legacyToString;
 	}
 
 	/**
