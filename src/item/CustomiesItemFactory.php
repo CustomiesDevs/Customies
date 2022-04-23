@@ -106,18 +106,19 @@ final class CustomiesItemFactory {
 	 * Registers a custom item ID to the required mappings in the ItemTranslator instance.
 	 */
 	private function registerCustomItemMapping(int $id): void {
-		$instance = ItemTranslator::getInstance();
-		$reflection = new ReflectionClass($instance);
+		$translator = ItemTranslator::getInstance();
+		$reflection = new ReflectionClass($translator);
 
-		foreach(["simpleCoreToNetMapping", "simpleNetToCoreMapping"] as $propertyName) {
-			$property = $reflection->getProperty($propertyName);
-			$property->setAccessible(true);
-			/**
-			 * @var int[]
-			 * @phpstan-var array<int, int>
-			 */
-			$value = $property->getValue($instance);
-			$property->setValue($instance, array_merge($value, [$id => $id]));
-		}
+		$reflectionProperty = $reflection->getProperty("simpleCoreToNetMapping");
+		$reflectionProperty->setAccessible(true);
+		/** @var int[] $value */
+		$value = $reflectionProperty->getValue($translator);
+		$reflectionProperty->setValue($translator, array_merge($value, [$id => $id]));
+
+		$reflectionProperty = $reflection->getProperty("simpleNetToCoreMapping");
+		$reflectionProperty->setAccessible(true);
+		/** @var int[] $value */
+		$value = $reflectionProperty->getValue($translator);
+		$reflectionProperty->setValue($translator, array_merge($value, [$id => $id]));
 	}
 }
