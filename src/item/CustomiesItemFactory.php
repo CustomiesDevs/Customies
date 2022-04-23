@@ -83,9 +83,7 @@ final class CustomiesItemFactory {
 		$this->registerCustomItemMapping($item->getId());
 		ItemFactory::getInstance()->register($item);
 
-		$componentBased = isset(((array)class_uses($item))[ItemComponentsTrait::class]);
-		if($componentBased) {
-			/** @var ItemComponentsTrait $item */
+		if(($componentBased = $item instanceof ItemComponents)) {
 			$componentsTag = $item->getComponents();
 			$componentsTag->setInt("id", $item->getId());
 			$componentsTag->setString("name", $identifier);
@@ -108,15 +106,15 @@ final class CustomiesItemFactory {
 	 * Registers a custom item ID to the required mappings in the ItemTranslator instance.
 	 */
 	private function registerCustomItemMapping(int $id): void {
-		$translator = ItemTranslator::getInstance();
-		$reflection = new ReflectionClass($translator);
+		$instance = ItemTranslator::getInstance();
+		$reflection = new ReflectionClass($instance);
 
-		$reflectionProperty = $reflection->getProperty("simpleCoreToNetMapping");
-		$reflectionProperty->setAccessible(true);
-		$reflectionProperty->setValue($translator, array_merge($reflectionProperty->getValue($translator), [$id => $id]));
-
-		$reflectionProperty = $reflection->getProperty("simpleNetToCoreMapping");
-		$reflectionProperty->setAccessible(true);
-		$reflectionProperty->setValue($translator, array_merge($reflectionProperty->getValue($translator), [$id => $id]));
+		foreach(["simpleCoreToNetMapping", "simpleNetToCoreMapping"] as $propertyName) {
+			$property = $reflection->getProperty($propertyName);
+			$property->setAccessible(true);
+			/** @var array $value */
+			$value = $property->getValue($instance);
+			$property->setValue($instance, array_merge($value, [$id => $id]));
+		}
 	}
 }
