@@ -6,7 +6,7 @@ use customies\block\CustomiesBlockFactory;
 use pocketmine\utils\SingletonTrait;
 use const pocketmine\BEDROCK_DATA_PATH;
 
-class LegacyBlockIdToStringIdMap {
+final class LegacyBlockIdToStringIdMap {
 	use SingletonTrait;
 
 	/**
@@ -21,32 +21,21 @@ class LegacyBlockIdToStringIdMap {
 	private array $stringToLegacy;
 
 	public function __construct() {
-		$blockIdMap = json_decode((string)file_get_contents(BEDROCK_DATA_PATH . 'block_id_map.json'), true);
-		$this->stringToLegacy = array_merge($blockIdMap, CustomiesBlockFactory::getIdentifierToIdMap());
+		$blockIdMap = json_decode((string)file_get_contents(BEDROCK_DATA_PATH . "block_id_map.json"), true);
+		$this->stringToLegacy = array_merge($blockIdMap);
 		$this->legacyToString = array_flip($this->stringToLegacy);
 	}
 
-	public function legacyToString(int $legacy) : ?string{
+	public function legacyToString(int $legacy): ?string {
 		return $this->legacyToString[$legacy] ?? null;
 	}
 
-	public function stringToLegacy(string $string) : ?int{
+	public function stringToLegacy(string $string): ?int {
 		return $this->stringToLegacy[$string] ?? null;
 	}
 
-	/**
-	 * @return string[]
-	 * @phpstan-return array<int, string>
-	 */
-	public function getLegacyToStringMap() : array{
-		return $this->legacyToString;
-	}
-
-	/**
-	 * @return int[]
-	 * @phpstan-return array<string, int>
-	 */
-	public function getStringToLegacyMap() : array{
-		return $this->stringToLegacy;
+	public function registerMapping(string $string, int $legacy): void {
+		$this->legacyToString[$legacy] = $string;
+		$this->stringToLegacy[$string] = $legacy;
 	}
 }

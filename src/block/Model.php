@@ -8,7 +8,7 @@ use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\FloatTag;
 use pocketmine\nbt\tag\ListTag;
 
-class Model {
+final class Model {
 
 	/** @var Material[] */
 	private array $materials;
@@ -18,9 +18,9 @@ class Model {
 
 	/**
 	 * @param Material[] $materials
-	 * @param string     $geometry
-	 * @param Vector3    $origin
-	 * @param Vector3    $size
+	 * @param string $geometry
+	 * @param Vector3 $origin
+	 * @param Vector3 $size
 	 */
 	public function __construct(array $materials, string $geometry, Vector3 $origin, Vector3 $size) {
 		$this->materials = $materials;

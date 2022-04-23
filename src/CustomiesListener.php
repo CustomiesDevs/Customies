@@ -11,45 +11,46 @@ use pocketmine\network\mcpe\protocol\BiomeDefinitionListPacket;
 use pocketmine\network\mcpe\protocol\ItemComponentPacket;
 use pocketmine\network\mcpe\protocol\ResourcePackStackPacket;
 use pocketmine\network\mcpe\protocol\StartGamePacket;
-use pocketmine\network\mcpe\protocol\types\BoolGameRule;
 use pocketmine\network\mcpe\protocol\types\Experiments;
 use function array_merge;
 
-class CustomiesListener implements Listener {
+final class CustomiesListener implements Listener {
 
 	private ?ItemComponentPacket $cachedItemComponentPacket = null;
+	private array $cachedItemTable = [];
+	private array $cachedBlockPalette = [];
 	private Experiments $experiments;
 
 	public function __construct() {
 		$this->experiments = new Experiments([
+			// "data_driven_items" is required for custom blocks to render in-game. With this disabled, they will be
+			// shown as the UPDATE texture block.
 			"data_driven_items" => true,
-			"experimental_molang_features" => true,
-			"scripting" => true
 		], true);
 	}
 
 	public function onDataPacketSend(DataPacketSendEvent $event): void {
 		foreach($event->getPackets() as $packet){
 			if($packet instanceof BiomeDefinitionListPacket) {
+				// ItemComponentPacket needs to be sent after the BiomeDefinitionListPacket.
 				if($this->cachedItemComponentPacket === null) {
-					$this->cachedItemComponentPacket = ItemComponentPacket::create(CustomiesItemFactory::getCachedItemProperties());
+					// Wait for the data to be needed before it is actually cached. Allows for all blocks and items to be
+					// registered before they are cached for the rest of the runtime.
+					$this->cachedItemComponentPacket = ItemComponentPacket::create(CustomiesItemFactory::getInstance()->getItemComponentEntries());
 				}
 				foreach($event->getTargets() as $session){
 					$session->sendDataPacket($this->cachedItemComponentPacket);
 				}
-//            }
-//            if ($packet instanceof AvailableActorIdentifiersPacket) {
-//                /** @var CompoundTag $root */
-//                $root = $packet->identifiers->getRoot();
-//                /** @var ListTag $vanilla */
-//                $vanilla = $root->getTag("idlist")->getValue();
-				/*$nbt = CompoundTag::create()->setTag("idlist", new ListTag(array_merge($vanilla->getValue(), CustomiesEntityFactory::getAvailableActorIdentifiers())));
-				$packet->identifiers = new CacheableNbt($nbt);*/
 			} elseif($packet instanceof StartGamePacket) {
-				$packet->levelSettings->gameRules["experimentalgameplay"] = new BoolGameRule(true, false);
+				if(count($this->cachedItemTable) === 0) {
+					// Wait for the data to be needed before it is actually cached. Allows for all blocks and items to be
+					// registered before they are cached for the rest of the runtime.
+					$this->cachedItemTable = array_merge($packet->itemTable, CustomiesItemFactory::getInstance()->getItemTableEntries());
+					$this->cachedBlockPalette = CustomiesBlockFactory::getInstance()->getBlockPaletteEntries();
+				}
 				$packet->levelSettings->experiments = $this->experiments;
-				$packet->itemTable = array_merge($packet->itemTable, CustomiesItemFactory::getItemTableEntries());
-				$packet->blockPalette = CustomiesBlockFactory::getBlockPaletteEntries();
+				$packet->itemTable = $this->cachedItemTable;
+				$packet->blockPalette = $this->cachedBlockPalette;
 			} else if($packet instanceof ResourcePackStackPacket) {
 				$packet->experiments = $this->experiments;
 			}

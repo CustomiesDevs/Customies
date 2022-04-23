@@ -5,7 +5,7 @@ namespace customies\block;
 
 use pocketmine\nbt\tag\CompoundTag;
 
-class Material {
+final class Material {
 
 	public const TARGET_ALL = "*";
 	public const TARGET_UP = "up";
@@ -33,6 +33,7 @@ class Material {
 	public function getTarget(): string {
 		return $this->target;
 	}
+
 	public function toNBT(): CompoundTag {
 		return CompoundTag::create()
 			->setString("texture", $this->texture)

@@ -11,40 +11,37 @@ use pocketmine\network\mcpe\convert\ItemTranslator;
 use pocketmine\network\mcpe\protocol\types\CacheableNbt;
 use pocketmine\network\mcpe\protocol\types\ItemComponentPacketEntry;
 use pocketmine\network\mcpe\protocol\types\ItemTypeEntry;
+use pocketmine\utils\SingletonTrait;
 use pocketmine\utils\Utils;
 use ReflectionClass;
 use ReflectionException;
 use RuntimeException;
 use function count;
 
-class CustomiesItemFactory {
+final class CustomiesItemFactory {
+	use SingletonTrait;
 
-	/**
-	 * @var Item[]
-	 * @phpstan-var array<string, Item>
-	 */
-	private static array $customItems = [];
+	private int $nextItemID = 950;
 	/**
 	 * @var ItemTypeEntry[]
 	 */
-	private static array $itemTableEntries = [];
+	private array $itemTableEntries = [];
 	/**
 	 * @var ItemComponentPacketEntry[]
-	 * @phpstan-var array<string, ItemComponentPacketEntry>
 	 */
-	private static array $cachedItemProperties = [];
+	private array $itemComponentEntries = [];
 
 	/**
 	 * Get a custom item from its identifier. an exception will be thrown if the item is not registered.
 	 *
 	 * @param string $identifier
-	 * @param int    $amount
+	 * @param int $amount
 	 *
 	 * @return Item
 	 */
-	public static function get(string $identifier, int $amount): Item {
+	public function get(string $identifier, int $amount): Item {
 		$id = -1;
-		foreach(self::$itemTableEntries as $entry){
+		foreach($this->itemTableEntries as $entry){
 			if($entry->getStringId() === $identifier) {
 				$id = $entry->getNumericId();
 			}
@@ -58,63 +55,62 @@ class CustomiesItemFactory {
 
 	/**
 	 * Returns the item properties CompoundTag which maps out all custom item properties.
-	 *
-	 * @return array
+	 * @return ItemComponentPacketEntry[]
 	 */
-	public static function getCachedItemProperties(): array {
-		return self::$cachedItemProperties;
+	public function getItemComponentEntries(): array {
+		return $this->itemComponentEntries;
 	}
 
 	/**
 	 * Returns custom item entries for the StartGamePacket itemTable property.
-	 *
-	 * @return int[]
-	 * @phpstan-return array<string, int>
+	 * @return ItemTypeEntry[]
 	 */
-	public static function getItemTableEntries(): array {
-		return self::$itemTableEntries;
+	public function getItemTableEntries(): array {
+		return $this->itemTableEntries;
 	}
 
 	/**
-	 * Register an item to the ItemFactory and all the required mappings.
-	 *
-	 * @param string $className
-	 * @param string $identifier
-	 * @param string $name
-	 * @throws ReflectionException
+	 * Registers the item to the item factory and assigns it an ID. It also updates the required mappings and stores the
+	 * item components if present.
 	 */
-	public static function registerItem(string $className, string $identifier, string $name): void {
+	public function registerItem(string $className, string $identifier, string $name): void {
 		if($className !== Item::class) {
 			Utils::testValidInstance($className, Item::class);
 		}
-
 		/** @var Item $item */
-		$item = new $className(new ItemIdentifier(950 + count(self::$customItems), 0), $name);
+		$item = new $className(new ItemIdentifier(++$this->nextItemID, 0), $name);
 
 		if(ItemFactory::getInstance()->isRegistered($item->getId())) {
-			throw new RuntimeException("Block with ID " . $item->getId() . " is already registered");
+			throw new RuntimeException("Item with ID " . $item->getId() . " is already registered");
 		}
-		self::registerCustomItemMapping($item->getId());
+		$this->registerCustomItemMapping($item->getId());
 		ItemFactory::getInstance()->register($item);
+
 		$componentBased = isset(class_uses($item)[ItemComponentsTrait::class]);
 		if($componentBased) {
 			/** @var ItemComponentsTrait $item */
 			$componentsTag = $item->getComponents();
 			$componentsTag->setInt("id", $item->getId());
 			$componentsTag->setString("name", $identifier);
-			self::$cachedItemProperties[$identifier] = new ItemComponentPacketEntry($identifier, new CacheableNbt($componentsTag));
+			$this->itemComponentEntries[$identifier] = new ItemComponentPacketEntry($identifier, new CacheableNbt($componentsTag));
 		}
-		self::$customItems[$identifier] = $item;
-		self::$itemTableEntries[] = new ItemTypeEntry($identifier, $item->getId(), $componentBased);
+		$this->itemTableEntries[] = new ItemTypeEntry($identifier, $item->getId(), $componentBased);
 	}
 
 	/**
-	 * Register a custom item id to the global ItemTranslator instance.
-	 * @param int $id
-	 * @return void
-	 * @throws ReflectionException
+	 * Registers the required mappings for the block to become an item that can be placed etc. It is assigned an ID that
+	 * correlates to its block ID.
 	 */
-	public static function registerCustomItemMapping(int $id): void {
+	public function registerBlockItem(string $identifier, int $blockId) {
+		$itemId = 255 - $blockId;
+		$this->registerCustomItemMapping($itemId);
+		$this->itemTableEntries[] = new ItemTypeEntry($identifier, $itemId, false);
+	}
+
+	/**
+	 * Registers a custom item ID to the required mappings in the ItemTranslator instance.
+	 */
+	private function registerCustomItemMapping(int $id): void {
 		$translator = ItemTranslator::getInstance();
 		$reflection = new ReflectionClass($translator);
 
@@ -125,9 +121,5 @@ class CustomiesItemFactory {
 		$reflectionProperty = $reflection->getProperty("simpleNetToCoreMapping");
 		$reflectionProperty->setAccessible(true);
 		$reflectionProperty->setValue($translator, $reflectionProperty->getValue($translator) + [$id => $id]);
-	}
-
-	public static function addItemTypeEntry(ItemTypeEntry $entry): void {
-		self::$itemTableEntries[] = $entry;
 	}
 }

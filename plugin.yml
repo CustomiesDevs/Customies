@@ -12,6 +12,3 @@ authors:
 contributors:
   - JackNoordhuis
   - Unickorn
-
-loadbefore:
-  - EmperialsSky

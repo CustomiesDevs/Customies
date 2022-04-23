@@ -10,92 +10,70 @@ use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\ListTag;
 use pocketmine\nbt\tag\StringTag;
 use pocketmine\nbt\tag\Tag;
+use RuntimeException;
 
-trait ItemComponentsTrait
-{
+trait ItemComponentsTrait {
 
-    /**
-     * Tag for storing item components
-     * @var CompoundTag
-     */
-    private $componentTag;
+	private CompoundTag $componentTag;
 
-    /**
-     * @param string $texture
-     * @param int $maxStackSize
-     */
-    protected function initComponentTag(string $texture, int $maxStackSize)
-    {
-        //this initializes the Compound Tag format, The format must be exactly like this or it will not work
-        $this->componentTag = CompoundTag::create()
-            ->setTag("components", CompoundTag::create()
-                ->setTag("item_properties", CompoundTag::create()
-	                ->setTag("minecraft:icon", CompoundTag::create()
-		                ->setString("texture", $texture)
-	                )
-                    ->setInt("max_stack_size", $maxStackSize)
-                )
-            );
-    }
+	/**
+	 * Initializes the components and creates the base CompoundTag required for the components to be sent to a client.
+	 * This must be called before any properties or components are added otherwise it will break.
+	 */
+	protected function initComponent(string $texture, int $maxStackSize): void {
+		$this->componentTag = CompoundTag::create()
+			->setTag("components", CompoundTag::create()
+				->setTag("item_properties", CompoundTag::create()
+					->setTag("minecraft:icon", CompoundTag::create()
+						->setString("texture", $texture))
+					->setInt("max_stack_size", $maxStackSize)));
+	}
 
-    /**
-     * @param string $key
-     * @param $value
-     * This field is used to add simple properties to the item, most usage will be done here, In the case
-     * of a resource pack file, I believe all fields under the "components" property in a resource pack .json
-     * would go here.
-     */
-    public function addProperty(string $key, $value)
-    {
-        $propertiesTag = $this->componentTag->getTag("components")->getTag("item_properties");
-        $type = self::getType($value);
-        if ($type !== null) $propertiesTag->setTag($key, $type);
-    }
+	/**
+	 *Attempts to set a property with the key and value provided. It will attempt to turn the value in to a Tag, but
+	 * will throw an exception if it cannot convert it.
+	 */
+	public function addProperty(string $key, $value): void {
+		$propertiesTag = $this->componentTag->getCompoundTag("components")->getCompoundTag("item_properties");
+		$tag = $this->getTagType($value);
+		if($tag === null) {
+			throw new RuntimeException("Failed to get tag type for property with key " . $key);
+		}
+		$propertiesTag->setTag($key, $tag);
+	}
 
-    /**
-     * @param string $key
-     * @param CompoundTag $tag
-     * This adds major components to an item, In a resource pack sense, this is where the major fields such as
-     * "minecraft:icon" go, it only accepts CompoundTags.
-     */
-    public function addComponent(string $key, CompoundTag $tag){
-        $componentsTag = $this->componentTag->getTag("components");
-        $componentsTag->setTag($key, $tag);
-    }
+	/**
+	 * Attempts to set a component with the key and value provided. It will attempt to turn the value in to a Tag, but
+	 * will throw an exception if it cannot convert it.
+	 */
+	public function addComponent(string $key, $value): void {
+		$componentsTag = $this->componentTag->getCompoundTag("components");
+		$tag = $this->getTagType($value);
+		if($tag === null) {
+			throw new RuntimeException("Failed to get tag type for component with key " . $key);
+		}
+		$componentsTag->setTag($key, $tag);
+	}
 
-    /**
-     * @return CompoundTag
-     */
-    public function getComponents(): CompoundTag{
-        return $this->componentTag;
-    }
+	/**
+	 * Returns the fully-structured CompountTag that can be sent to a client in the ItemComponentsPacket.
+	 */
+	public function getComponents(): CompoundTag {
+		return $this->componentTag;
+	}
 
-    /**
-     * @param $type
-     * @return Tag|null
-     * This will most likely need to be updated to make it better in the future, but this should work for now
-     */
-    public static function getType($type): ?Tag
-    {
-        switch (true) {
-            case is_bool($type):
-                return new ByteTag((int)$type);
-            case is_float($type):
-                return new FloatTag($type);
-            case is_int($type):
-                return new IntTag($type);
-            case is_string($type):
-                return new StringTag($type);
-            case is_array($type):
-                $v = [];
-                foreach ($type as $item){
-                    $v[] = new FloatTag($item);
-                }
-                return new ListTag($v);
-        }
-        if ($type instanceof CompoundTag){
-            return $type;
-        }
-        return null;
-    }
+	/**
+	 * Attempts to return the correct Tag for the provided type.
+	 */
+	private function getTagType($type): ?Tag {
+		return match (true) {
+			is_array($type) => new ListTag($type),
+			is_bool($type) => new ByteTag($type ? 1 : 0),
+			is_float($type) => new FloatTag($type),
+			is_int($type) => new IntTag($type),
+			is_string($type) => new StringTag($type),
+			$type instanceof CompoundTag => $type,
+			default => null,
+		};
+	}
 }

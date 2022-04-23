@@ -32,8 +32,6 @@ class LevelDB extends \pocketmine\world\format\io\leveldb\LevelDB {
 	/**
 	 * deserializePaletted is copied from pocketmine/world/format/io/leveldb/LevelDB.deserializePaletted() but changes
 	 * the LegacyBlockIdToStringIdMap instance to support loading custom blocks from the world.
-	 * @param BinaryStream $stream
-	 * @return PalettedBlockArray
 	 */
 	protected function deserializePaletted(BinaryStream $stream): PalettedBlockArray {
 		$bitsPerBlock = $stream->getByte() >> 1;
@@ -63,10 +61,6 @@ class LevelDB extends \pocketmine\world\format\io\leveldb\LevelDB {
 	/**
 	 * saveChunk is copied from pocketmine/world/format/io/leveldb/LevelDB.saveChunk() but changes the
 	 * LegacyBlockIdToStringIdMap instance to support storing custom blocks in the world.
-	 * @param int       $chunkX
-	 * @param int       $chunkZ
-	 * @param ChunkData $chunkData
-	 * @return void
 	 */
 	public function saveChunk(int $chunkX, int $chunkZ, ChunkData $chunkData): void {
 		$idMap = LegacyBlockIdToStringIdMap::getInstance();

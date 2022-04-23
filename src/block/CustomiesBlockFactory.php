@@ -4,14 +4,14 @@ declare(strict_types=1);
 namespace customies\block;
 
 use customies\item\CustomiesItemFactory;
-use customies\task\AsyncWorkerStartHookTask;
+use customies\task\AsyncRegisterBlocksTask;
+use customies\world\LegacyBlockIdToStringIdMap;
 use InvalidArgumentException;
 use OutOfRangeException;
 use pocketmine\block\Block;
 use pocketmine\block\BlockBreakInfo;
 use pocketmine\block\BlockFactory;
 use pocketmine\block\BlockIdentifier;
-use pocketmine\data\bedrock\LegacyBlockIdToStringIdMap;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\network\mcpe\convert\GlobalItemTypeDictionary;
 use pocketmine\network\mcpe\convert\R12ToCurrentBlockMapEntry;
@@ -21,95 +21,51 @@ use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializerContext;
 use pocketmine\network\mcpe\protocol\types\BlockPaletteEntry;
 use pocketmine\network\mcpe\protocol\types\CacheableNbt;
-use pocketmine\network\mcpe\protocol\types\ItemTypeEntry;
 use pocketmine\Server;
+use pocketmine\utils\SingletonTrait;
 use pocketmine\utils\Utils;
 use ReflectionClass;
 use ReflectionException;
 use RuntimeException;
 use SplFixedArray;
 use function array_fill;
-use function array_keys;
-use function array_map;
-use function array_merge;
-use function array_values;
 use function count;
-use function explode;
 use function file_get_contents;
-use function get_class;
-use function ord;
-use function strlen;
-use function strtolower;
-use function unserialize;
-use function usort;
 use const pocketmine\BEDROCK_DATA_PATH;
 
-class CustomiesBlockFactory {
+final class CustomiesBlockFactory {
+	use SingletonTrait;
 
-	private const NEW_BLOCK_FACTORY_SIZE = 32768;
+	private const NEW_BLOCK_FACTORY_SIZE = 2048 << Block::INTERNAL_METADATA_BITS;
 
 	/**
 	 * @var Block[]
 	 * @phpstan-var array<string, Block>
 	 */
-	private static array $customBlocks = [];
-	/**
-	 * @var CompoundTag[]
-	 * @phpstan-var array<int, CompoundTag>
-	 */
-	private static array $customBlockStates = [];
+	private array $customBlocks = [];
 	/**
 	 * @var Model[]
 	 * @phpstan-var array<int, Model>
 	 */
-	private static array $customBlockModels = [];
-	/**
-	 * @var int[]
-	 * @phpstan-var array<string, int>
-	 */
-	private static array $identifierToIdMap = [];
-	/**
-	 * @var CompoundTag[]
-	 * @phpstan-var array<string, CompoundTag>
-	 */
-	private static array $identifierToStatesMap = [];
-	/**
-	 * @var int[]
-	 * @phpstan-var array<string, int>
-	 */
-	private static array $identifierToRuntimeIdMap = [];
+	private array $customBlockModels = [];
 	/** @var BlockPaletteEntry[] */
-	private static array $blockPaletteEntries = [];
+	private array $blockPaletteEntries = [];
+
+	public function __construct() {
+		$this->increaseBlockFactoryLimits();
+	}
 
 	/**
-	 * Adds a worker initialize hook to the async pool to sync the BlockFactory for every thread that is created.
+	 * Adds a worker initialize hook to the async pool to sync the BlockFactory for every thread worker that is created.
+	 * It is especially important for the workers that deal with chunk encoding, as using the wrong runtime ID mappings
+	 * can result in massive issues with almost every block showing as the wrong thing and causing lag to clients.
 	 */
-	public static function addWorkerInitHook(): void {
-		$blocks = serialize(self::$customBlocks);
-		$models = serialize(self::$customBlockModels);
+	public function addWorkerInitHook(): void {
+		$blocks = serialize($this->customBlocks);
 		$server = Server::getInstance();
-		$server->getAsyncPool()->addWorkerStartHook(static function (int $worker) use ($server, $blocks, $models): void {
-			$server->getAsyncPool()->submitTaskToWorker(new AsyncWorkerStartHookTask($blocks, $models), $worker);
+		$server->getAsyncPool()->addWorkerStartHook(static function (int $worker) use ($server, $blocks): void {
+			$server->getAsyncPool()->submitTaskToWorker(new AsyncRegisterBlocksTask($blocks), $worker);
 		});
-	}
-
-	/**
-	 * Initializes the block factory and increases the default limits set by pocketmine.
-	 *
-	 * @throws ReflectionException
-	 */
-	public static function init(): void {
-		self::increaseBlockFactoryLimits();
-	}
-
-	/**
-	 * Updates all the RuntimeBlockMappings to sync pocketmine with the custom blocks.
-	 *
-	 * @throws ReflectionException
-	 */
-	public static function updateRuntimeMappings(): void {
-		self::registerCustomKnownStates(self::$customBlockStates);
-		self::registerCustomRuntimeMappings();
 	}
 
 	/**
@@ -119,8 +75,8 @@ class CustomiesBlockFactory {
 	 *
 	 * @return Block
 	 */
-	public static function get(string $identifier): Block {
-		$id = self::$identifierToIdMap[$identifier] ?? -1;
+	public function get(string $identifier): Block {
+		$id = LegacyBlockIdToStringIdMap::getInstance()->stringToLegacy($identifier) ?? -1;
 		if($id < 0) {
 			throw new InvalidArgumentException("Custom block " . $identifier . " is not registered");
 		}
@@ -133,17 +89,8 @@ class CustomiesBlockFactory {
 	 *
 	 * @return BlockPaletteEntry[]
 	 */
-	public static function getBlockPaletteEntries(): array {
-		return self::$blockPaletteEntries;
-	}
-
-	/**
-	 * Returns the identifier => legacyId map for all custom blocks.
-	 *
-	 * @return int[]
-	 */
-	public static function getIdentifierToIdMap(): array {
-		return self::$identifierToIdMap;
+	public function getBlockPaletteEntries(): array {
+		return $this->blockPaletteEntries;
 	}
 
 	/**
@@ -151,8 +98,8 @@ class CustomiesBlockFactory {
 	 *
 	 * @return int
 	 */
-	private static function getNextAvailableId(): int {
-		$id = 1000 + count(self::$identifierToIdMap);
+	private function getNextAvailableId(): int {
+		$id = 1000 + count($this->customBlocks);
 		if($id > (self::NEW_BLOCK_FACTORY_SIZE / 16)) {
 			throw new OutOfRangeException("All custom block ids are used up");
 		}
@@ -163,38 +110,30 @@ class CustomiesBlockFactory {
 	/**
 	 * Register a block to the BlockFactory and all the required mappings.
 	 *
-	 * @param string         $className
-	 * @param string         $identifier
-	 * @param string         $name
+	 * @param string $className
+	 * @param string $identifier
+	 * @param string $name
 	 * @param BlockBreakInfo $breakInfo
-	 * @param Model|null     $model
+	 * @param Model|null $model
 	 */
-	public static function registerBlock(string $className, string $identifier, string $name, BlockBreakInfo $breakInfo, ?Model $model = null): void {
+	public function registerBlock(string $className, string $identifier, string $name, BlockBreakInfo $breakInfo, ?Model $model = null): void {
 		if($className !== Block::class) {
 			Utils::testValidInstance($className, Block::class);
 		}
 
 		/** @var Block $block */
-		$block = new $className(new BlockIdentifier(self::getNextAvailableId(), 0), $name, $breakInfo);
+		$block = new $className(new BlockIdentifier($this->getNextAvailableId(), 0), $name, $breakInfo);
 
 		if(BlockFactory::getInstance()->isRegistered($block->getId())) {
 			throw new InvalidArgumentException("Block with ID " . $block->getId() . " is already registered");
 		}
 		BlockFactory::getInstance()->register($block);
-		CustomiesItemFactory::registerCustomItemMapping(255 - $block->getId());
-		CustomiesItemFactory::addItemTypeEntry(new ItemTypeEntry($identifier, 255 - $block->getId(), false));
+		CustomiesItemFactory::getInstance()->registerBlockItem($identifier, $block->getId());
 
 		$blockState = CompoundTag::create()
 			->setString("name", $identifier)
 			->setTag("states", CompoundTag::create());
-		$runtimeId = self::getRuntimeId($blockState);
-
-		/*if($model !== null) {
-			$materialsTag = CompoundTag::create();
-			foreach($model->getMaterials() as $material){
-				$materialsTag->setTag($material->getTarget(), $material->toNBT());
-			}
-		}*/ // TODO: Is this needed?
+		BlockPalette::getInstance()->insertState($blockState);
 
 		$propertiesTag = CompoundTag::create();
 		$components = CompoundTag::create()
@@ -216,123 +155,36 @@ class CustomiesBlockFactory {
 			foreach($model->toNBT() as $tagName => $tag){
 				$components->setTag($tagName, $tag);
 			}
-
-			self::$customBlockModels[$block->getId()] = $model;
 		}
 		$propertiesTag->setTag("components", $components);
 
-		//TODO: Support editing the loot table of the block and the map color
+		$this->blockPaletteEntries[] = new BlockPaletteEntry($identifier, new CacheableNbt($propertiesTag));
 
-		self::$blockPaletteEntries[] = new BlockPaletteEntry($identifier, new CacheableNbt($propertiesTag));
-
-		self::$customBlocks[$identifier] = $block;
-		self::$customBlockStates[$runtimeId] = $blockState;
-		self::$identifierToIdMap[$identifier] = $block->getId();
-		self::$identifierToStatesMap[$identifier] = $blockState;
-		//self::$identifierToRuntimeIdMap[explode(":", $identifier)[1]] = $runtimeId; // TODO: Is this needed?
+		$this->customBlocks[$identifier] = $block;
+		LegacyBlockIdToStringIdMap::getInstance()->registerMapping($identifier, $block->getId());
 	}
 
 	/**
-	 * Modifies the BlockFactory and increases the fixed array sizes within pocketmine. This function allows for up to
-	 * 1048 new custom blocks to be registered.
+	 * Modifies the properties in the BlockFactory instance to increase the SplFixedArrays to double the limit of blocks
+	 * that can be registered.
 	 *
 	 * @throws ReflectionException
 	 */
-	public static function increaseBlockFactoryLimits(): void {
+	public function increaseBlockFactoryLimits(): void {
 		$instance = BlockFactory::getInstance();
 		$blockFactory = new ReflectionClass($instance);
-
-		$fullListProperty = $blockFactory->getProperty("fullList");
-		$fullListProperty->setAccessible(true);
-
-		/** @var SplFixedArray $fullList */
-		$fullList = $fullListProperty->getValue($instance);
-		$fullList->setSize(self::NEW_BLOCK_FACTORY_SIZE);
-
-		$fullListProperty->setValue($instance, $fullList);
-
-		$mappedStateIdsProp = $blockFactory->getProperty("mappedStateIds");
-		$mappedStateIdsProp->setAccessible(true);
-
-		/** @var SplFixedArray $fullList */
-		$mappedStateIds = $mappedStateIdsProp->getValue($instance);
-		$mappedStateIds->setSize(self::NEW_BLOCK_FACTORY_SIZE);
-
-		$mappedStateIdsProp->setValue($instance, $mappedStateIds);
-
+		foreach(["fullList", "mappedStateIds"] as $propertyName){
+			$property = $blockFactory->getProperty($propertyName);
+			$property->setAccessible(true);
+			/** @var SplFixedArray $array */
+			$array = $property->getValue($instance);
+			$array->setSize(self::NEW_BLOCK_FACTORY_SIZE);
+			$property->setValue($instance, $array);
+		}
 		$instance->light = SplFixedArray::fromArray(array_fill(0, self::NEW_BLOCK_FACTORY_SIZE, 0));
 		$instance->lightFilter = SplFixedArray::fromArray(array_fill(0, self::NEW_BLOCK_FACTORY_SIZE, 1));
 		$instance->blocksDirectSkyLight = SplFixedArray::fromArray(array_fill(0, self::NEW_BLOCK_FACTORY_SIZE, false));
 		$instance->blastResistance = SplFixedArray::fromArray(array_fill(0, self::NEW_BLOCK_FACTORY_SIZE, 0.0));
-	}
-
-	/**
-	 * Registers the known states of the custom blocks so pocketmine can send them to the client when requested.
-	 *
-	 * @param array $customKnownStates
-	 *
-	 * @throws ReflectionException
-	 */
-	public static function registerCustomKnownStates(array $customKnownStates): void {
-		$instance = RuntimeBlockMapping::getInstance();
-		$runtimeBlockMapping = new ReflectionClass($instance);
-
-		$knownStatesProperty = $runtimeBlockMapping->getProperty("bedrockKnownStates");
-		$knownStatesProperty->setAccessible(true);
-
-		/** @var CompoundTag[] $bedrockKnownStates */
-		$bedrockKnownStates = $knownStatesProperty->getValue($instance);
-
-		$states = array_merge($bedrockKnownStates, $customKnownStates);
-
-		$groupedStates = [];
-		array_map(static function (CompoundTag $tag) use (&$groupedStates): void {
-			$name = $tag->getString("name", "minecraft:unknown");
-			if(!isset($groupedStates[$name])) {
-				$groupedStates[$name] = [$tag];
-			} else {
-				$groupedStates[$name][] = $tag;
-			}
-		}, $states);
-
-		$stateNames = array_keys($groupedStates);
-		usort($stateNames, static fn(string $a, string $b) => strcmp(hash("fnv164", $a), hash("fnv164", $b)));
-		/*usort($stateNames, static function (string $a, string $b): int {
-			$a = strtolower($a);
-			$b = strtolower($b);
-			for($i = 0, $length = strlen($a); $i < $length; ++$i){
-				if(($b[$i] ?? "") === "") {
-					return 1;
-				}
-				$charA = ord($a[$i]) === 95 ? 0 : ord($a[$i]);
-				$charB = ord($b[$i]) === 95 ? 0 : ord($b[$i]);
-				if($charA !== $charB) {
-					return $charA < $charB ? -1 : 1;
-				}
-			}
-			return 0;
-		});*/ // This code is for when it was like fucking dumb as fucking fuck. Keeping in case they change
-
-		$sortedStates = [];
-
-//		$t = "";
-		foreach($stateNames as $stateName){
-			$states = $groupedStates[$stateName];
-			foreach($states as $state){
-//				/** @var CompoundTag $state */
-//				$h = $stateName . " ";
-//				$st = [];
-//				foreach($state->getCompoundTag("states")->getValue() as $n => $tag){
-//					$st[] = "[$n: " . $tag->getValue() . "]";
-//				}
-//				$t .= $h . implode(" ", $st) . "\n";
-				$sortedStates[] = $state;
-			}
-		}
-
-//		file_put_contents(Server::getInstance()->getDataPath() . "block_states.txt", $t);
-
-		$knownStatesProperty->setValue($instance, array_values($sortedStates));
 	}
 
 	/**
@@ -341,17 +193,15 @@ class CustomiesBlockFactory {
 	 *
 	 * @throws ReflectionException
 	 */
-	public static function registerCustomRuntimeMappings(): void {
+	public function registerCustomRuntimeMappings(): void {
 		$instance = RuntimeBlockMapping::getInstance();
-		$bedrockKnownStates = $instance->getBedrockKnownStates();
 		$runtimeBlockMapping = new ReflectionClass($instance);
 
-		$legacyMapProperty = $runtimeBlockMapping->getProperty("legacyToRuntimeMap");
-		$legacyMapProperty->setAccessible(true);
-		$legacyMapProperty->setValue($instance, []);
-		$runtimeMapProperty = $runtimeBlockMapping->getProperty("runtimeToLegacyMap");
-		$runtimeMapProperty->setAccessible(true);
-		$runtimeMapProperty->setValue($instance, []);
+		foreach(["legacyToRuntimeMap", "runtimeToLegacyMap"] as $propertyName){
+			$property = $runtimeBlockMapping->getProperty($propertyName);
+			$property->setAccessible(true);
+			$property->setValue($instance, []);
+		}
 
 		$registerMappingMethod = $runtimeBlockMapping->getMethod("registerMapping");
 		$registerMappingMethod->setAccessible(true);
@@ -376,22 +226,23 @@ class CustomiesBlockFactory {
 			$legacyStateMap[] = new R12ToCurrentBlockMapEntry($id, $meta, $state);
 		}
 
-		foreach(self::$identifierToStatesMap as $identifier => $state){
-			$legacyStateMap[] = new R12ToCurrentBlockMapEntry($identifier, 0, $state);
+		foreach(BlockPalette::getInstance()->getCustomStates() as $state){
+			$legacyStateMap[] = new R12ToCurrentBlockMapEntry($state->getString("name"), 0, $state);
 		}
 
 		/**
 		 * @var int[][] $idToStatesMap string id -> int[] list of candidate state indices
 		 */
 		$idToStatesMap = [];
-		foreach($bedrockKnownStates as $k => $state){
+		$states = BlockPalette::getInstance()->getStates();
+		foreach($states as $k => $state){
 			$idToStatesMap[$state->getString("name")][] = $k;
 		}
 
 		foreach($legacyStateMap as $pair){
-			$id = $legacyIdMap->stringToLegacy($pair->getId()) ?? (self::$identifierToIdMap[$pair->getId()] ?? null);
+			$id = $legacyIdMap->stringToLegacy($pair->getId());
 			if($id === null) {
-				throw new \RuntimeException("No legacy ID matches " . $pair->getId());
+				throw new RuntimeException("No legacy ID matches " . $pair->getId());
 			}
 			$data = $pair->getMeta();
 			if($data > 15) {
@@ -403,70 +254,12 @@ class CustomiesBlockFactory {
 				continue;
 			}
 			foreach($idToStatesMap[$mappedName] as $k){
-				$networkState = $bedrockKnownStates[$k];
+				$networkState = $states[$k];
 				if($mappedState->equals($networkState)) {
 					$registerMapping($k, $id, $data);
 					continue 2;
 				}
 			}
 		}
-	}
-
-	private static function getRuntimeId(CompoundTag $customState): int {
-		$states = array_merge(RuntimeBlockMapping::getInstance()->getBedrockKnownStates(), self::$customBlockStates, [$customState]);
-
-		$groupedStates = [];
-		array_map(static function (CompoundTag $tag) use (&$groupedStates): void {
-			$name = $tag->getString("name", "minecraft:unknown");
-			if(!isset($groupedStates[$name])) {
-				$groupedStates[$name] = [$tag];
-			} else {
-				$groupedStates[$name][] = $tag;
-			}
-		}, $states);
-
-		$stateNames = array_keys($groupedStates);
-		usort($stateNames, static fn(string $a, string $b) => strcmp(hash("fnv164", $a), hash("fnv164", $b)));
-		/*usort($stateNames, static function (string $a, string $b): int {
-			$a = strtolower($a);
-			$b = strtolower($b);
-			for($i = 0, $length = strlen($a); $i < $length; ++$i){
-				if(($b[$i] ?? "") === "") {
-					return 1;
-				}
-				$charA = ord($a[$i]) === 95 ? 0 : ord($a[$i]);
-				$charB = ord($b[$i]) === 95 ? 0 : ord($b[$i]);
-				if($charA !== $charB) {
-					return $charA < $charB ? -1 : 1;
-				}
-			}
-			return 0;
-		});*/ // This code is for when it was like fucking dumb as fucking fuck. Keeping in case they change
-
-		$sortedStates = [];
-		$i = 0;
-		foreach($stateNames as $stateName){
-			$states = $groupedStates[$stateName];
-			foreach($states as $state){
-				$sortedStates[] = $state;
-			}
-			/*if(($oldId = self::$identifierToRuntimeIdMap[$stateName] ?? -1) >= 0) {
-				self::$identifierToRuntimeIdMap[$stateName] = $i;
-				self::$customBlockStates[$i] = self::$customBlockStates[$oldId];
-				unset(self::$customBlockStates[$oldId]);
-			}*/ // TODO: Update state runtime ids if they changed from registering new blocks
-			++$i;
-		}
-
-		/**
-		 * @var  $runtimeId int
-		 * @var  $state     CompoundTag
-		 */
-		foreach($sortedStates as $runtimeId => $state){
-			if($state->getString("name", "minecraft:unknown") === $customState->getString("name", "minecraft:unknown")) {
-				return $runtimeId;
-			}
-		}
-		return -1;
 	}
 }

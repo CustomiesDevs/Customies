@@ -3,33 +3,36 @@ declare(strict_types=1);
 
 namespace customies\entity;
 
+use pocketmine\entity\Entity;
 use pocketmine\entity\EntityDataHelper;
 use pocketmine\entity\EntityFactory;
 use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\utils\SingletonTrait;
 use pocketmine\world\World;
 use function array_flip;
 use function count;
 
 class CustomiesEntityFactory {
+	use SingletonTrait;
 
 	/**
 	 * @var string[]
 	 * @phpstan-var array<string, string>
 	 */
-	private static $identifierToClassMap = [];
+	private array $identifierToClassMap = [];
 	/**
 	 * @var string[]
 	 * @phpstan-var array<int, string>
 	 */
-	private static $idToIdentifierMap = [];
+	private array $idToIdentifierMap = [];
 
 	/**
 	 * Returns the identifier => className map for all custom entities.
 	 *
 	 * @return array<string, string>
 	 */
-	public static function getIdentifierToClassMap(): array {
-		return self::$identifierToClassMap;
+	public function getIdentifierToClassMap(): array {
+		return $this->identifierToClassMap;
 	}
 
 	/**
@@ -38,10 +41,10 @@ class CustomiesEntityFactory {
 	 *
 	 * @return CompoundTag[]
 	 */
-	public static function getAvailableActorIdentifiers(): array {
+	public function getAvailableActorIdentifiers(): array {
 		$identifiers = [];
 
-		foreach(self::$idToIdentifierMap as $legacyId => $identifier){
+		foreach($this->idToIdentifierMap as $legacyId => $identifier){
 			$identifiers[] = CompoundTag::create()
 				->setString("bid", "")
 				->setByte("experimental", 1)
@@ -59,8 +62,8 @@ class CustomiesEntityFactory {
 	 *
 	 * @return array<int, string>
 	 */
-	public static function getIdToIdentifierMap(): array {
-		return self::$idToIdentifierMap;
+	public function getIdToIdentifierMap(): array {
+		return $this->idToIdentifierMap;
 	}
 
 	/**
@@ -71,8 +74,8 @@ class CustomiesEntityFactory {
 	 *
 	 * @return string
 	 */
-	public static function getIdentifierFromId(int $id): string {
-		return self::$idToIdentifierMap[$id] ?? "";
+	public function getIdentifierFromId(int $id): string {
+		return $this->idToIdentifierMap[$id] ?? "";
 	}
 
 	/**
@@ -83,8 +86,8 @@ class CustomiesEntityFactory {
 	 *
 	 * @return int
 	 */
-	public static function getIdFromIdentifier(string $identifier): int {
-		return array_flip(self::$idToIdentifierMap)[$identifier] ?? -1;
+	public function getIdFromIdentifier(string $identifier): int {
+		return array_flip($this->idToIdentifierMap)[$identifier] ?? -1;
 	}
 
 	/**
@@ -93,16 +96,16 @@ class CustomiesEntityFactory {
 	 * @param string $className
 	 * @param string $identifier
 	 *
-	 * @phpstan-param class-string<\pocketmine\entity\Entity> $className
+	 * @phpstan-param class-string<Entity> $className
 	 */
-	public static function registerEntity(string $className, string $identifier): void {
-		$id = 150 + count(self::$idToIdentifierMap);
+	public function registerEntity(string $className, string $identifier): void {
+		$id = 150 + count($this->idToIdentifierMap);
 
 		EntityFactory::getInstance()->register($className, static function (World $world, CompoundTag $nbt) use ($className): string {
 			return new $className(EntityDataHelper::parseLocation($nbt, $world), $nbt);
 		}, [$identifier]);
 
-		self::$identifierToClassMap[$identifier] = $className;
-		self::$idToIdentifierMap[$id] = $identifier;
+		$this->identifierToClassMap[$identifier] = $className;
+		$this->idToIdentifierMap[$id] = $identifier;
 	}
 }
