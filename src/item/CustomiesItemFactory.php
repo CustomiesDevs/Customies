@@ -112,7 +112,10 @@ final class CustomiesItemFactory {
 		foreach(["simpleCoreToNetMapping", "simpleNetToCoreMapping"] as $propertyName) {
 			$property = $reflection->getProperty($propertyName);
 			$property->setAccessible(true);
-			/** @var array $value */
+			/**
+			 * @var int[]
+			 * @phpstan-var array<int, int>
+			 */
 			$value = $property->getValue($instance);
 			$property->setValue($instance, array_merge($value, [$id => $id]));
 		}
