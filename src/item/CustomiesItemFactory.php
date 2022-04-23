@@ -33,10 +33,6 @@ final class CustomiesItemFactory {
 
 	/**
 	 * Get a custom item from its identifier. an exception will be thrown if the item is not registered.
-	 *
-	 * @param string $identifier
-	 * @param int $amount
-	 *
 	 * @return Item
 	 */
 	public function get(string $identifier, int $amount): Item {
@@ -72,6 +68,7 @@ final class CustomiesItemFactory {
 	/**
 	 * Registers the item to the item factory and assigns it an ID. It also updates the required mappings and stores the
 	 * item components if present.
+	 * @phpstan-param class-string $className
 	 */
 	public function registerItem(string $className, string $identifier, string $name): void {
 		if($className !== Item::class) {
@@ -86,7 +83,7 @@ final class CustomiesItemFactory {
 		$this->registerCustomItemMapping($item->getId());
 		ItemFactory::getInstance()->register($item);
 
-		$componentBased = isset(class_uses($item)[ItemComponentsTrait::class]);
+		$componentBased = isset(((array)class_uses($item))[ItemComponentsTrait::class]);
 		if($componentBased) {
 			/** @var ItemComponentsTrait $item */
 			$componentsTag = $item->getComponents();
@@ -101,7 +98,7 @@ final class CustomiesItemFactory {
 	 * Registers the required mappings for the block to become an item that can be placed etc. It is assigned an ID that
 	 * correlates to its block ID.
 	 */
-	public function registerBlockItem(string $identifier, int $blockId) {
+	public function registerBlockItem(string $identifier, int $blockId): void {
 		$itemId = 255 - $blockId;
 		$this->registerCustomItemMapping($itemId);
 		$this->itemTableEntries[] = new ItemTypeEntry($identifier, $itemId, false);

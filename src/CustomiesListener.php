@@ -11,13 +11,21 @@ use pocketmine\network\mcpe\protocol\BiomeDefinitionListPacket;
 use pocketmine\network\mcpe\protocol\ItemComponentPacket;
 use pocketmine\network\mcpe\protocol\ResourcePackStackPacket;
 use pocketmine\network\mcpe\protocol\StartGamePacket;
+use pocketmine\network\mcpe\protocol\types\BlockPaletteEntry;
 use pocketmine\network\mcpe\protocol\types\Experiments;
+use pocketmine\network\mcpe\protocol\types\ItemTypeEntry;
 use function array_merge;
 
 final class CustomiesListener implements Listener {
 
 	private ?ItemComponentPacket $cachedItemComponentPacket = null;
+	/**
+	 * @var ItemTypeEntry[]
+	 */
 	private array $cachedItemTable = [];
+	/**
+	 * @var BlockPaletteEntry[]
+	 */
 	private array $cachedBlockPalette = [];
 	private Experiments $experiments;
 

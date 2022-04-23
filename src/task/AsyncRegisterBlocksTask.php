@@ -22,7 +22,9 @@ final class AsyncRegisterBlocksTask extends AsyncTask {
 		 * @var  $block      Block
 		 */
 		foreach($blocks as $identifier => $block){
-			CustomiesBlockFactory::getInstance()->registerBlock(get_class($block), $identifier, $block->getName(), $block->getBreakInfo());
+			/** @phpstan-var class-string $className */
+			$className = get_class($block);
+			CustomiesBlockFactory::getInstance()->registerBlock($className, $identifier, $block->getName(), $block->getBreakInfo());
 		}
 		CustomiesBlockFactory::getInstance()->registerCustomRuntimeMappings();
 	}

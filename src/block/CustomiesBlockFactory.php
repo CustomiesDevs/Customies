@@ -43,11 +43,6 @@ final class CustomiesBlockFactory {
 	 * @phpstan-var array<string, Block>
 	 */
 	private array $customBlocks = [];
-	/**
-	 * @var Model[]
-	 * @phpstan-var array<int, Model>
-	 */
-	private array $customBlockModels = [];
 	/** @var BlockPaletteEntry[] */
 	private array $blockPaletteEntries = [];
 
@@ -70,10 +65,6 @@ final class CustomiesBlockFactory {
 
 	/**
 	 * Get a custom block from its identifier. An exception will be thrown if the block is not registered.
-	 *
-	 * @param string $identifier
-	 *
-	 * @return Block
 	 */
 	public function get(string $identifier): Block {
 		$id = LegacyBlockIdToStringIdMap::getInstance()->stringToLegacy($identifier) ?? -1;
@@ -86,7 +77,6 @@ final class CustomiesBlockFactory {
 
 	/**
 	 * Returns all the block palette entries that need to be sent to the client.
-	 *
 	 * @return BlockPaletteEntry[]
 	 */
 	public function getBlockPaletteEntries(): array {
@@ -95,8 +85,6 @@ final class CustomiesBlockFactory {
 
 	/**
 	 * Returns the next available custom block id, an exception will be thrown if the block factory is full.
-	 *
-	 * @return int
 	 */
 	private function getNextAvailableId(): int {
 		$id = 1000 + count($this->customBlocks);
@@ -109,12 +97,7 @@ final class CustomiesBlockFactory {
 
 	/**
 	 * Register a block to the BlockFactory and all the required mappings.
-	 *
-	 * @param string $className
-	 * @param string $identifier
-	 * @param string $name
-	 * @param BlockBreakInfo $breakInfo
-	 * @param Model|null $model
+	 * @phpstan-param class-string $className
 	 */
 	public function registerBlock(string $className, string $identifier, string $name, BlockBreakInfo $breakInfo, ?Model $model = null): void {
 		if($className !== Block::class) {
@@ -167,8 +150,6 @@ final class CustomiesBlockFactory {
 	/**
 	 * Modifies the properties in the BlockFactory instance to increase the SplFixedArrays to double the limit of blocks
 	 * that can be registered.
-	 *
-	 * @throws ReflectionException
 	 */
 	public function increaseBlockFactoryLimits(): void {
 		$instance = BlockFactory::getInstance();
@@ -190,8 +171,6 @@ final class CustomiesBlockFactory {
 	/**
 	 * Registers the custom block runtime mappings
 	 * to tell PocketMine about the custom blocks.
-	 *
-	 * @throws ReflectionException
 	 */
 	public function registerCustomRuntimeMappings(): void {
 		$instance = RuntimeBlockMapping::getInstance();
@@ -214,7 +193,7 @@ final class CustomiesBlockFactory {
 		/** @var R12ToCurrentBlockMapEntry[] $legacyStateMap */
 		$legacyStateMap = [];
 
-		$legacyStateMapReader = PacketSerializer::decoder(file_get_contents(BEDROCK_DATA_PATH . "r12_to_current_block_map.bin"), 0, new PacketSerializerContext(GlobalItemTypeDictionary::getInstance()->getDictionary()));
+		$legacyStateMapReader = PacketSerializer::decoder((string)file_get_contents(BEDROCK_DATA_PATH . "r12_to_current_block_map.bin"), 0, new PacketSerializerContext(GlobalItemTypeDictionary::getInstance()->getDictionary()));
 		$nbtReader = new NetworkNbtSerializer();
 		while(!$legacyStateMapReader->feof()){
 			$id = $legacyStateMapReader->getString();

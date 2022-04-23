@@ -28,8 +28,8 @@ class CustomiesEntityFactory {
 
 	/**
 	 * Returns the identifier => className map for all custom entities.
-	 *
-	 * @return array<string, string>
+	 * @return string[]
+	 * @phpstan-return array<string, string>
 	 */
 	public function getIdentifierToClassMap(): array {
 		return $this->identifierToClassMap;
@@ -38,7 +38,6 @@ class CustomiesEntityFactory {
 	/**
 	 * Returns a compound tag array of all the custom entity ids/identifiers.
 	 * This is used to make the client know about all the entities.
-	 *
 	 * @return CompoundTag[]
 	 */
 	public function getAvailableActorIdentifiers(): array {
@@ -59,8 +58,8 @@ class CustomiesEntityFactory {
 
 	/**
 	 * Returns the legacyId => identifier map for all custom entities.
-	 *
-	 * @return array<int, string>
+	 * @return string[]
+	 * @phpstan-return array<int, string>
 	 */
 	public function getIdToIdentifierMap(): array {
 		return $this->idToIdentifierMap;
@@ -69,10 +68,6 @@ class CustomiesEntityFactory {
 	/**
 	 * Returns the identifier of an entity from its legacy id.
 	 * An empty string is returned if the entity is not registered.
-	 *
-	 * @param int $id
-	 *
-	 * @return string
 	 */
 	public function getIdentifierFromId(int $id): string {
 		return $this->idToIdentifierMap[$id] ?? "";
@@ -81,10 +76,6 @@ class CustomiesEntityFactory {
 	/**
 	 * Returns the legacy id of an entity from its string identifier.
 	 * -1 will be returned if the entity identifier is not registered.
-	 *
-	 * @param string $identifier
-	 *
-	 * @return int
 	 */
 	public function getIdFromIdentifier(string $identifier): int {
 		return array_flip($this->idToIdentifierMap)[$identifier] ?? -1;
@@ -92,16 +83,12 @@ class CustomiesEntityFactory {
 
 	/**
 	 * Register an entity to the EntityFactory and all the required mappings.
-	 *
-	 * @param string $className
-	 * @param string $identifier
-	 *
 	 * @phpstan-param class-string<Entity> $className
 	 */
 	public function registerEntity(string $className, string $identifier): void {
 		$id = 150 + count($this->idToIdentifierMap);
 
-		EntityFactory::getInstance()->register($className, static function (World $world, CompoundTag $nbt) use ($className): string {
+		EntityFactory::getInstance()->register($className, static function (World $world, CompoundTag $nbt) use ($className): Entity {
 			return new $className(EntityDataHelper::parseLocation($nbt, $world), $nbt);
 		}, [$identifier]);
 

@@ -17,14 +17,13 @@ final class BlockPalette {
 	/** @var CompoundTag[] */
 	private array $customStates = [];
 
-	private RuntimeBlockMapping $tempInstance;
-	private ReflectionClass $runtimeBlockMapping;
+	private RuntimeBlockMapping $runtimeBlockMapping;
 	private \ReflectionProperty $bedrockKnownStates;
 
 	public function __construct() {
-		$this->tempInstance = $instance = RuntimeBlockMapping::getInstance();
+		$this->runtimeBlockMapping = $instance = RuntimeBlockMapping::getInstance();
 		$this->states = $instance->getBedrockKnownStates();
-		$this->runtimeBlockMapping = $runtimeBlockMapping = new ReflectionClass($instance);
+		$runtimeBlockMapping = new ReflectionClass($instance);
 		$this->bedrockKnownStates = $bedrockKnownStates = $runtimeBlockMapping->getProperty("bedrockKnownStates");
 		$bedrockKnownStates->setAccessible(true);
 	}
@@ -44,7 +43,7 @@ final class BlockPalette {
 	}
 
 	public function insertState(CompoundTag $state): void {
-		if($state->getString("name") === null) {
+		if($state->getString("name". "") === "") {
 			throw new RuntimeException("Block state must contain a StringTag called 'name'");
 		}
 		if($state->getCompoundTag("states") === null) {
@@ -68,6 +67,6 @@ final class BlockPalette {
 			}
 		}
 		$this->states = $sortedStates;
-		$this->bedrockKnownStates->setValue($this->tempInstance, $sortedStates);
+		$this->bedrockKnownStates->setValue($this->runtimeBlockMapping, $sortedStates);
 	}
 }
