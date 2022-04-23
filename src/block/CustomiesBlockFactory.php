@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace customies\block;
 
 use customies\item\CustomiesItemFactory;
-use customies\task\AsyncClosureTask;
+use customies\task\AsyncWorkerStartHookTask;
 use InvalidArgumentException;
 use OutOfRangeException;
 use pocketmine\block\Block;
@@ -89,22 +89,7 @@ class CustomiesBlockFactory {
 		$models = serialize(self::$customBlockModels);
 		$server = Server::getInstance();
 		$server->getAsyncPool()->addWorkerStartHook(static function (int $worker) use ($server, $blocks, $models): void {
-			$server->getAsyncPool()->submitTaskToWorker(new AsyncClosureTask(static function () use ($blocks, $models) {
-				$blocks = unserialize($blocks);
-				$models = unserialize($models);
-
-				CustomiesBlockFactory::init();
-
-				/**
-				 * @var  $identifier string
-				 * @var  $block      Block
-				 */
-				foreach($blocks as $identifier => $block){
-					CustomiesBlockFactory::registerBlock(get_class($block), $identifier, $block->getName(), $block->getBreakInfo(), $models[$block->getId()] ?? null);
-				}
-
-				CustomiesBlockFactory::updateRuntimeMappings();
-			}), $worker);
+			$server->getAsyncPool()->submitTaskToWorker(new AsyncWorkerStartHookTask($blocks, $models), $worker);
 		});
 	}
 
