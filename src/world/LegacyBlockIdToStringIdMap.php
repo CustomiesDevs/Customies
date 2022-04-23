@@ -21,8 +21,9 @@ final class LegacyBlockIdToStringIdMap {
 	private array $stringToLegacy;
 
 	public function __construct() {
+		/** @phpstan-var array<string, int> $blockIdMap */
 		$blockIdMap = json_decode((string)file_get_contents(BEDROCK_DATA_PATH . "block_id_map.json"), true);
-		$this->stringToLegacy = array_merge($blockIdMap);
+		$this->stringToLegacy = $blockIdMap;
 		/** @phpstan-var array<int, string> $flipped */
 		$flipped = array_flip($this->stringToLegacy);
 		$this->legacyToString = $flipped;

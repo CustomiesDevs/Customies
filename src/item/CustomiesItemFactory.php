@@ -113,10 +113,10 @@ final class CustomiesItemFactory {
 
 		$reflectionProperty = $reflection->getProperty("simpleCoreToNetMapping");
 		$reflectionProperty->setAccessible(true);
-		$reflectionProperty->setValue($translator, $reflectionProperty->getValue($translator) + [$id => $id]);
+		$reflectionProperty->setValue($translator, array_merge($reflectionProperty->getValue($translator), [$id => $id]));
 
 		$reflectionProperty = $reflection->getProperty("simpleNetToCoreMapping");
 		$reflectionProperty->setAccessible(true);
-		$reflectionProperty->setValue($translator, $reflectionProperty->getValue($translator) + [$id => $id]);
+		$reflectionProperty->setValue($translator, array_merge($reflectionProperty->getValue($translator), [$id => $id]));
 	}
 }

@@ -16,11 +16,8 @@ final class AsyncRegisterBlocksTask extends AsyncTask {
 	}
 
 	public function onRun(): void {
+		/** @phpstan-var array<string, Block> $blocks */
 		$blocks = unserialize($this->blocks);
-		/**
-		 * @var  $identifier string
-		 * @var  $block      Block
-		 */
 		foreach($blocks as $identifier => $block){
 			/** @phpstan-var class-string $className */
 			$className = get_class($block);
