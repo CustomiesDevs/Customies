@@ -1,7 +1,0 @@
-parameters:
-  paths:
-    - /source/src
-  level: 9
-  bootstrapFiles:
-    - phar:///pocketmine/PocketMine-MP.phar/vendor/autoload.php
-  checkGenericClassInNonGenericObjectType: false
