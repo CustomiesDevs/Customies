@@ -42,6 +42,9 @@ final class BlockPalette {
 		return $this->customStates;
 	}
 
+	/**
+	 * Inserts the provided state in to the correct position of the palette.
+	 */
 	public function insertState(CompoundTag $state): void {
 		if($state->getString("name". "") === "") {
 			throw new RuntimeException("Block state must contain a StringTag called 'name'");
@@ -53,6 +56,9 @@ final class BlockPalette {
 		$this->customStates[] = $state;
 	}
 
+	/**
+	 * Sorts the palette's block states in the correct order, also adding the provided state to the array.
+	 */
 	private function sortWith(CompoundTag $state): void {
 		$states = [$state->getString("name") => [$state]];
 		foreach($this->states as $state){

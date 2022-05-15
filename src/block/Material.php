@@ -16,24 +16,25 @@ final class Material {
 	public const RENDER_METHOD_BLEND = "blend";
 	public const RENDER_METHOD_OPAQUE = "opaque";
 
-	private string $target;
-	private string $texture;
-	private string $renderMethod;
-	private bool $faceDimming;
-	private bool $ambientOcclusion;
-
-	public function __construct(string $target, string $texture, string $renderMethod, bool $faceDimming = true, bool $ambientOcclusion = true) {
-		$this->target = $target;
-		$this->texture = $texture;
-		$this->renderMethod = $renderMethod;
-		$this->faceDimming = $faceDimming;
-		$this->ambientOcclusion = $ambientOcclusion;
+	public function __construct(
+		private string $target,
+		private string $texture,
+		private string $renderMethod,
+		private bool   $faceDimming = true,
+		private bool   $ambientOcclusion = true
+	) {
 	}
 
+	/**
+	 * Returns the targeted face for the material.
+	 */
 	public function getTarget(): string {
 		return $this->target;
 	}
 
+	/**
+	 * Returns the material in the correct NBT format supported by the client.
+	 */
 	public function toNBT(): CompoundTag {
 		return CompoundTag::create()
 			->setString("texture", $this->texture)

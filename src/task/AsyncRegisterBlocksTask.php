@@ -9,10 +9,7 @@ use pocketmine\scheduler\AsyncTask;
 
 final class AsyncRegisterBlocksTask extends AsyncTask {
 
-	private string $blocks;
-
-	public function __construct(string $blocks) {
-		$this->blocks = $blocks;
+	public function __construct(private string $blocks) {
 	}
 
 	public function onRun(): void {

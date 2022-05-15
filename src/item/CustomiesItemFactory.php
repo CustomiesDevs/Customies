@@ -32,8 +32,7 @@ final class CustomiesItemFactory {
 	private array $itemComponentEntries = [];
 
 	/**
-	 * Get a custom item from its identifier. an exception will be thrown if the item is not registered.
-	 * @return Item
+	 * Get a custom item from its identifier. An exception will be thrown if the item is not registered.
 	 */
 	public function get(string $identifier, int $amount): Item {
 		$id = -1;

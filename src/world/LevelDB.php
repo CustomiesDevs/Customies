@@ -121,7 +121,6 @@ class LevelDB extends \pocketmine\world\format\io\leveldb\LevelDB {
 
 	/**
 	 * This method is copied from pocketmine/world/format/io/leveldb/LevelDB.writeTags() since it is private.
-	 * @param CompoundTag[] $targets
 	 */
 	private function writeTags(array $targets, string $index, \LevelDBWriteBatch $write): void {
 		if(count($targets) > 0) {

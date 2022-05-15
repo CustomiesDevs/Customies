@@ -169,8 +169,7 @@ final class CustomiesBlockFactory {
 	}
 
 	/**
-	 * Registers the custom block runtime mappings
-	 * to tell PocketMine about the custom blocks.
+	 * Registers the custom block runtime mappings to tell PocketMine about the custom blocks.
 	 */
 	public function registerCustomRuntimeMappings(): void {
 		$instance = RuntimeBlockMapping::getInstance();
