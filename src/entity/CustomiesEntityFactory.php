@@ -11,6 +11,7 @@ use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\ListTag;
 use pocketmine\network\mcpe\cache\StaticPacketCache;
 use pocketmine\network\mcpe\protocol\AvailableActorIdentifiersPacket;
+use pocketmine\network\mcpe\protocol\types\CacheableNbt;
 use pocketmine\utils\SingletonTrait;
 use pocketmine\world\World;
 use ReflectionClass;
@@ -34,7 +35,7 @@ class CustomiesEntityFactory {
 		foreach($this->actorIdentifiers as $identifier){
 			$idList->push($identifier);
 		}
-		$property->setValue($idList);
+		$packet->identifiers = new CacheableNbt($root);
 	}
 
 	/**
@@ -46,7 +47,6 @@ class CustomiesEntityFactory {
 		EntityFactory::getInstance()->register($className, $creationFunc ?? static function (World $world, CompoundTag $nbt) use ($className): Entity {
 				return new $className(EntityDataHelper::parseLocation($nbt, $world), $nbt);
 			}, [$identifier]);
-
 		$this->actorIdentifiers[] = CompoundTag::create()->setString("id", $identifier);
 	}
 }
