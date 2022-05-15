@@ -30,7 +30,7 @@ trait ItemComponentsTrait {
 	}
 
 	/**
-	 *Attempts to set a property with the key and value provided. It will attempt to turn the value in to a Tag, but
+	 * Attempts to set a property with the key and value provided. It will attempt to turn the value in to a Tag, but
 	 * will throw an exception if it cannot convert it.
 	 */
 	public function addProperty(string $key, $value): void {

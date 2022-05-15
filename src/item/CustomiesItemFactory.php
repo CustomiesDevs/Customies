@@ -34,7 +34,7 @@ final class CustomiesItemFactory {
 	/**
 	 * Get a custom item from its identifier. An exception will be thrown if the item is not registered.
 	 */
-	public function get(string $identifier, int $amount): Item {
+	public function get(string $identifier, int $amount = 1): Item {
 		$id = -1;
 		foreach($this->itemTableEntries as $entry){
 			if($entry->getStringId() === $identifier) {

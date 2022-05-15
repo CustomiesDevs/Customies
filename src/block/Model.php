@@ -10,15 +10,20 @@ use pocketmine\nbt\tag\ListTag;
 
 final class Model {
 
+	/** @var Material[] */
+	private array $materials;
+	private string $geometry;
+	private Vector3 $origin;
+	private Vector3 $size;
+
 	/**
 	 * @param Material[] $materials
 	 */
-	public function __construct(
-		private array   $materials,
-		private string  $geometry,
-		private Vector3 $origin,
-		private Vector3 $size
-	) {
+	public function __construct(array $materials, string $geometry, Vector3 $origin, Vector3 $size) {
+		$this->materials = $materials;
+		$this->geometry = $geometry;
+		$this->origin = $origin;
+		$this->size = $size;
 	}
 
 	/**
