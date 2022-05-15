@@ -5,6 +5,7 @@ namespace customies;
 
 use Closure;
 use customies\block\CustomiesBlockFactory;
+use customies\entity\CustomiesEntityFactory;
 use customies\world\LevelDB;
 use pocketmine\plugin\PluginBase;
 use pocketmine\scheduler\ClosureTask;
@@ -23,9 +24,10 @@ final class Customies extends PluginBase {
 
 		$this->getScheduler()->scheduleDelayedTask(new ClosureTask(static function (): void {
 			// This task is scheduled with a 0-tick delay so it runs as soon as the server has started. Plugins should
-			// register their custom blocks in onEnable() before this is executed.
+			// register their custom blocks and entities in onEnable() before this is executed.
 			CustomiesBlockFactory::getInstance()->registerCustomRuntimeMappings();
 			CustomiesBlockFactory::getInstance()->addWorkerInitHook();
+			CustomiesEntityFactory::getInstance()->updateStaticPacketCache();
 		}), 0);
 	}
 }

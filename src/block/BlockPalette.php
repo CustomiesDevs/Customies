@@ -7,6 +7,7 @@ use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\network\mcpe\convert\RuntimeBlockMapping;
 use pocketmine\utils\SingletonTrait;
 use ReflectionClass;
+use ReflectionProperty;
 use RuntimeException;
 
 final class BlockPalette {
@@ -18,7 +19,7 @@ final class BlockPalette {
 	private array $customStates = [];
 
 	private RuntimeBlockMapping $runtimeBlockMapping;
-	private \ReflectionProperty $bedrockKnownStates;
+	private ReflectionProperty $bedrockKnownStates;
 
 	public function __construct() {
 		$this->runtimeBlockMapping = $instance = RuntimeBlockMapping::getInstance();
