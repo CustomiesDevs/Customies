@@ -8,6 +8,7 @@ use pocketmine\entity\Entity;
 use pocketmine\entity\EntityDataHelper;
 use pocketmine\entity\EntityFactory;
 use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\nbt\tag\ListTag;
 use pocketmine\network\mcpe\cache\StaticPacketCache;
 use pocketmine\network\mcpe\protocol\AvailableActorIdentifiersPacket;
 use pocketmine\utils\SingletonTrait;
@@ -29,7 +30,7 @@ class CustomiesEntityFactory {
 		$packet = $property->getValue($instance);
 		/** @var CompoundTag $root */
 		$root = $packet->identifiers->getRoot();
-		$idList = $root->getListTag("idlist");
+		$idList = $root->getListTag("idlist") ?? new ListTag();
 		foreach($this->actorIdentifiers as $identifier){
 			$idList->push($identifier);
 		}

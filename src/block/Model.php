@@ -23,6 +23,7 @@ final class Model {
 
 	/**
 	 * Returns the model in the correct NBT format supported by the client.
+	 * @return CompoundTag[]
 	 */
 	public function toNBT(): array {
 		$materials = CompoundTag::create();
