@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace customies\item;
+namespace twistedasylummc\customies\item;
 
 use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\CompoundTag;
@@ -17,19 +17,6 @@ trait ItemComponentsTrait {
 	private CompoundTag $componentTag;
 
 	/**
-	 * Initializes the components and creates the base CompoundTag required for the components to be sent to a client.
-	 * This must be called before any properties or components are added otherwise it will break.
-	 */
-	protected function initComponent(string $texture, int $maxStackSize): void {
-		$this->componentTag = CompoundTag::create()
-			->setTag("components", CompoundTag::create()
-				->setTag("item_properties", CompoundTag::create()
-					->setTag("minecraft:icon", CompoundTag::create()
-						->setString("texture", $texture))
-					->setInt("max_stack_size", $maxStackSize)));
-	}
-
-	/**
 	 * Attempts to set a property with the key and value provided. It will attempt to turn the value in to a Tag, but
 	 * will throw an exception if it cannot convert it.
 	 */
@@ -40,6 +27,21 @@ trait ItemComponentsTrait {
 			throw new RuntimeException("Failed to get tag type for property with key " . $key);
 		}
 		$propertiesTag->setTag($key, $tag);
+	}
+
+	/**
+	 * Attempts to return the correct Tag for the provided type.
+	 */
+	private function getTagType($type): ?Tag {
+		return match (true) {
+			is_array($type) => new ListTag($type),
+			is_bool($type) => new ByteTag($type ? 1 : 0),
+			is_float($type) => new FloatTag($type),
+			is_int($type) => new IntTag($type),
+			is_string($type) => new StringTag($type),
+			$type instanceof CompoundTag => $type,
+			default => null,
+		};
 	}
 
 	/**
@@ -60,17 +62,15 @@ trait ItemComponentsTrait {
 	}
 
 	/**
-	 * Attempts to return the correct Tag for the provided type.
+	 * Initializes the components and creates the base CompoundTag required for the components to be sent to a client.
+	 * This must be called before any properties or components are added otherwise it will break.
 	 */
-	private function getTagType($type): ?Tag {
-		return match (true) {
-			is_array($type) => new ListTag($type),
-			is_bool($type) => new ByteTag($type ? 1 : 0),
-			is_float($type) => new FloatTag($type),
-			is_int($type) => new IntTag($type),
-			is_string($type) => new StringTag($type),
-			$type instanceof CompoundTag => $type,
-			default => null,
-		};
+	protected function initComponent(string $texture, int $maxStackSize): void {
+		$this->componentTag = CompoundTag::create()
+			->setTag("components", CompoundTag::create()
+				->setTag("item_properties", CompoundTag::create()
+					->setTag("minecraft:icon", CompoundTag::create()
+						->setString("texture", $texture))
+					->setInt("max_stack_size", $maxStackSize)));
 	}
 }

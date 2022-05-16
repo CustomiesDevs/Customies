@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace customies\block;
+namespace twistedasylummc\customies\block;
 
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\network\mcpe\convert\RuntimeBlockMapping;
@@ -47,7 +47,7 @@ final class BlockPalette {
 	 * Inserts the provided state in to the correct position of the palette.
 	 */
 	public function insertState(CompoundTag $state): void {
-		if($state->getString("name". "") === "") {
+		if($state->getString("name" . "") === "") {
 			throw new RuntimeException("Block state must contain a StringTag called 'name'");
 		}
 		if($state->getCompoundTag("states") === null) {

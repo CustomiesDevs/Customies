@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace customies\block;
+namespace twistedasylummc\customies\block;
 
 use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\CompoundTag;

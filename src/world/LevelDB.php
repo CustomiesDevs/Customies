@@ -1,9 +1,8 @@
 <?php
 declare(strict_types=1);
 
-namespace customies\world;
+namespace twistedasylummc\customies\world;
 
-use customies\block\CustomiesBlockFactory;
 use InvalidArgumentException;
 use LevelDBWriteBatch;
 use pocketmine\block\Block;
@@ -16,47 +15,12 @@ use pocketmine\world\format\Chunk;
 use pocketmine\world\format\io\ChunkData;
 use pocketmine\world\format\io\exception\CorruptedChunkException;
 use pocketmine\world\format\PalettedBlockArray;
-use function array_flip;
 use function array_map;
-use function array_merge;
 use function chr;
 use function count;
-use function file_get_contents;
-use function json_decode;
 use function str_repeat;
-use const pocketmine\BEDROCK_DATA_PATH;
-use const pocketmine\RESOURCE_PATH;
 
 class LevelDB extends \pocketmine\world\format\io\leveldb\LevelDB {
-
-	/**
-	 * deserializePaletted is copied from pocketmine/world/format/io/leveldb/LevelDB.deserializePaletted() but changes
-	 * the LegacyBlockIdToStringIdMap instance to support loading custom blocks from the world.
-	 */
-	protected function deserializePaletted(BinaryStream $stream): PalettedBlockArray {
-		$bitsPerBlock = $stream->getByte() >> 1;
-
-		try {
-			$words = $stream->get(PalettedBlockArray::getExpectedWordArraySize($bitsPerBlock));
-		} catch(InvalidArgumentException $e) {
-			throw new CorruptedChunkException("Failed to deserialize paletted storage: " . $e->getMessage(), 0, $e);
-		}
-		$nbt = new LittleEndianNbtSerializer();
-		$palette = [];
-		$idMap = LegacyBlockIdToStringIdMap::getInstance();
-		for($i = 0, $paletteSize = $stream->getLInt(); $i < $paletteSize; ++$i){
-			$offset = $stream->getOffset();
-
-			$tag = $nbt->read($stream->getBuffer(), $offset)->mustGetCompoundTag();
-			$stream->setOffset($offset);
-
-			$id = $idMap->stringToLegacy($tag->getString("name")) ?? BlockLegacyIds::INFO_UPDATE;
-			$data = $tag->getShort("val");
-			$palette[] = ($id << Block::INTERNAL_METADATA_BITS) | $data;
-		}
-
-		return PalettedBlockArray::fromData($bitsPerBlock, $words, $palette);
-	}
 
 	/**
 	 * saveChunk is copied from pocketmine/world/format/io/leveldb/LevelDB.saveChunk() but changes the
@@ -130,5 +94,34 @@ class LevelDB extends \pocketmine\world\format\io\leveldb\LevelDB {
 		} else {
 			$write->delete($index);
 		}
+	}
+
+	/**
+	 * deserializePaletted is copied from pocketmine/world/format/io/leveldb/LevelDB.deserializePaletted() but changes
+	 * the LegacyBlockIdToStringIdMap instance to support loading custom blocks from the world.
+	 */
+	protected function deserializePaletted(BinaryStream $stream): PalettedBlockArray {
+		$bitsPerBlock = $stream->getByte() >> 1;
+
+		try {
+			$words = $stream->get(PalettedBlockArray::getExpectedWordArraySize($bitsPerBlock));
+		} catch(InvalidArgumentException $e) {
+			throw new CorruptedChunkException("Failed to deserialize paletted storage: " . $e->getMessage(), 0, $e);
+		}
+		$nbt = new LittleEndianNbtSerializer();
+		$palette = [];
+		$idMap = LegacyBlockIdToStringIdMap::getInstance();
+		for($i = 0, $paletteSize = $stream->getLInt(); $i < $paletteSize; ++$i){
+			$offset = $stream->getOffset();
+
+			$tag = $nbt->read($stream->getBuffer(), $offset)->mustGetCompoundTag();
+			$stream->setOffset($offset);
+
+			$id = $idMap->stringToLegacy($tag->getString("name")) ?? BlockLegacyIds::INFO_UPDATE;
+			$data = $tag->getShort("val");
+			$palette[] = ($id << Block::INTERNAL_METADATA_BITS) | $data;
+		}
+
+		return PalettedBlockArray::fromData($bitsPerBlock, $words, $palette);
 	}
 }

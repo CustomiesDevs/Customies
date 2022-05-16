@@ -1,11 +1,8 @@
 <?php
 declare(strict_types=1);
 
-namespace customies\block;
+namespace twistedasylummc\customies\block;
 
-use customies\item\CustomiesItemFactory;
-use customies\task\AsyncRegisterBlocksTask;
-use customies\world\LegacyBlockIdToStringIdMap;
 use InvalidArgumentException;
 use OutOfRangeException;
 use pocketmine\block\Block;
@@ -25,9 +22,11 @@ use pocketmine\Server;
 use pocketmine\utils\SingletonTrait;
 use pocketmine\utils\Utils;
 use ReflectionClass;
-use ReflectionException;
 use RuntimeException;
 use SplFixedArray;
+use twistedasylummc\customies\item\CustomiesItemFactory;
+use twistedasylummc\customies\task\AsyncRegisterBlocksTask;
+use twistedasylummc\customies\world\LegacyBlockIdToStringIdMap;
 use function array_fill;
 use function count;
 use function file_get_contents;
@@ -48,6 +47,27 @@ final class CustomiesBlockFactory {
 
 	public function __construct() {
 		$this->increaseBlockFactoryLimits();
+	}
+
+	/**
+	 * Modifies the properties in the BlockFactory instance to increase the SplFixedArrays to double the limit of blocks
+	 * that can be registered.
+	 */
+	public function increaseBlockFactoryLimits(): void {
+		$instance = BlockFactory::getInstance();
+		$blockFactory = new ReflectionClass($instance);
+		foreach(["fullList", "mappedStateIds"] as $propertyName){
+			$property = $blockFactory->getProperty($propertyName);
+			$property->setAccessible(true);
+			/** @var SplFixedArray $array */
+			$array = $property->getValue($instance);
+			$array->setSize(self::NEW_BLOCK_FACTORY_SIZE);
+			$property->setValue($instance, $array);
+		}
+		$instance->light = SplFixedArray::fromArray(array_fill(0, self::NEW_BLOCK_FACTORY_SIZE, 0));
+		$instance->lightFilter = SplFixedArray::fromArray(array_fill(0, self::NEW_BLOCK_FACTORY_SIZE, 1));
+		$instance->blocksDirectSkyLight = SplFixedArray::fromArray(array_fill(0, self::NEW_BLOCK_FACTORY_SIZE, false));
+		$instance->blastResistance = SplFixedArray::fromArray(array_fill(0, self::NEW_BLOCK_FACTORY_SIZE, 0.0));
 	}
 
 	/**
@@ -81,18 +101,6 @@ final class CustomiesBlockFactory {
 	 */
 	public function getBlockPaletteEntries(): array {
 		return $this->blockPaletteEntries;
-	}
-
-	/**
-	 * Returns the next available custom block id, an exception will be thrown if the block factory is full.
-	 */
-	private function getNextAvailableId(): int {
-		$id = 1000 + count($this->customBlocks);
-		if($id > (self::NEW_BLOCK_FACTORY_SIZE / 16)) {
-			throw new OutOfRangeException("All custom block ids are used up");
-		}
-
-		return $id;
 	}
 
 	/**
@@ -148,24 +156,15 @@ final class CustomiesBlockFactory {
 	}
 
 	/**
-	 * Modifies the properties in the BlockFactory instance to increase the SplFixedArrays to double the limit of blocks
-	 * that can be registered.
+	 * Returns the next available custom block id, an exception will be thrown if the block factory is full.
 	 */
-	public function increaseBlockFactoryLimits(): void {
-		$instance = BlockFactory::getInstance();
-		$blockFactory = new ReflectionClass($instance);
-		foreach(["fullList", "mappedStateIds"] as $propertyName){
-			$property = $blockFactory->getProperty($propertyName);
-			$property->setAccessible(true);
-			/** @var SplFixedArray $array */
-			$array = $property->getValue($instance);
-			$array->setSize(self::NEW_BLOCK_FACTORY_SIZE);
-			$property->setValue($instance, $array);
+	private function getNextAvailableId(): int {
+		$id = 1000 + count($this->customBlocks);
+		if($id > (self::NEW_BLOCK_FACTORY_SIZE / 16)) {
+			throw new OutOfRangeException("All custom block ids are used up");
 		}
-		$instance->light = SplFixedArray::fromArray(array_fill(0, self::NEW_BLOCK_FACTORY_SIZE, 0));
-		$instance->lightFilter = SplFixedArray::fromArray(array_fill(0, self::NEW_BLOCK_FACTORY_SIZE, 1));
-		$instance->blocksDirectSkyLight = SplFixedArray::fromArray(array_fill(0, self::NEW_BLOCK_FACTORY_SIZE, false));
-		$instance->blastResistance = SplFixedArray::fromArray(array_fill(0, self::NEW_BLOCK_FACTORY_SIZE, 0.0));
+
+		return $id;
 	}
 
 	/**

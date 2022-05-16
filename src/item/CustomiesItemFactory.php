@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace customies\item;
+namespace twistedasylummc\customies\item;
 
 use InvalidArgumentException;
 use pocketmine\item\Item;
@@ -14,9 +14,7 @@ use pocketmine\network\mcpe\protocol\types\ItemTypeEntry;
 use pocketmine\utils\SingletonTrait;
 use pocketmine\utils\Utils;
 use ReflectionClass;
-use ReflectionException;
 use RuntimeException;
-use function count;
 
 final class CustomiesItemFactory {
 	use SingletonTrait;
@@ -92,16 +90,6 @@ final class CustomiesItemFactory {
 	}
 
 	/**
-	 * Registers the required mappings for the block to become an item that can be placed etc. It is assigned an ID that
-	 * correlates to its block ID.
-	 */
-	public function registerBlockItem(string $identifier, int $blockId): void {
-		$itemId = 255 - $blockId;
-		$this->registerCustomItemMapping($itemId);
-		$this->itemTableEntries[] = new ItemTypeEntry($identifier, $itemId, false);
-	}
-
-	/**
 	 * Registers a custom item ID to the required mappings in the ItemTranslator instance.
 	 */
 	private function registerCustomItemMapping(int $id): void {
@@ -119,5 +107,15 @@ final class CustomiesItemFactory {
 		/** @var int[] $value */
 		$value = $reflectionProperty->getValue($translator);
 		$reflectionProperty->setValue($translator, array_merge($value, [$id => $id]));
+	}
+
+	/**
+	 * Registers the required mappings for the block to become an item that can be placed etc. It is assigned an ID that
+	 * correlates to its block ID.
+	 */
+	public function registerBlockItem(string $identifier, int $blockId): void {
+		$itemId = 255 - $blockId;
+		$this->registerCustomItemMapping($itemId);
+		$this->itemTableEntries[] = new ItemTypeEntry($identifier, $itemId, false);
 	}
 }

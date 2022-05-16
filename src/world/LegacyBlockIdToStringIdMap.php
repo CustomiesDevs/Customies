@@ -1,8 +1,7 @@
 <?php
 
-namespace customies\world;
+namespace twistedasylummc\customies\world;
 
-use customies\block\CustomiesBlockFactory;
 use pocketmine\utils\SingletonTrait;
 use const pocketmine\BEDROCK_DATA_PATH;
 
