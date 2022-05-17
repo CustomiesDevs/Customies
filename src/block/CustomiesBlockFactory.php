@@ -44,6 +44,8 @@ final class CustomiesBlockFactory {
 	private array $customBlocks = [];
 	/** @var BlockPaletteEntry[] */
 	private array $blockPaletteEntries = [];
+	/** @var R12ToCurrentBlockMapEntry[] */
+	private array $legacyStateMap = [];
 
 	public function __construct() {
 		$this->increaseBlockFactoryLimits();

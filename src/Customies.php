@@ -8,7 +8,6 @@ use pocketmine\plugin\PluginBase;
 use pocketmine\scheduler\ClosureTask;
 use pocketmine\world\format\io\WritableWorldProviderManagerEntry;
 use twistedasylummc\customies\block\CustomiesBlockFactory;
-use twistedasylummc\customies\entity\CustomiesEntityFactory;
 use twistedasylummc\customies\world\LevelDB;
 
 final class Customies extends PluginBase {
@@ -27,7 +26,6 @@ final class Customies extends PluginBase {
 			// register their custom blocks and entities in onEnable() before this is executed.
 			CustomiesBlockFactory::getInstance()->registerCustomRuntimeMappings();
 			CustomiesBlockFactory::getInstance()->addWorkerInitHook();
-			CustomiesEntityFactory::getInstance()->updateStaticPacketCache();
 		}), 0);
 	}
 }

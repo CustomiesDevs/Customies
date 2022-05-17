@@ -19,10 +19,7 @@ use ReflectionClass;
 class CustomiesEntityFactory {
 	use SingletonTrait;
 
-	/** @var CompoundTag[] */
-	private array $actorIdentifiers = [];
-
-	public function updateStaticPacketCache(): void {
+	public function updateStaticPacketCache(string $identifier): void {
 		$instance = StaticPacketCache::getInstance();
 		$staticPacketCache = new ReflectionClass($instance);
 		$property = $staticPacketCache->getProperty("availableActorIdentifiers");
@@ -32,9 +29,7 @@ class CustomiesEntityFactory {
 		/** @var CompoundTag $root */
 		$root = $packet->identifiers->getRoot();
 		$idList = $root->getListTag("idlist") ?? new ListTag();
-		foreach($this->actorIdentifiers as $identifier){
-			$idList->push($identifier);
-		}
+		$idList->push(CompoundTag::create()->setString("id", $identifier));
 		$packet->identifiers = new CacheableNbt($root);
 	}
 
@@ -47,6 +42,6 @@ class CustomiesEntityFactory {
 		EntityFactory::getInstance()->register($className, $creationFunc ?? static function (World $world, CompoundTag $nbt) use ($className): Entity {
 				return new $className(EntityDataHelper::parseLocation($nbt, $world), $nbt);
 			}, [$identifier]);
-		$this->actorIdentifiers[] = CompoundTag::create()->setString("id", $identifier);
+		$this->updateStaticPacketCache($identifier);
 	}
 }
