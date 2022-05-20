@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace twistedasylummc\customies\block;
+namespace customiesdevs\customies\block;
 
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\network\mcpe\convert\RuntimeBlockMapping;

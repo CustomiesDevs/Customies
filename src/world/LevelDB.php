@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace twistedasylummc\customies\world;
+namespace customiesdevs\customies\world;
 
 use InvalidArgumentException;
 use LevelDBWriteBatch;
