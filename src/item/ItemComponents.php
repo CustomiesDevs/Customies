@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace twistedasylummc\customies\item;
+namespace customiesdevs\customies\item;
 
 use pocketmine\nbt\tag\CompoundTag;
 

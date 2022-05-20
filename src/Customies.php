@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace twistedasylummc\customies;
+namespace customiesdevs\customies;
 
 use Closure;
 use pocketmine\plugin\PluginBase;
 use pocketmine\scheduler\ClosureTask;
 use pocketmine\world\format\io\WritableWorldProviderManagerEntry;
-use twistedasylummc\customies\block\CustomiesBlockFactory;
-use twistedasylummc\customies\world\LevelDB;
+use customiesdevs\customies\block\CustomiesBlockFactory;
+use customiesdevs\customies\world\LevelDB;
 
 final class Customies extends PluginBase {
 
