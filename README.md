@@ -23,7 +23,7 @@ model all you need to do is register
 the block with the same parameters you would use to construct a Block normally.
 
 ```php
-use twistedasylummc\customies\block\CustomiesBlockFactory;
+use customiesdevs\customies\block\CustomiesBlockFactory;
 use pocketmine\block\BlockBreakInfo;
 
 // ...
@@ -45,9 +45,9 @@ materials, a texture, an origin and a size.
   does not support blocks being larger than this
 
 ```php
-use twistedasylummc\customies\block\CustomiesBlockFactory;
-use twistedasylummc\customies\block\Material;
-use twistedasylummc\customies\block\Model;
+use customiesdevs\customies\block\CustomiesBlockFactory;
+use customiesdevs\customies\block\Material;
+use customiesdevs\customies\block\Model;
 use pocketmine\block\BlockBreakInfo;
 use pocketmine\math\Vector3;
 
@@ -76,7 +76,7 @@ the `CustomiesEntityFactory` class to register the entity, and then spawn the en
 normally.
 
 ```php
-use twistedasylummc\customies\entity\CustomiesEntityFactory;
+use customiesdevs\customies\entity\CustomiesEntityFactory;
 
 // ...
 
@@ -101,7 +101,7 @@ Registering a custom item is as simple as registering a normal item, but the ID 
 do is use the `CustomiesItemFactory` class to register the item, and fetch it as you would with a vanilla item.
 
 ```php
-use twistedasylummc\customies\item\CustomiesItemFactory;
+use customiesdevs\customies\item\CustomiesItemFactory;
 
 // ...
 
@@ -121,8 +121,8 @@ edible or have durability etc. To get started with components, you need to imple
 the `ItemComponentsTrait` and call the `initComponent` method in the constructor of your class.
 
 ```php
-use twistedasylummc\customies\item\ItemComponents;
-use twistedasylummc\customies\item\ItemComponentsTrait;
+use customiesdevs\customies\item\ItemComponents;
+use customiesdevs\customies\item\ItemComponentsTrait;
 use pocketmine\item\Item;
 
 class ExampleItem extends Item implements ItemComponents {
