@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace twistedasylummc\customies\task;
+namespace customiesdevs\customies\task;
 
 use pocketmine\block\Block;
 use pocketmine\scheduler\AsyncTask;
-use twistedasylummc\customies\block\CustomiesBlockFactory;
+use customiesdevs\customies\block\CustomiesBlockFactory;
 
 final class AsyncRegisterBlocksTask extends AsyncTask {
 

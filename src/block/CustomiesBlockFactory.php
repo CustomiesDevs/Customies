@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace twistedasylummc\customies\block;
+namespace customiesdevs\customies\block;
 
 use InvalidArgumentException;
 use OutOfRangeException;
@@ -24,9 +24,9 @@ use pocketmine\utils\Utils;
 use ReflectionClass;
 use RuntimeException;
 use SplFixedArray;
-use twistedasylummc\customies\item\CustomiesItemFactory;
-use twistedasylummc\customies\task\AsyncRegisterBlocksTask;
-use twistedasylummc\customies\world\LegacyBlockIdToStringIdMap;
+use customiesdevs\customies\item\CustomiesItemFactory;
+use customiesdevs\customies\task\AsyncRegisterBlocksTask;
+use customiesdevs\customies\world\LegacyBlockIdToStringIdMap;
 use function array_fill;
 use function count;
 use function file_get_contents;
