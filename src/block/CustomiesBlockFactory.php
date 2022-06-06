@@ -139,7 +139,7 @@ final class CustomiesBlockFactory {
 			->setTag("minecraft:explosion_resistance", CompoundTag::create()
 				->setFloat("value", $block->getBreakInfo()->getBlastResistance()))
 			->setTag("minecraft:friction", CompoundTag::create()
-				->setFloat("value", $block->getFrictionFactor() === 0.6 ? 0.1 : $block->getFrictionFactor()))
+				->setFloat("value", $block->getFrictionFactor()))
 			->setTag("minecraft:flammable", CompoundTag::create()
 				->setFloat("flame_odds", $block->getFlameEncouragement())
 				->setFloat("burn_odds", $block->getFlammability()));
