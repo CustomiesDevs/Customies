@@ -38,11 +38,11 @@ final class CreativeInventoryInfo {
 	}
 
 	const CATEGORY_ALL = "all";
-	const COMMANDS = "commands";
-	const CONSTRUCTION = "construction";
-	const EQUIPMENT = "equipment";
-	const ITEMS = "items";
-	const NATURE = "nature";
+	const CATEGORY_COMMANDS = "commands";
+	const CATEGORY_CONSTRUCTION = "construction";
+	const CATEGORY_EQUIPMENT = "equipment";
+	const CATEGORY_ITEMS = "items";
+	const CATEGORY_NATURE = "nature";
 	const NONE = "none";
 
 	const GROUP_ANVIL = "itemGroup.name.anvil";
