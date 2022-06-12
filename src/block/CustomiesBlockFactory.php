@@ -9,6 +9,7 @@ use pocketmine\block\Block;
 use pocketmine\block\BlockBreakInfo;
 use pocketmine\block\BlockFactory;
 use pocketmine\block\BlockIdentifier;
+use pocketmine\inventory\CreativeInventory;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\network\mcpe\convert\GlobalItemTypeDictionary;
 use pocketmine\network\mcpe\convert\R12ToCurrentBlockMapEntry;
@@ -109,7 +110,11 @@ final class CustomiesBlockFactory {
 	 * Register a block to the BlockFactory and all the required mappings.
 	 * @phpstan-param class-string $className
 	 */
-	public function registerBlock(string $className, string $identifier, string $name, BlockBreakInfo $breakInfo, ?Model $model = null): void {
+	public function registerBlock(string $className, string $identifier, string $name, BlockBreakInfo $breakInfo, ?Model $model = null, array $creativeTab = [
+		"category" => "construction",
+		"group" => "itemGroup.name.stone",
+		"register_to_creative" => true,
+	]): void {
 		if($className !== Block::class) {
 			Utils::testValidInstance($className, Block::class);
 		}
@@ -139,22 +144,30 @@ final class CustomiesBlockFactory {
 			->setTag("minecraft:explosion_resistance", CompoundTag::create()
 				->setFloat("value", $block->getBreakInfo()->getBlastResistance()))
 			->setTag("minecraft:friction", CompoundTag::create()
-				->setFloat("value", $block->getFrictionFactor() === 0.6 ? 0.1 : $block->getFrictionFactor()))
+				->setFloat("value", $block->getFrictionFactor()))
 			->setTag("minecraft:flammable", CompoundTag::create()
 				->setFloat("flame_odds", $block->getFlameEncouragement())
-				->setFloat("burn_odds", $block->getFlammability()));
+				->setFloat("burn_odds", $block->getFlammability()))
+			->setTag("minecraft:creative_category", CompoundTag::create()
+				->setString("category","construction")
+				->setString("group", "itemGroup.name.stone"));
 
 		if($model !== null) {
 			foreach($model->toNBT() as $tagName => $tag){
 				$components->setTag($tagName, $tag);
 			}
 		}
+
 		$propertiesTag->setTag("components", $components);
 
 		$this->blockPaletteEntries[] = new BlockPaletteEntry($identifier, new CacheableNbt($propertiesTag));
 
 		$this->customBlocks[$identifier] = $block;
 		LegacyBlockIdToStringIdMap::getInstance()->registerMapping($identifier, $block->getId());
+
+		if($creativeTab["register_to_creative"]){
+			CreativeInventory::getInstance()->add($block->asItem());
+		}
 	}
 
 	/**
