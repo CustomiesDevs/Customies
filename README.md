@@ -62,6 +62,17 @@ public function onEnable(): void {
 // ...
 ```
 
+If you want register your block into the creative tab, add this array behind the model variable:
+
+You can find the different categories and groups on the [Microsoft documentation](https://docs.microsoft.com/en-us/minecraft/creator/reference/content/blockreference/examples/blockcomponents/minecraftblock_creative_category)
+```php
+array $creativeTab = [
+    "category" => "construction",
+	"group" => "itemGroup.name.stone",
+	"register_to_creative" => true,
+]
+```
+
 ```php
 $block = CustomiesBlockFactory::getInstance()->get("customies:example_block");
 ```
