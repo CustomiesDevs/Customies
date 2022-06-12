@@ -3,10 +3,13 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies\item;
 
+use customiesdevs\customies\block\CreativeInventoryInfo;
 use InvalidArgumentException;
+use pocketmine\inventory\CreativeInventory;
 use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
 use pocketmine\item\ItemIdentifier;
+use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\network\mcpe\convert\ItemTranslator;
 use pocketmine\network\mcpe\protocol\types\CacheableNbt;
 use pocketmine\network\mcpe\protocol\types\ItemComponentPacketEntry;
@@ -61,9 +64,10 @@ final class CustomiesItemFactory {
 	/**
 	 * Registers the item to the item factory and assigns it an ID. It also updates the required mappings and stores the
 	 * item components if present.
+	 * CreativeInventoryInfo not completely implemented yet.
 	 * @phpstan-param class-string $className
 	 */
-	public function registerItem(string $className, string $identifier, string $name): void {
+	public function registerItem(string $className, string $identifier, string $name, ?CreativeInventoryInfo $creativeInventoryInfo = null): void {
 		if($className !== Item::class) {
 			Utils::testValidInstance($className, Item::class);
 		}
@@ -80,9 +84,28 @@ final class CustomiesItemFactory {
 			$componentsTag = $item->getComponents();
 			$componentsTag->setInt("id", $item->getId());
 			$componentsTag->setString("name", $identifier);
+			/**
+			if($creativeInventoryInfo !== null){
+				$componentsTag->setTag("item_properties", CompoundTag::create()
+					->setInt("category",match ($creativeInventoryInfo->getCategory()){
+						CreativeInventoryInfo::CATEGORY_CONSTRUCTION => 1,
+						CreativeInventoryInfo::CATEGORY_NATURE => 2,
+						CreativeInventoryInfo::CATEGORY_EQUIPMENT => 3,
+						CreativeInventoryInfo::CATEGORY_ITEMS => 4
+					})
+					->setString("group",$creativeInventoryInfo->getGroup()));
+			}
+			 **/
+
 			$this->itemComponentEntries[$identifier] = new ItemComponentPacketEntry($identifier, new CacheableNbt($componentsTag));
 		}
 		$this->itemTableEntries[$identifier] = new ItemTypeEntry($identifier, $item->getId(), $componentBased);
+
+		/**
+		if ($creativeInventoryInfo !== null) {
+			CreativeInventory::getInstance()->add($item);
+		}
+		 **/
 	}
 
 	/**
