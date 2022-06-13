@@ -142,7 +142,7 @@ class ExampleItem extends Item implements ItemComponents {
 }
 ```
 
-If you want to set a category and group for sort your items, define a CreativeInventoryInfo object as the 3rd parameter
+If you want to define a category and a group to sort your items, define a CreativeInventoryInfo object as the third parameter.
 
 ```php
 $cti = new CreativeInventoryInfo(CreativeInventoryInfo::CATEGORY_EQUIPMENT,CreativeInventoryInfo::GROUP_SWORD);
