@@ -117,4 +117,6 @@ final class CreativeInventoryInfo {
 	const GROUP_WOOD = "itemGroup.name.wood";
 	const GROUP_WOOL = "itemGroup.name.wool";
 	const GROUP_WOOL_CARPET = "itemGroup.name.woolCarpet";
+	const GROUP_CANDLES = "itemGroup.name.candles";
+	const GROUP_GOAT_HORN = "itemGroup.name.goatHorn";
 }

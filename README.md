@@ -142,6 +142,13 @@ class ExampleItem extends Item implements ItemComponents {
 }
 ```
 
+If you want to set a category and group for sort your items, define a CreativeInventoryInfo object as the 3rd parameter
+
+```php
+$cti = new CreativeInventoryInfo(CreativeInventoryInfo::CATEGORY_EQUIPMENT,CreativeInventoryInfo::GROUP_SWORD);
+$this->initComponent("exemple_item",64, $cti);
+```
+
 Now that you have an item with components, you can add either components or properties using the `addComponent`
 and `addProperty` methods.
 

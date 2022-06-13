@@ -3,13 +3,11 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies\item;
 
-use customiesdevs\customies\block\CreativeInventoryInfo;
 use InvalidArgumentException;
 use pocketmine\inventory\CreativeInventory;
 use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
 use pocketmine\item\ItemIdentifier;
-use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\network\mcpe\convert\ItemTranslator;
 use pocketmine\network\mcpe\protocol\types\CacheableNbt;
 use pocketmine\network\mcpe\protocol\types\ItemComponentPacketEntry;
@@ -18,16 +16,20 @@ use pocketmine\utils\SingletonTrait;
 use pocketmine\utils\Utils;
 use ReflectionClass;
 use RuntimeException;
+
 use function array_values;
 
 final class CustomiesItemFactory {
+
 	use SingletonTrait;
 
 	private int $nextItemID = 950;
+
 	/**
 	 * @var ItemTypeEntry[]
 	 */
 	private array $itemTableEntries = [];
+
 	/**
 	 * @var ItemComponentPacketEntry[]
 	 */
@@ -38,7 +40,7 @@ final class CustomiesItemFactory {
 	 */
 	public function get(string $identifier, int $amount = 1): Item {
 		$id = $this->itemTableEntries[$identifier]?->getNumericId();
-		if($id === null) {
+		if ($id === null) {
 			throw new InvalidArgumentException("Custom item " . $identifier . " is not registered");
 		}
 
@@ -67,45 +69,28 @@ final class CustomiesItemFactory {
 	 * CreativeInventoryInfo not completely implemented yet.
 	 * @phpstan-param class-string $className
 	 */
-	public function registerItem(string $className, string $identifier, string $name, ?CreativeInventoryInfo $creativeInventoryInfo = null): void {
-		if($className !== Item::class) {
+	public function registerItem(string $className, string $identifier, string $name): void {
+		if ($className !== Item::class) {
 			Utils::testValidInstance($className, Item::class);
 		}
 		/** @var Item $item */
 		$item = new $className(new ItemIdentifier(++$this->nextItemID, 0), $name);
 
-		if(ItemFactory::getInstance()->isRegistered($item->getId())) {
+		if (ItemFactory::getInstance()->isRegistered($item->getId())) {
 			throw new RuntimeException("Item with ID " . $item->getId() . " is already registered");
 		}
 		$this->registerCustomItemMapping($item->getId());
 		ItemFactory::getInstance()->register($item);
 
-		if(($componentBased = $item instanceof ItemComponents)) {
+		if (($componentBased = $item instanceof ItemComponents)) {
 			$componentsTag = $item->getComponents();
 			$componentsTag->setInt("id", $item->getId());
 			$componentsTag->setString("name", $identifier);
-			/**
-			if($creativeInventoryInfo !== null){
-				$componentsTag->setTag("item_properties", CompoundTag::create()
-					->setInt("category",match ($creativeInventoryInfo->getCategory()){
-						CreativeInventoryInfo::CATEGORY_CONSTRUCTION => 1,
-						CreativeInventoryInfo::CATEGORY_NATURE => 2,
-						CreativeInventoryInfo::CATEGORY_EQUIPMENT => 3,
-						CreativeInventoryInfo::CATEGORY_ITEMS => 4
-					})
-					->setString("group",$creativeInventoryInfo->getGroup()));
-			}
-			 **/
-
 			$this->itemComponentEntries[$identifier] = new ItemComponentPacketEntry($identifier, new CacheableNbt($componentsTag));
 		}
-		$this->itemTableEntries[$identifier] = new ItemTypeEntry($identifier, $item->getId(), $componentBased);
 
-		/**
-		if ($creativeInventoryInfo !== null) {
-			CreativeInventory::getInstance()->add($item);
-		}
-		 **/
+		$this->itemTableEntries[$identifier] = new ItemTypeEntry($identifier, $item->getId(), $componentBased);
+		CreativeInventory::getInstance()->add($item);
 	}
 
 	/**
