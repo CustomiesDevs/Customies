@@ -11,17 +11,14 @@ use ReflectionProperty;
 use RuntimeException;
 
 final class BlockPalette {
-
 	use SingletonTrait;
 
 	/** @var CompoundTag[] */
 	private array $states;
-
 	/** @var CompoundTag[] */
 	private array $customStates = [];
 
 	private RuntimeBlockMapping $runtimeBlockMapping;
-
 	private ReflectionProperty $bedrockKnownStates;
 
 	public function __construct() {
@@ -50,10 +47,10 @@ final class BlockPalette {
 	 * Inserts the provided state in to the correct position of the palette.
 	 */
 	public function insertState(CompoundTag $state): void {
-		if ($state->getString("name" . "") === "") {
+		if($state->getString("name" . "") === "") {
 			throw new RuntimeException("Block state must contain a StringTag called 'name'");
 		}
-		if ($state->getCompoundTag("states") === null) {
+		if($state->getCompoundTag("states") === null) {
 			throw new RuntimeException("Block state must contain a CompoundTag called 'states'");
 		}
 		$this->sortWith($state);
@@ -65,14 +62,14 @@ final class BlockPalette {
 	 */
 	private function sortWith(CompoundTag $state): void {
 		$states = [$state->getString("name") => [$state]];
-		foreach ($this->states as $state) {
+		foreach($this->states as $state){
 			$states[$state->getString("name")][] = $state;
 		}
 		$names = array_keys($states);
 		usort($names, static fn(string $a, string $b) => strcmp(hash("fnv164", $a), hash("fnv164", $b)));
 		$sortedStates = [];
-		foreach ($names as $name) {
-			foreach ($states[$name] as $state) {
+		foreach($names as $name){
+			foreach($states[$name] as $state){
 				$sortedStates[] = $state;
 			}
 		}

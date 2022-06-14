@@ -15,7 +15,6 @@ use pocketmine\world\format\Chunk;
 use pocketmine\world\format\io\ChunkData;
 use pocketmine\world\format\io\exception\CorruptedChunkException;
 use pocketmine\world\format\PalettedBlockArray;
-
 use function array_map;
 use function chr;
 use function count;
@@ -35,11 +34,11 @@ class LevelDB extends \pocketmine\world\format\io\leveldb\LevelDB {
 		$write->put($index . self::TAG_VERSION, chr(self::CURRENT_LEVEL_CHUNK_VERSION));
 
 		$chunk = $chunkData->getChunk();
-		if ($chunk->getTerrainDirtyFlag(Chunk::DIRTY_FLAG_BLOCKS)) {
+		if($chunk->getTerrainDirtyFlag(Chunk::DIRTY_FLAG_BLOCKS)) {
 			$subChunks = $chunk->getSubChunks();
-			foreach ($subChunks as $y => $subChunk) {
+			foreach($subChunks as $y => $subChunk){
 				$key = $index . self::TAG_SUBCHUNK_PREFIX . chr($y);
-				if ($subChunk->isEmptyAuthoritative()) {
+				if($subChunk->isEmptyAuthoritative()) {
 					$write->delete($key);
 				} else {
 					$subStream = new BinaryStream();
@@ -47,14 +46,14 @@ class LevelDB extends \pocketmine\world\format\io\leveldb\LevelDB {
 
 					$layers = $subChunk->getBlockLayers();
 					$subStream->putByte(count($layers));
-					foreach ($layers as $blocks) {
+					foreach($layers as $blocks){
 						$subStream->putByte($blocks->getBitsPerBlock() << 1);
 						$subStream->put($blocks->getWordArray());
 
 						$palette = $blocks->getPalette();
 						$subStream->putLInt(count($palette));
 						$tags = [];
-						foreach ($palette as $p) {
+						foreach($palette as $p){
 							$tags[] = new TreeRoot(CompoundTag::create()
 								->setString("name", $idMap->legacyToString($p >> Block::INTERNAL_METADATA_BITS) ?? "minecraft:info_update")
 								->setInt("oldid", $p >> Block::INTERNAL_METADATA_BITS) //PM only (debugging), vanilla doesn't have this
@@ -69,7 +68,7 @@ class LevelDB extends \pocketmine\world\format\io\leveldb\LevelDB {
 			}
 		}
 
-		if ($chunk->getTerrainDirtyFlag(Chunk::DIRTY_FLAG_BIOMES)) {
+		if($chunk->getTerrainDirtyFlag(Chunk::DIRTY_FLAG_BIOMES)) {
 			$write->put($index . self::TAG_DATA_2D, str_repeat("\x00", 512) . $chunk->getBiomeIdArray());
 		}
 
@@ -89,7 +88,7 @@ class LevelDB extends \pocketmine\world\format\io\leveldb\LevelDB {
 	 * @param CompoundTag[] $targets
 	 */
 	private function writeTags(array $targets, string $index, \LevelDBWriteBatch $write): void {
-		if (count($targets) > 0) {
+		if(count($targets) > 0) {
 			$nbt = new LittleEndianNbtSerializer();
 			$write->put($index, $nbt->writeMultiple(array_map(fn(CompoundTag $tag) => new TreeRoot($tag), $targets)));
 		} else {
@@ -106,13 +105,13 @@ class LevelDB extends \pocketmine\world\format\io\leveldb\LevelDB {
 
 		try {
 			$words = $stream->get(PalettedBlockArray::getExpectedWordArraySize($bitsPerBlock));
-		} catch (InvalidArgumentException $e) {
+		} catch(InvalidArgumentException $e) {
 			throw new CorruptedChunkException("Failed to deserialize paletted storage: " . $e->getMessage(), 0, $e);
 		}
 		$nbt = new LittleEndianNbtSerializer();
 		$palette = [];
 		$idMap = LegacyBlockIdToStringIdMap::getInstance();
-		for ($i = 0, $paletteSize = $stream->getLInt(); $i < $paletteSize; ++$i) {
+		for($i = 0, $paletteSize = $stream->getLInt(); $i < $paletteSize; ++$i){
 			$offset = $stream->getOffset();
 
 			$tag = $nbt->read($stream->getBuffer(), $offset)->mustGetCompoundTag();

@@ -12,11 +12,8 @@ final class Model {
 
 	/** @var Material[] */
 	private array $materials;
-
 	private string $geometry;
-
 	private Vector3 $origin;
-
 	private Vector3 $size;
 
 	/**
@@ -35,7 +32,7 @@ final class Model {
 	 */
 	public function toNBT(): array {
 		$materials = CompoundTag::create();
-		foreach ($this->materials as $material) {
+		foreach($this->materials as $material){
 			$materials->setTag($material->getTarget(), $material->toNBT());
 		}
 
