@@ -177,25 +177,25 @@ final class CreativeInventoryInfo {
 	private string $group;
 
 	/**
-	 * @param string $category
-	 * @param string $group
+	 * @param string|null $category
+	 * @param string|null $group
 	 */
-	public function __construct(string $category, string $group) {
-		$this->category = $category;
-		$this->group = $group;
+	public function __construct(?string $category = null, ?string $group = null) {
+		$this->category = $category ?? self::NONE;
+		$this->group = $group ?? self::NONE;
 	}
 
 	/**
 	 * @return string
 	 */
 	public function getCategory(): string {
-		return $this->category;
+		return $this->category ?? self::NONE;
 	}
 
 	/**
 	 * @return string
 	 */
 	public function getGroup(): string {
-		return $this->group;
+		return $this->group ?? self::NONE;
 	}
 }
