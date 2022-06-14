@@ -74,9 +74,10 @@ trait ItemComponentsTrait {
 						CreativeInventoryInfo::CATEGORY_CONSTRUCTION => 1,
 						CreativeInventoryInfo::CATEGORY_NATURE => 2,
 						CreativeInventoryInfo::CATEGORY_EQUIPMENT => 3,
-						default => 4
+						CreativeInventoryInfo::CATEGORY_ITEMS => 4,
+						default => CreativeInventoryInfo::NONE
 					})
-					->setString("creative_group", $cti->getGroup() ?? CreativeInventoryInfo::GROUP_MISC_FOOD)
+					->setString("creative_group", $cti->getGroup() ?? CreativeInventoryInfo::NONE)
 					->setTag("minecraft:icon", CompoundTag::create()
 						->setString("texture", $texture))
 					->setInt("max_stack_size", $maxStackSize)));
