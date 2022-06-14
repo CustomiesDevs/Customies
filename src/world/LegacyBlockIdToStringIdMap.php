@@ -3,9 +3,11 @@
 namespace customiesdevs\customies\world;
 
 use pocketmine\utils\SingletonTrait;
+
 use const pocketmine\BEDROCK_DATA_PATH;
 
 final class LegacyBlockIdToStringIdMap {
+
 	use SingletonTrait;
 
 	/**
@@ -13,6 +15,7 @@ final class LegacyBlockIdToStringIdMap {
 	 * @phpstan-var array<int, string>
 	 */
 	private array $legacyToString;
+
 	/**
 	 * @var int[]
 	 * @phpstan-var array<string, int>

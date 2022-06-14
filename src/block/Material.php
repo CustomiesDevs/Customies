@@ -17,9 +17,13 @@ final class Material {
 	public const RENDER_METHOD_OPAQUE = "opaque";
 
 	private string $target;
+
 	private string $texture;
+
 	private string $renderMethod;
+
 	private bool $faceDimming;
+
 	private bool $ambientOcclusion;
 
 	public function __construct(string $target, string $texture, string $renderMethod, bool $faceDimming = true, bool $ambientOcclusion = true) {
