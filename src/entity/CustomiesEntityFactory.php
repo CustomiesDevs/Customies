@@ -19,6 +19,18 @@ use ReflectionClass;
 class CustomiesEntityFactory {
 	use SingletonTrait;
 
+	/**
+	 * Register an entity to the EntityFactory and all the required mappings.
+	 * @phpstan-param class-string<Entity> $className
+	 * @phpstan-param Closure(World $world, CompoundTag $nbt) : Entity $creationFunc
+	 */
+	public function registerEntity(string $className, string $identifier, ?Closure $creationFunc = null): void {
+		EntityFactory::getInstance()->register($className, $creationFunc ?? static function (World $world, CompoundTag $nbt) use ($className): Entity {
+				return new $className(EntityDataHelper::parseLocation($nbt, $world), $nbt);
+			}, [$identifier]);
+		$this->updateStaticPacketCache($identifier);
+	}
+
 	public function updateStaticPacketCache(string $identifier): void {
 		$instance = StaticPacketCache::getInstance();
 		$staticPacketCache = new ReflectionClass($instance);
@@ -31,17 +43,5 @@ class CustomiesEntityFactory {
 		$idList = $root->getListTag("idlist") ?? new ListTag();
 		$idList->push(CompoundTag::create()->setString("id", $identifier));
 		$packet->identifiers = new CacheableNbt($root);
-	}
-
-	/**
-	 * Register an entity to the EntityFactory and all the required mappings.
-	 * @phpstan-param class-string<Entity> $className
-	 * @phpstan-param Closure(World $world, CompoundTag $nbt) : Entity $creationFunc
-	 */
-	public function registerEntity(string $className, string $identifier, ?Closure $creationFunc = null): void {
-		EntityFactory::getInstance()->register($className, $creationFunc ?? static function (World $world, CompoundTag $nbt) use ($className): Entity {
-				return new $className(EntityDataHelper::parseLocation($nbt, $world), $nbt);
-			}, [$identifier]);
-		$this->updateStaticPacketCache($identifier);
 	}
 }

@@ -16,20 +16,16 @@ use pocketmine\utils\SingletonTrait;
 use pocketmine\utils\Utils;
 use ReflectionClass;
 use RuntimeException;
-
 use function array_values;
 
 final class CustomiesItemFactory {
-
 	use SingletonTrait;
 
 	private int $nextItemID = 950;
-
 	/**
 	 * @var ItemTypeEntry[]
 	 */
 	private array $itemTableEntries = [];
-
 	/**
 	 * @var ItemComponentPacketEntry[]
 	 */
@@ -40,10 +36,9 @@ final class CustomiesItemFactory {
 	 */
 	public function get(string $identifier, int $amount = 1): Item {
 		$id = $this->itemTableEntries[$identifier]?->getNumericId();
-		if ($id === null) {
+		if($id === null) {
 			throw new InvalidArgumentException("Custom item " . $identifier . " is not registered");
 		}
-
 		return ItemFactory::getInstance()->get($id, 0, $amount);
 	}
 
@@ -66,23 +61,22 @@ final class CustomiesItemFactory {
 	/**
 	 * Registers the item to the item factory and assigns it an ID. It also updates the required mappings and stores the
 	 * item components if present.
-	 * CreativeInventoryInfo not completely implemented yet.
 	 * @phpstan-param class-string $className
 	 */
 	public function registerItem(string $className, string $identifier, string $name): void {
-		if ($className !== Item::class) {
+		if($className !== Item::class) {
 			Utils::testValidInstance($className, Item::class);
 		}
 		/** @var Item $item */
 		$item = new $className(new ItemIdentifier(++$this->nextItemID, 0), $name);
 
-		if (ItemFactory::getInstance()->isRegistered($item->getId())) {
+		if(ItemFactory::getInstance()->isRegistered($item->getId())) {
 			throw new RuntimeException("Item with ID " . $item->getId() . " is already registered");
 		}
 		$this->registerCustomItemMapping($item->getId());
 		ItemFactory::getInstance()->register($item);
 
-		if (($componentBased = $item instanceof ItemComponents)) {
+		if(($componentBased = $item instanceof ItemComponents)) {
 			$componentsTag = $item->getComponents();
 			$componentsTag->setInt("id", $item->getId());
 			$componentsTag->setString("name", $identifier);

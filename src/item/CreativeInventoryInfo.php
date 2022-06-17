@@ -1,41 +1,8 @@
 <?php
 
-namespace customiesdevs\customies\block;
+namespace customiesdevs\customies\item;
 
 final class CreativeInventoryInfo {
-
-	/**
-	 * @var string
-	 */
-	private string $category;
-
-	/**
-	 * @var string
-	 */
-	private string $group;
-
-	/**
-	 * @param string|null $category
-	 * @param string|null $group
-	 */
-	public function __construct(?string $category = null, ?string $group = null) {
-		$this->category = $category ?? self::NONE;
-		$this->group = $group ?? self::NONE;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getCategory(): string {
-		return $this->category ?? self::NONE;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getGroup(): string {
-		return $this->group ?? self::NONE;
-	}
 
 	const CATEGORY_ALL = "all";
 	const CATEGORY_COMMANDS = "commands";
@@ -43,8 +10,8 @@ final class CreativeInventoryInfo {
 	const CATEGORY_EQUIPMENT = "equipment";
 	const CATEGORY_ITEMS = "items";
 	const CATEGORY_NATURE = "nature";
-	const NONE = "none";
 
+	const NONE = "none";
 	const GROUP_ANVIL = "itemGroup.name.anvil";
 	const GROUP_ARROW = "itemGroup.name.arrow";
 	const GROUP_AXE = "itemGroup.name.axe";
@@ -119,4 +86,34 @@ final class CreativeInventoryInfo {
 	const GROUP_WOOL_CARPET = "itemGroup.name.woolCarpet";
 	const GROUP_CANDLES = "itemGroup.name.candles";
 	const GROUP_GOAT_HORN = "itemGroup.name.goatHorn";
+
+	public static function DEFAULT(): self {
+		return new self(self::CATEGORY_ALL, self::NONE);
+	}
+
+	private string $category;
+	private string $group;
+
+	public function __construct(string $category = self::NONE, string $group = self::NONE) {
+		$this->category = $category;
+		$this->group = $group;
+	}
+
+	public function getCategory(): string {
+		return $this->category;
+	}
+
+	public function getNumericCategory(): int {
+		return match ($this->getCategory()) {
+			self::CATEGORY_CONSTRUCTION => 1,
+			self::CATEGORY_NATURE => 2,
+			self::CATEGORY_EQUIPMENT => 3,
+			self::CATEGORY_ITEMS => 4,
+			default => self::NONE
+		};
+	}
+
+	public function getGroup(): string {
+		return $this->group;
+	}
 }

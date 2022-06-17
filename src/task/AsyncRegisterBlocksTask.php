@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies\task;
 
+use customiesdevs\customies\block\CustomiesBlockFactory;
 use pocketmine\block\Block;
 use pocketmine\scheduler\AsyncTask;
-use customiesdevs\customies\block\CustomiesBlockFactory;
 
 final class AsyncRegisterBlocksTask extends AsyncTask {
 

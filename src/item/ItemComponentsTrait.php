@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies\item;
 
-use customiesdevs\customies\block\CreativeInventoryInfo;
 use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\FloatTag;
@@ -24,7 +23,7 @@ trait ItemComponentsTrait {
 	public function addProperty(string $key, $value): void {
 		$propertiesTag = $this->componentTag->getCompoundTag("components")->getCompoundTag("item_properties");
 		$tag = $this->getTagType($value);
-		if ($tag === null) {
+		if($tag === null) {
 			throw new RuntimeException("Failed to get tag type for property with key " . $key);
 		}
 		$propertiesTag->setTag($key, $tag);
@@ -52,7 +51,7 @@ trait ItemComponentsTrait {
 	public function addComponent(string $key, $value): void {
 		$componentsTag = $this->componentTag->getCompoundTag("components");
 		$tag = $this->getTagType($value);
-		if ($tag === null) {
+		if($tag === null) {
 			throw new RuntimeException("Failed to get tag type for component with key " . $key);
 		}
 		$componentsTag->setTag($key, $tag);
@@ -66,18 +65,13 @@ trait ItemComponentsTrait {
 	 * Initializes the components and creates the base CompoundTag required for the components to be sent to a client.
 	 * This must be called before any properties or components are added otherwise it will break.
 	 */
-	protected function initComponent(string $texture, int $maxStackSize, ?CreativeInventoryInfo $cti = null): void {
+	protected function initComponent(string $texture, int $maxStackSize, ?CreativeInventoryInfo $creativeInfo = null): void {
+		$creativeInfo ??= CreativeInventoryInfo::DEFAULT();
 		$this->componentTag = CompoundTag::create()
 			->setTag("components", CompoundTag::create()
 				->setTag("item_properties", CompoundTag::create()
-					->setInt("creative_category", match ($cti->getCategory()) {
-						CreativeInventoryInfo::CATEGORY_CONSTRUCTION => 1,
-						CreativeInventoryInfo::CATEGORY_NATURE => 2,
-						CreativeInventoryInfo::CATEGORY_EQUIPMENT => 3,
-						CreativeInventoryInfo::CATEGORY_ITEMS => 4,
-						default => CreativeInventoryInfo::NONE
-					})
-					->setString("creative_group", $cti->getGroup() ?? CreativeInventoryInfo::NONE)
+					->setInt("creative_category", $creativeInfo->getNumericCategory())
+					->setString("creative_group", $creativeInfo->getGroup())
 					->setTag("minecraft:icon", CompoundTag::create()
 						->setString("texture", $texture))
 					->setInt("max_stack_size", $maxStackSize)));
