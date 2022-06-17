@@ -11,7 +11,7 @@ final class CreativeInventoryInfo {
 	const CATEGORY_ITEMS = "items";
 	const CATEGORY_NATURE = "nature";
 
-	const NONE = 0;
+	const NONE = "none";
 	const GROUP_ANVIL = "itemGroup.name.anvil";
 	const GROUP_ARROW = "itemGroup.name.arrow";
 	const GROUP_AXE = "itemGroup.name.axe";
@@ -109,7 +109,7 @@ final class CreativeInventoryInfo {
 			self::CATEGORY_NATURE => 2,
 			self::CATEGORY_EQUIPMENT => 3,
 			self::CATEGORY_ITEMS => 4,
-			default => self::NONE
+			default => 0
 		};
 	}
 
