@@ -103,7 +103,7 @@ final class CreativeInventoryInfo {
 		return $this->category;
 	}
 
-	public function getNumericCategory(): int {
+	public function getNumericCategory(): string|int {
 		return match ($this->getCategory()) {
 			self::CATEGORY_CONSTRUCTION => 1,
 			self::CATEGORY_NATURE => 2,
