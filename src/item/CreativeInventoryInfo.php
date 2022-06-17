@@ -109,7 +109,7 @@ final class CreativeInventoryInfo {
 			self::CATEGORY_NATURE => 2,
 			self::CATEGORY_EQUIPMENT => 3,
 			self::CATEGORY_ITEMS => 4,
-			default => self::NONE
+			default => 0
 		};
 	}
 
