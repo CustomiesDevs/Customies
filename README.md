@@ -62,6 +62,14 @@ public function onEnable(): void {
 // ...
 ```
 
+If you want register your block into the creative tab, add this array behind the model variable:
+
+You can find the different categories and groups on the [Microsoft documentation](https://docs.microsoft.com/en-us/minecraft/creator/reference/content/blockreference/examples/blockcomponents/minecraftblock_creative_category)
+```php
+$creative = new CreativeInventoryInfo(CreativeInventoryInfo::CATEGORY_ALL, CreativeInventoryInfo::GROUP_CONCRETE);
+CustomiesBlockFactory::getInstance()->registerBlock(Block::class, "customies:example_block", "Example Block", new BlockBreakInfo(1),$creative);
+```
+
 ```php
 $block = CustomiesBlockFactory::getInstance()->get("customies:example_block");
 ```
@@ -132,6 +140,13 @@ class ExampleItem extends Item implements ItemComponents {
 		$this->initComponent("example_item", 64);
 	}
 }
+```
+
+If you want to define a category and a group to sort your items, define a CreativeInventoryInfo object as the third parameter.
+
+```php
+$cti = new CreativeInventoryInfo(CreativeInventoryInfo::CATEGORY_EQUIPMENT,CreativeInventoryInfo::GROUP_SWORD);
+$this->initComponent("exemple_item",64, $cti);
 ```
 
 Now that you have an item with components, you can add either components or properties using the `addComponent`
