@@ -11,7 +11,7 @@ final class CreativeInventoryInfo {
 	const CATEGORY_ITEMS = "items";
 	const CATEGORY_NATURE = "nature";
 
-	const NONE = "none";
+	const NONE = 0;
 	const GROUP_ANVIL = "itemGroup.name.anvil";
 	const GROUP_ARROW = "itemGroup.name.arrow";
 	const GROUP_AXE = "itemGroup.name.axe";
@@ -103,7 +103,7 @@ final class CreativeInventoryInfo {
 		return $this->category;
 	}
 
-	public function getNumericCategory(): string|int {
+	public function getNumericCategory(): int {
 		return match ($this->getCategory()) {
 			self::CATEGORY_CONSTRUCTION => 1,
 			self::CATEGORY_NATURE => 2,
