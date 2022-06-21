@@ -3,12 +3,13 @@ description: A PocketMine-MP plugin that implements support for custom blocks, i
 
 main: twistedasylummc\customies\Customies
 src-namespace-prefix: twistedasylummc\customies
-version: 1.0.2
+version: 1.0.4
 api: 4.0.0
 
 authors:
   - DenielWorld
   - TwistedAsylumMC
 contributors:
+  - ScarceityPvP
   - JackNoordhuis
   - Unickorn
