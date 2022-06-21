@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace twistedasylummc\customies\item;
+namespace customiesdevs\customies\item;
 
 use InvalidArgumentException;
 use pocketmine\item\Item;
@@ -15,6 +15,7 @@ use pocketmine\utils\SingletonTrait;
 use pocketmine\utils\Utils;
 use ReflectionClass;
 use RuntimeException;
+use function array_values;
 
 final class CustomiesItemFactory {
 	use SingletonTrait;
@@ -33,13 +34,8 @@ final class CustomiesItemFactory {
 	 * Get a custom item from its identifier. An exception will be thrown if the item is not registered.
 	 */
 	public function get(string $identifier, int $amount = 1): Item {
-		$id = -1;
-		foreach($this->itemTableEntries as $entry){
-			if($entry->getStringId() === $identifier) {
-				$id = $entry->getNumericId();
-			}
-		}
-		if($id < 0) {
+		$id = $this->itemTableEntries[$identifier]?->getNumericId();
+		if($id === null) {
 			throw new InvalidArgumentException("Custom item " . $identifier . " is not registered");
 		}
 
@@ -59,7 +55,7 @@ final class CustomiesItemFactory {
 	 * @return ItemTypeEntry[]
 	 */
 	public function getItemTableEntries(): array {
-		return $this->itemTableEntries;
+		return array_values($this->itemTableEntries);
 	}
 
 	/**
@@ -86,7 +82,7 @@ final class CustomiesItemFactory {
 			$componentsTag->setString("name", $identifier);
 			$this->itemComponentEntries[$identifier] = new ItemComponentPacketEntry($identifier, new CacheableNbt($componentsTag));
 		}
-		$this->itemTableEntries[] = new ItemTypeEntry($identifier, $item->getId(), $componentBased);
+		$this->itemTableEntries[$identifier] = new ItemTypeEntry($identifier, $item->getId(), $componentBased);
 	}
 
 	/**
@@ -100,13 +96,13 @@ final class CustomiesItemFactory {
 		$reflectionProperty->setAccessible(true);
 		/** @var int[] $value */
 		$value = $reflectionProperty->getValue($translator);
-		$reflectionProperty->setValue($translator, array_merge($value, [$id => $id]));
+		$reflectionProperty->setValue($translator, $value + [$id => $id]);
 
 		$reflectionProperty = $reflection->getProperty("simpleNetToCoreMapping");
 		$reflectionProperty->setAccessible(true);
 		/** @var int[] $value */
 		$value = $reflectionProperty->getValue($translator);
-		$reflectionProperty->setValue($translator, array_merge($value, [$id => $id]));
+		$reflectionProperty->setValue($translator, $value + [$id => $id]);
 	}
 
 	/**

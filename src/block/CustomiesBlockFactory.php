@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace twistedasylummc\customies\block;
+namespace customiesdevs\customies\block;
 
 use InvalidArgumentException;
 use OutOfRangeException;
@@ -24,9 +24,9 @@ use pocketmine\utils\Utils;
 use ReflectionClass;
 use RuntimeException;
 use SplFixedArray;
-use twistedasylummc\customies\item\CustomiesItemFactory;
-use twistedasylummc\customies\task\AsyncRegisterBlocksTask;
-use twistedasylummc\customies\world\LegacyBlockIdToStringIdMap;
+use customiesdevs\customies\item\CustomiesItemFactory;
+use customiesdevs\customies\task\AsyncRegisterBlocksTask;
+use customiesdevs\customies\world\LegacyBlockIdToStringIdMap;
 use function array_fill;
 use function count;
 use function file_get_contents;
@@ -44,6 +44,8 @@ final class CustomiesBlockFactory {
 	private array $customBlocks = [];
 	/** @var BlockPaletteEntry[] */
 	private array $blockPaletteEntries = [];
+	/** @var R12ToCurrentBlockMapEntry[] */
+	private array $legacyStateMap = [];
 
 	public function __construct() {
 		$this->increaseBlockFactoryLimits();
@@ -137,7 +139,7 @@ final class CustomiesBlockFactory {
 			->setTag("minecraft:explosion_resistance", CompoundTag::create()
 				->setFloat("value", $block->getBreakInfo()->getBlastResistance()))
 			->setTag("minecraft:friction", CompoundTag::create()
-				->setFloat("value", $block->getFrictionFactor() === 0.6 ? 0.1 : $block->getFrictionFactor()))
+				->setFloat("value", $block->getFrictionFactor()))
 			->setTag("minecraft:flammable", CompoundTag::create()
 				->setFloat("flame_odds", $block->getFlameEncouragement())
 				->setFloat("burn_odds", $block->getFlammability()));
