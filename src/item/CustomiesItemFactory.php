@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace customiesdevs\customies\item;
 
 use InvalidArgumentException;
+use pocketmine\inventory\CreativeInventory;
 use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
 use pocketmine\item\ItemIdentifier;
@@ -38,7 +39,6 @@ final class CustomiesItemFactory {
 		if($id === null) {
 			throw new InvalidArgumentException("Custom item " . $identifier . " is not registered");
 		}
-
 		return ItemFactory::getInstance()->get($id, 0, $amount);
 	}
 
@@ -82,7 +82,9 @@ final class CustomiesItemFactory {
 			$componentsTag->setString("name", $identifier);
 			$this->itemComponentEntries[$identifier] = new ItemComponentPacketEntry($identifier, new CacheableNbt($componentsTag));
 		}
+
 		$this->itemTableEntries[$identifier] = new ItemTypeEntry($identifier, $item->getId(), $componentBased);
+		CreativeInventory::getInstance()->add($item);
 	}
 
 	/**

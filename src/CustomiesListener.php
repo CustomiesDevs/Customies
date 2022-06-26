@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies;
 
+use customiesdevs\customies\block\CustomiesBlockFactory;
+use customiesdevs\customies\item\CustomiesItemFactory;
 use pocketmine\event\Listener;
 use pocketmine\event\server\DataPacketSendEvent;
 use pocketmine\network\mcpe\protocol\BiomeDefinitionListPacket;
@@ -12,8 +14,6 @@ use pocketmine\network\mcpe\protocol\StartGamePacket;
 use pocketmine\network\mcpe\protocol\types\BlockPaletteEntry;
 use pocketmine\network\mcpe\protocol\types\Experiments;
 use pocketmine\network\mcpe\protocol\types\ItemTypeEntry;
-use customiesdevs\customies\block\CustomiesBlockFactory;
-use customiesdevs\customies\item\CustomiesItemFactory;
 use function array_merge;
 
 final class CustomiesListener implements Listener {

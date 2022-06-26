@@ -65,10 +65,13 @@ trait ItemComponentsTrait {
 	 * Initializes the components and creates the base CompoundTag required for the components to be sent to a client.
 	 * This must be called before any properties or components are added otherwise it will break.
 	 */
-	protected function initComponent(string $texture, int $maxStackSize): void {
+	protected function initComponent(string $texture, int $maxStackSize, ?CreativeInventoryInfo $creativeInfo = null): void {
+		$creativeInfo ??= CreativeInventoryInfo::DEFAULT();
 		$this->componentTag = CompoundTag::create()
 			->setTag("components", CompoundTag::create()
 				->setTag("item_properties", CompoundTag::create()
+					->setInt("creative_category", $creativeInfo->getNumericCategory())
+					->setString("creative_group", $creativeInfo->getGroup())
 					->setTag("minecraft:icon", CompoundTag::create()
 						->setString("texture", $texture))
 					->setInt("max_stack_size", $maxStackSize)));

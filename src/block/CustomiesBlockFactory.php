@@ -3,12 +3,17 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies\block;
 
+use customiesdevs\customies\item\CreativeInventoryInfo;
+use customiesdevs\customies\item\CustomiesItemFactory;
+use customiesdevs\customies\task\AsyncRegisterBlocksTask;
+use customiesdevs\customies\world\LegacyBlockIdToStringIdMap;
 use InvalidArgumentException;
 use OutOfRangeException;
 use pocketmine\block\Block;
 use pocketmine\block\BlockBreakInfo;
 use pocketmine\block\BlockFactory;
 use pocketmine\block\BlockIdentifier;
+use pocketmine\inventory\CreativeInventory;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\network\mcpe\convert\GlobalItemTypeDictionary;
 use pocketmine\network\mcpe\convert\R12ToCurrentBlockMapEntry;
@@ -24,9 +29,6 @@ use pocketmine\utils\Utils;
 use ReflectionClass;
 use RuntimeException;
 use SplFixedArray;
-use customiesdevs\customies\item\CustomiesItemFactory;
-use customiesdevs\customies\task\AsyncRegisterBlocksTask;
-use customiesdevs\customies\world\LegacyBlockIdToStringIdMap;
 use function array_fill;
 use function count;
 use function file_get_contents;
@@ -109,7 +111,7 @@ final class CustomiesBlockFactory {
 	 * Register a block to the BlockFactory and all the required mappings.
 	 * @phpstan-param class-string $className
 	 */
-	public function registerBlock(string $className, string $identifier, string $name, BlockBreakInfo $breakInfo, ?Model $model = null): void {
+	public function registerBlock(string $className, string $identifier, string $name, BlockBreakInfo $breakInfo, ?Model $model = null, ?CreativeInventoryInfo $creativeInfo = null): void {
 		if($className !== Block::class) {
 			Utils::testValidInstance($className, Block::class);
 		}
@@ -149,7 +151,13 @@ final class CustomiesBlockFactory {
 				$components->setTag($tagName, $tag);
 			}
 		}
+
+		$creativeInfo ??= CreativeInventoryInfo::DEFAULT();
+		$components->setTag("minecraft:creative_category", CompoundTag::create()
+			->setString("category", $creativeInfo->getCategory())
+			->setString("group", $creativeInfo->getGroup()));
 		$propertiesTag->setTag("components", $components);
+		CreativeInventory::getInstance()->add($block->asItem());
 
 		$this->blockPaletteEntries[] = new BlockPaletteEntry($identifier, new CacheableNbt($propertiesTag));
 
