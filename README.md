@@ -14,6 +14,12 @@ A PocketMine-MP plugin that implements support for custom blocks, items and enti
 | [JackNoordhuis](https://github.com/JackNoordhuis) | Suggested the idea of using async workers and helped write the code which made them function |
 | [ScarceityPvP](https://github.com/ScarceityPvP)   | Helped develop the item components implementation and block-related bug fixes                |
 
+## Community
+
+Official Discord community chat for socializing, receiving help with the plugin, and sharing creations. Join in on the fun!
+
+<a href="https://discord.gg/Tm6wGxWqgh"><img src="https://img.shields.io/discord/989466131305754625?label=discord&color=7289DA&logo=discord" alt="Discord" /></a>
+
 ## Usage
 
 ### Custom Blocks
@@ -155,7 +161,7 @@ and `addProperty` methods.
 ```php
 // ...
 
-$this->addComponent("minecraft:armor", ["protection" => 4]);
+$this->addComponent("minecraft:armor", ["protection" => new IntTag(4)]);
 $this->addProperty("allow_off_hand", true);
 
 // ...
