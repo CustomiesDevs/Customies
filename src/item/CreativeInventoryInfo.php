@@ -87,6 +87,9 @@ final class CreativeInventoryInfo {
 	const GROUP_CANDLES = "itemGroup.name.candles";
 	const GROUP_GOAT_HORN = "itemGroup.name.goatHorn";
 
+	/**
+	 * Returns a default type which puts the item in to the all category and no sub group.
+	 */
 	public static function DEFAULT(): self {
 		return new self(self::CATEGORY_ALL, self::NONE);
 	}
@@ -99,10 +102,16 @@ final class CreativeInventoryInfo {
 		$this->group = $group;
 	}
 
+	/**
+	 * Returns the category the item is part of.
+	 */
 	public function getCategory(): string {
 		return $this->category;
 	}
 
+	/**
+	 * Returns the numeric representation of the category the item is part of.
+	 */
 	public function getNumericCategory(): int {
 		return match ($this->getCategory()) {
 			self::CATEGORY_CONSTRUCTION => 1,
@@ -113,6 +122,9 @@ final class CreativeInventoryInfo {
 		};
 	}
 
+	/**
+	 * Returns the group the item is part of, if any.
+	 */
 	public function getGroup(): string {
 		return $this->group;
 	}
