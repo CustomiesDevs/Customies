@@ -5,12 +5,6 @@
             "customiesdevs\\customies\\": "src/"
         }
     },
-    "authors": [
-        {
-            "name": "xxAROX",
-            "email": "arox.email.0@gmail.com"
-        }
-    ],
     "require": {},
     "require-dev": {
         "pocketmine/pocketmine-mp": "^4.6.0"

@@ -18,6 +18,20 @@ fun!
 
 The usage guides have been moved to the [Customies Wiki](https://github.com/CustomiesDevs/Customies/wiki)!
 
+## Composer
+
+```json5
+{
+   // ...
+   "repositories": [
+      {
+         "type": "vcs",
+         "url":  "git@github.com:CustomiesDevs/Customies.git"
+      }
+   ]
+}
+```
+
 ## Important Contributors
 
 | Name                                                  | Contribution                                                                                 |
