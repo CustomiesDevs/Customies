@@ -50,7 +50,20 @@ trait ItemComponentsTrait {
 	 */
 	public function addComponent(string $key, $value): void {
 		$componentsTag = $this->componentTag->getCompoundTag("components");
-		$tag = $this->getTagType($value);
+		if (is_array($value)) {
+		    $tag = CompoundTag::create();
+		    foreach ($value as $keyValue => $valueQueried) {
+		        if (is_int($valueQueried)) {
+		            $tag->setInt($keyValue, $valueQueried);
+                } elseif (is_float($valueQueried)) {
+		            $tag->setFloat($keyValue, $valueQueried);
+                } elseif (is_bool($valueQueried)) {
+		            $tag->setByte($keyValue, $valueQueried ? 1 : 0);
+                }
+            }
+        } else {
+            $tag = $this->getTagType($value);
+        }
 		if($tag === null) {
 			throw new RuntimeException("Failed to get tag type for component with key " . $key);
 		}
