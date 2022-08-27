@@ -68,10 +68,10 @@ final class CustomiesBlockFactory {
 			$array->setSize(self::NEW_BLOCK_FACTORY_SIZE);
 			$property->setValue($instance, $array);
 		}
-		$instance->light = SplFixedArray::fromArray(array_fill(0, self::NEW_BLOCK_FACTORY_SIZE, 0));
-		$instance->lightFilter = SplFixedArray::fromArray(array_fill(0, self::NEW_BLOCK_FACTORY_SIZE, 1));
-		$instance->blocksDirectSkyLight = SplFixedArray::fromArray(array_fill(0, self::NEW_BLOCK_FACTORY_SIZE, false));
-		$instance->blastResistance = SplFixedArray::fromArray(array_fill(0, self::NEW_BLOCK_FACTORY_SIZE, 0.0));
+        $instance->light = SplFixedArray::fromArray(array_merge($instance->light->toArray(), array_fill(count($instance->light), self::NEW_BLOCK_FACTORY_SIZE, 0)));
+        $instance->lightFilter = SplFixedArray::fromArray(array_merge($instance->lightFilter->toArray(), array_fill(count($instance->lightFilter), self::NEW_BLOCK_FACTORY_SIZE, 1)));
+        $instance->blocksDirectSkyLight = SplFixedArray::fromArray(array_merge($instance->blocksDirectSkyLight->toArray(), array_fill(count($instance->blocksDirectSkyLight), self::NEW_BLOCK_FACTORY_SIZE, false)));
+        $instance->blastResistance = SplFixedArray::fromArray(array_merge($instance->blastResistance->toArray(), array_fill(count($instance->blastResistance), self::NEW_BLOCK_FACTORY_SIZE, 0.0)));
 	}
 
 	/**
@@ -131,20 +131,20 @@ final class CustomiesBlockFactory {
 		BlockPalette::getInstance()->insertState($blockState);
 
 		$propertiesTag = CompoundTag::create();
-		$components = CompoundTag::create()
-			->setTag("minecraft:block_light_emission", CompoundTag::create()
-				->setFloat("value", (float)$block->getLightLevel() / 15))
-			->setTag("minecraft:block_light_filter", CompoundTag::create()
-				->setInt("value", $block->getLightFilter()))
-			->setTag("minecraft:destroy_time", CompoundTag::create()
-				->setFloat("value", $block->getBreakInfo()->getHardness()))
-			->setTag("minecraft:explosion_resistance", CompoundTag::create()
-				->setFloat("value", $block->getBreakInfo()->getBlastResistance()))
-			->setTag("minecraft:friction", CompoundTag::create()
-				->setFloat("value", $block->getFrictionFactor()))
-			->setTag("minecraft:flammable", CompoundTag::create()
-				->setFloat("flame_odds", $block->getFlameEncouragement())
-				->setFloat("burn_odds", $block->getFlammability()));
+        $components = CompoundTag::create()
+            ->setTag("minecraft:light_emission", CompoundTag::create()
+                ->setInt("value", $block->getLightLevel()))
+            ->setTag("minecraft:block_light_filter", CompoundTag::create()
+                ->setInt("value", $block->getLightFilter()))
+            ->setTag("minecraft:destructible_by_mining", CompoundTag::create()
+                ->setFloat("value", $block->getBreakInfo()->getHardness()))
+            ->setTag("minecraft:destructible_by_explosion", CompoundTag::create()
+                ->setFloat("value", $block->getBreakInfo()->getBlastResistance()))
+            ->setTag("minecraft:friction", CompoundTag::create()
+                ->setFloat("value", $block->getFrictionFactor()))
+            ->setTag("minecraft:flammable", CompoundTag::create()
+                ->setInt("catch_chance_modifier", $block->getFlameEncouragement())//Did MC revert this change or?
+                ->setInt("destroy_chance_modifier", $block->getFlammability()));
 
 		if($model !== null) {
 			foreach($model->toNBT() as $tagName => $tag){
