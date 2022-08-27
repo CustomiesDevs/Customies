@@ -133,17 +133,17 @@ final class CustomiesBlockFactory {
 		$propertiesTag = CompoundTag::create();
         $components = CompoundTag::create()
             ->setTag("minecraft:light_emission", CompoundTag::create()
-                ->setInt("value", $block->getLightLevel()))
+                ->setByte("emission", $block->getLightLevel()))
             ->setTag("minecraft:block_light_filter", CompoundTag::create()
-                ->setInt("value", $block->getLightFilter()))
+                ->setByte("lightLevel", $block->getLightFilter()))
             ->setTag("minecraft:destructible_by_mining", CompoundTag::create()
-                ->setFloat("value", $block->getBreakInfo()->getHardness()))
+                ->setFloat("value", $block->getBreakInfo()->getHardness()))//Says seconds_to_destroy in docs
             ->setTag("minecraft:destructible_by_explosion", CompoundTag::create()
-                ->setFloat("value", $block->getBreakInfo()->getBlastResistance()))
+                ->setFloat("value", $block->getBreakInfo()->getBlastResistance()))//Uses explosion_resistance in docs
             ->setTag("minecraft:friction", CompoundTag::create()
                 ->setFloat("value", $block->getFrictionFactor()))
             ->setTag("minecraft:flammable", CompoundTag::create()
-                ->setInt("catch_chance_modifier", $block->getFlameEncouragement())//Did MC revert this change or?
+                ->setInt("catch_chance_modifier", $block->getFlameEncouragement())
                 ->setInt("destroy_chance_modifier", $block->getFlammability()));
 
 		if($model !== null) {
