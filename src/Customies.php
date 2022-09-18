@@ -13,10 +13,9 @@ use pocketmine\world\format\io\WritableWorldProviderManagerEntry;
 
 final class Customies extends PluginBase {
 
-
 	protected function onLoad(): void {
-	    CustomiesItemFactory::getInstance()->initCache($this->getDataFolder());
-	    CustomiesBlockFactory::getInstance()->initCache($this->getDataFolder());
+		CustomiesItemFactory::getInstance()->initCache($this->getDataFolder());
+		CustomiesBlockFactory::getInstance()->initCache($this->getDataFolder());
 		$provider = new WritableWorldProviderManagerEntry(\Closure::fromCallable([LevelDB::class, 'isValid']), fn(string $path) => new LevelDB($path), Closure::fromCallable([LevelDB::class, 'generate']));
 		$this->getServer()->getWorldManager()->getProviderManager()->addProvider($provider, "leveldb", true);
 		$this->getServer()->getWorldManager()->getProviderManager()->setDefault($provider);
@@ -33,9 +32,8 @@ final class Customies extends PluginBase {
 		}), 0);
 	}
 
-	protected function onDisable(): void
-    {
-        CustomiesItemFactory::getInstance()->getItemIDCache()->save();
-        CustomiesBlockFactory::getInstance()->getBlockIdCache()->save();
-    }
+	protected function onDisable(): void {
+		CustomiesItemFactory::getInstance()->getItemIDCache()->save();
+		CustomiesBlockFactory::getInstance()->getBlockIdCache()->save();
+	}
 }

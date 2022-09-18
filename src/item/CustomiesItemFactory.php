@@ -22,9 +22,9 @@ use function array_values;
 final class CustomiesItemFactory {
 	use SingletonTrait;
 
-    /**
-     * @var IDCache
-     */
+	/**
+	 * @var IDCache
+	 */
 	private IDCache $itemIDCache;
 
 	/**
@@ -36,12 +36,12 @@ final class CustomiesItemFactory {
 	 */
 	private array $itemComponentEntries = [];
 
-    /**
-     * @param string $dataFolderPath
-     */
+	/**
+	 * @param string $dataFolderPath
+	 */
 	public function initCache(string $dataFolderPath): void {
-	    $this->itemIDCache = new IDCache(950, $dataFolderPath . "items.cache");
-    }
+		$this->itemIDCache = new IDCache(950, $dataFolderPath . "items.cache");
+	}
 
 	/**
 	 * Get a custom item from its identifier. An exception will be thrown if the item is not registered.
@@ -70,13 +70,13 @@ final class CustomiesItemFactory {
 		return array_values($this->itemTableEntries);
 	}
 
-    /**
-     * Returns the cache of string identifiers to item ids used for inter-runtime id saving.
-     * @return IDCache
-     */
+	/**
+	 * Returns the cache of string identifiers to item ids used for inter-runtime id saving.
+	 * @return IDCache
+	 */
 	public function getItemIDCache(): IDCache {
-	    return $this->itemIDCache;
-    }
+		return $this->itemIDCache;
+	}
 
 	/**
 	 * Registers the item to the item factory and assigns it an ID. It also updates the required mappings and stores the
