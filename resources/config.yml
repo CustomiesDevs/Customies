@@ -1,6 +1,0 @@
-# Specifies weather to save item ids between runtime in order to avoid conflicts that might occur when unregistering an
-# item.
-item-id-caching: false
-# Specifies weather to save block ids between runtime in order to avoid conflicts that might occur when unregistering a
-# block.
-block-id-caching: false
