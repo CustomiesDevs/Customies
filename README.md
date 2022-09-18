@@ -24,7 +24,7 @@ The usage guides have been moved to the [Customies Wiki](https://github.com/Cust
 |-------------------------------------------------------|----------------------------------------------------------------------------------------------|
 | [TwistedAsylumMC](https://github.com/TwistedAsylumMC) | Helped research and develop the first versions of Customies as well as maintain the code     |
 | [DenielW](https://github.com/DenielWorld)             | Helped research and develop the first versions of Customies                                  |
-| [ScarceityPvP](https://github.com/ScarceityPvP)       | Helped develop the item components implementation and block-related bug fixes                |
+| [Abimek](https://github.com/abimek)                   | Helped develop the item components implementation and block-related bug fixes                |
 | [Unickorn](https://github.com/Unickorn)               | Maintained the code during the PM4 betas and kept it up to date                              |
 | [JackNoordhuis](https://github.com/JackNoordhuis)     | Suggested the idea of using async workers and helped write the code which made them function |
 > Future contributors will not be added to this list. This is a list of the contributors who helped develop the plugin before the public release.
