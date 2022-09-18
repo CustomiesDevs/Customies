@@ -29,6 +29,7 @@ use pocketmine\utils\Utils;
 use ReflectionClass;
 use RuntimeException;
 use SplFixedArray;
+use function asort;
 use function array_fill;
 use function count;
 use function file_get_contents;
@@ -36,6 +37,9 @@ use const pocketmine\BEDROCK_DATA_PATH;
 
 final class CustomiesBlockFactory {
 	use SingletonTrait;
+
+	private int $nextBlockID = 1000;
+	private bool $caching = false;
 
 	private const NEW_BLOCK_FACTORY_SIZE = 2048 << Block::INTERNAL_METADATA_BITS;
 
@@ -48,10 +52,23 @@ final class CustomiesBlockFactory {
 	private array $blockPaletteEntries = [];
 	/** @var R12ToCurrentBlockMapEntry[] */
 	private array $legacyStateMap = [];
+	// blockIdCache holds a string identifier to block id map used when block-id-caching is enabled in the config.
+	private array $blockIdCache = [];
 
 	public function __construct() {
 		$this->increaseBlockFactoryLimits();
 	}
+
+    /**
+     * @param array $cache
+     */
+    public function initCache(array $cache): void {
+        if (!$this->caching) {
+            $this->caching = true;
+            asort($this->blockIdCache);
+            $this->blockIdCache = $cache;
+        }
+    }
 
 	/**
 	 * Modifies the properties in the BlockFactory instance to increase the SplFixedArrays to double the limit of blocks
@@ -107,6 +124,14 @@ final class CustomiesBlockFactory {
 		return $this->blockPaletteEntries;
 	}
 
+    /**
+     * Returns the cache of string identifiers to item ids used for inter-runtime id saving.
+     * @return array
+     */
+    public function getBlockIdCache(): array {
+        return $this->blockIdCache;
+    }
+
 	/**
 	 * Register a block to the BlockFactory and all the required mappings.
 	 * @phpstan-param class-string $className
@@ -117,7 +142,7 @@ final class CustomiesBlockFactory {
 		}
 
 		/** @var Block $block */
-		$block = new $className(new BlockIdentifier($this->getNextAvailableId(), 0), $name, $breakInfo);
+		$block = new $className(new BlockIdentifier($this->getNextAvailableId($identifier), 0), $name, $breakInfo);
 
 		if(BlockFactory::getInstance()->isRegistered($block->getId())) {
 			throw new InvalidArgumentException("Block with ID " . $block->getId() . " is already registered");
@@ -163,18 +188,6 @@ final class CustomiesBlockFactory {
 
 		$this->customBlocks[$identifier] = $block;
 		LegacyBlockIdToStringIdMap::getInstance()->registerMapping($identifier, $block->getId());
-	}
-
-	/**
-	 * Returns the next available custom block id, an exception will be thrown if the block factory is full.
-	 */
-	private function getNextAvailableId(): int {
-		$id = 1000 + count($this->customBlocks);
-		if($id > (self::NEW_BLOCK_FACTORY_SIZE / 16)) {
-			throw new OutOfRangeException("All custom block ids are used up");
-		}
-
-		return $id;
 	}
 
 	/**
@@ -249,4 +262,49 @@ final class CustomiesBlockFactory {
 			}
 		}
 	}
+
+    /**
+     * Returns the next available custom block id, an exception will be thrown if the block factory is full.
+     */
+    private function getNextAvailableId(string $identifier): int {
+        if($this->caching){
+            // if the item is already cached then return the cached item id.
+            if (isset($this->blockIdCache[$identifier])) {
+                $id = $this->blockIdCache[$identifier];
+            } else {
+                $id = ++$this->nextBlockID;
+                $previous = null;
+                foreach ($this->blockIdCache as $key => $value) {
+                    if ($value > $id) {
+                        if ($previous !== null) {
+                            $id = $this->blockIdCache[$previous]+1;
+                            // if the id already exists increment by one and keep looking
+                            if ($id === $value){
+                                $id += 1;
+                                continue;
+                            }
+                            $this->blockIdCache[$identifier] = $id;
+                            break;
+                        }
+                        $this->nextBlockID = $id;
+                    }
+                    $previous = $key;
+                }
+                // we do this on the off chance that the id matches the greatest id inside of the cache.
+                if($this->blockIdCache[$previous] === $id){
+                    $id += 1;
+                    $this->blockIdCache[$identifier] = $id;
+                    $this->nextBlockID = $id;
+                }
+                asort($this->blockIdCache);
+            }
+        }else{
+            // if we're not caching then just get the item id using the normal means.
+            $id = ++$this->nextBlockID;
+        }
+        if($id > (self::NEW_BLOCK_FACTORY_SIZE / 16)) {
+            throw new OutOfRangeException("All custom block ids are used up");
+        }
+        return $id;
+    }
 }

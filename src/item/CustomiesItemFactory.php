@@ -17,11 +17,20 @@ use pocketmine\utils\Utils;
 use ReflectionClass;
 use RuntimeException;
 use function array_values;
+use function asort;
 
 final class CustomiesItemFactory {
 	use SingletonTrait;
 
-	private int $nextItemID = 950;
+    private int $nextItemID = 950;
+    private bool $caching = false;
+
+    /**
+     * @var array
+     * itemIdCache holds a string identifier to item id map used when item-id-caching is enabled in the config.
+     */
+	private array $itemIdCache = [];
+
 	/**
 	 * @var ItemTypeEntry[]
 	 */
@@ -30,6 +39,17 @@ final class CustomiesItemFactory {
 	 * @var ItemComponentPacketEntry[]
 	 */
 	private array $itemComponentEntries = [];
+
+    /**
+     * @param array $cache
+     */
+	public function initCache(array $cache): void {
+	    if (!$this->caching) {
+            $this->caching = true;
+            asort($this->itemIdCache);
+            $this->itemIdCache = $cache;
+        }
+    }
 
 	/**
 	 * Get a custom item from its identifier. An exception will be thrown if the item is not registered.
@@ -58,6 +78,14 @@ final class CustomiesItemFactory {
 		return array_values($this->itemTableEntries);
 	}
 
+    /**
+     * Returns the cache of string identifiers to item ids used for inter-runtime id saving.
+     * @return array
+     */
+	public function getItemIdCache(): array {
+	    return $this->itemIdCache;
+    }
+
 	/**
 	 * Registers the item to the item factory and assigns it an ID. It also updates the required mappings and stores the
 	 * item components if present.
@@ -67,8 +95,9 @@ final class CustomiesItemFactory {
 		if($className !== Item::class) {
 			Utils::testValidInstance($className, Item::class);
 		}
+
 		/** @var Item $item */
-		$item = new $className(new ItemIdentifier(++$this->nextItemID, 0), $name);
+		$item = new $className(new ItemIdentifier($this->getNextAvailableId($identifier), 0), $name);
 
 		if(ItemFactory::getInstance()->isRegistered($item->getId())) {
 			throw new RuntimeException("Item with ID " . $item->getId() . " is already registered");
@@ -116,4 +145,47 @@ final class CustomiesItemFactory {
 		$this->registerCustomItemMapping($itemId);
 		$this->itemTableEntries[] = new ItemTypeEntry($identifier, $itemId, false);
 	}
+
+    /**
+     * getNextAvailableId retrieves the lowest unregistered item id above 950. It will check the item id cache if caching is
+     * enabled.
+     */
+	private function getNextAvailableId(string $identifier): int {
+        if($this->caching){
+            // if the item is already cached then return the cached item id.
+            if (isset($this->itemIdCache[$identifier])) {
+                $id = $this->itemIdCache[$identifier];
+            } else {
+                $id = ++$this->nextItemID;
+                $previous = null;
+                foreach ($this->itemIdCache as $key => $value) {
+                    if ($value > $id) {
+                        if ($previous !== null) {
+                            $id = $this->itemIdCache[$previous]+1;
+                            // if the id already exists increment by one and keep looking
+                            if ($id === $value){
+                                $id += 1;
+                                continue;
+                            }
+                            $this->itemIdCache[$identifier] = $id;
+                            break;
+                        }
+                        $this->nextItemID = $id;
+                    }
+                    $previous = $key;
+                }
+                // we do this on the off chance that the id matches the greatest id inside of the cache.
+                if($this->itemIdCache[$previous] === $id){
+                    $id += 1;
+                    $this->itemIdCache[$identifier] = $id;
+                    $this->nextItemID = $id;
+                }
+                asort($this->itemIdCache);
+            }
+        }else{
+            // if we're not caching then just get the item id using the normal means.
+            $id = ++$this->nextItemID;
+        }
+        return $id;
+    }
 }
