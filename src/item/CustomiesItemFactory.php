@@ -22,11 +22,7 @@ use function array_values;
 final class CustomiesItemFactory {
 	use SingletonTrait;
 
-	/**
-	 * @var IDCache
-	 */
 	private IDCache $itemIDCache;
-
 	/**
 	 * @var ItemTypeEntry[]
 	 */
@@ -37,6 +33,7 @@ final class CustomiesItemFactory {
 	private array $itemComponentEntries = [];
 
 	/**
+	 * Initializes the item ID cache.
 	 * @param string $dataFolderPath
 	 */
 	public function initCache(string $dataFolderPath): void {

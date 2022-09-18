@@ -40,9 +40,6 @@ final class CustomiesBlockFactory {
 
 	private const NEW_BLOCK_FACTORY_SIZE = 2048 << Block::INTERNAL_METADATA_BITS;
 
-    /**
-     * @var IDCache
-     */
     private IDCache $blockIDCache;
 	/**
 	 * @var Block[]
@@ -58,9 +55,10 @@ final class CustomiesBlockFactory {
 		$this->increaseBlockFactoryLimits();
 	}
 
-    /**
-     * @param string $dataFolderPath
-     */
+	/**
+	 * Initializes the ID cache.
+	 * @param string $dataFolderPath
+	 */
     public function initCache(string $dataFolderPath): void {
         $this->blockIDCache = new IDCache(1000, $dataFolderPath . "blocks.cache");
     }
