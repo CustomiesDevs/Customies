@@ -157,6 +157,9 @@ final class CustomiesBlockFactory {
 			->setString("category", $creativeInfo->getCategory())
 			->setString("group", $creativeInfo->getGroup()));
 		$propertiesTag->setTag("components", $components);
+		$propertiesTag->setTag("menu_category", CompoundTag::create()
+			->setString("category", $creativeInfo?->getCategory() ?? "")
+			->setString("group", $creativeInfo?->getGroup() ?? ""));
 		CreativeInventory::getInstance()->add($block->asItem());
 
 		$this->blockPaletteEntries[] = new BlockPaletteEntry($identifier, new CacheableNbt($propertiesTag));
