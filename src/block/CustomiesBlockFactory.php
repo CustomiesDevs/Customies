@@ -161,7 +161,7 @@ final class CustomiesBlockFactory {
 
 		$this->blockPaletteEntries[] = new BlockPaletteEntry($identifier, new CacheableNbt($propertiesTag));
 
-		$this->blockFuncs[$identifier] = $block;
+		$this->blockFuncs[$identifier] = $blockFunc;
 		LegacyBlockIdToStringIdMap::getInstance()->registerMapping($identifier, $block->getId());
 	}
 
