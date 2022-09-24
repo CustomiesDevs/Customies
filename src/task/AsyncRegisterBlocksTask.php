@@ -13,12 +13,12 @@ final class AsyncRegisterBlocksTask extends AsyncTask {
 	}
 
 	public function onRun(): void {
-		/** @phpstan-var array<string, Block> $blocks */
+		/** @phpstan-var array<string, Closure(int): Block> $blocks */
 		$blocks = unserialize($this->blocks);
-		foreach($blocks as $identifier => $block){
-			/** @phpstan-var class-string $className */
-			$className = get_class($block);
-			CustomiesBlockFactory::getInstance()->registerBlock($className, $identifier, $block->getName(), $block->getBreakInfo());
+		foreach($blocks as $identifier => $blockFunc){
+			// We do not care about the model or creative inventory data in other threads since it is unused outside of
+			// the main thread.
+			CustomiesBlockFactory::getInstance()->registerBlock($blockFunc, $identifier);
 		}
 		CustomiesBlockFactory::getInstance()->registerCustomRuntimeMappings();
 	}
