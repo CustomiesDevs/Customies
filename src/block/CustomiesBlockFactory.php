@@ -78,8 +78,8 @@ final class CustomiesBlockFactory {
 	 * can result in massive issues with almost every block showing as the wrong thing and causing lag to clients.
 	 */
 	public function addWorkerInitHook(): void {
-		$blocks = serialize($this->blockFuncs);
 		$server = Server::getInstance();
+		$blocks = $this->blockFuncs;
 		$server->getAsyncPool()->addWorkerStartHook(static function (int $worker) use ($server, $blocks): void {
 			$server->getAsyncPool()->submitTaskToWorker(new AsyncRegisterBlocksTask($blocks), $worker);
 		});
