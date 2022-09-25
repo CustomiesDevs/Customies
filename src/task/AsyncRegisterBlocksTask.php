@@ -19,7 +19,7 @@ final class AsyncRegisterBlocksTask extends AsyncTask {
 	 */
 	public function __construct(array $blockFuncs) {
 		$this->blockFuncs = new Threaded();
-		foreach($blockFuncs as $identifier => $blockFunc) {
+		foreach($blockFuncs as $identifier => $blockFunc){
 			$this->blockFuncs[$identifier] = $blockFunc;
 		}
 	}
