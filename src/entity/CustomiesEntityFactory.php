@@ -26,8 +26,8 @@ class CustomiesEntityFactory {
 	 */
 	public function registerEntity(string $className, string $identifier, ?Closure $creationFunc = null): void {
 		EntityFactory::getInstance()->register($className, $creationFunc ?? static function (World $world, CompoundTag $nbt) use ($className): Entity {
-				return new $className(EntityDataHelper::parseLocation($nbt, $world), $nbt);
-			}, [$identifier]);
+			return new $className(EntityDataHelper::parseLocation($nbt, $world), $nbt);
+		}, [$identifier]);
 		$this->updateStaticPacketCache($identifier);
 	}
 

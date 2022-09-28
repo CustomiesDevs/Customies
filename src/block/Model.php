@@ -42,7 +42,19 @@ final class Model {
 				->setTag("materials", $materials),
 			"minecraft:geometry" => CompoundTag::create()
 				->setString("value", $this->geometry),
-			"minecraft:pick_collision" => CompoundTag::create()
+			"minecraft:collision_box" => CompoundTag::create()
+				->setByte("enabled", 1)
+				->setTag("origin", new ListTag([
+					new FloatTag($this->origin->getX()),
+					new FloatTag($this->origin->getY()),
+					new FloatTag($this->origin->getZ())
+				]))
+				->setTag("size", new ListTag([
+					new FloatTag($this->size->getX()),
+					new FloatTag($this->size->getY()),
+					new FloatTag($this->size->getZ())
+				])),
+			"minecraft:selection_box" => CompoundTag::create()
 				->setByte("enabled", 1)
 				->setTag("origin", new ListTag([
 					new FloatTag($this->origin->getX()),
