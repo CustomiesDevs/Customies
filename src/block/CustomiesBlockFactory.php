@@ -40,7 +40,7 @@ final class CustomiesBlockFactory {
 
 	private const NEW_BLOCK_FACTORY_SIZE = 2048 << Block::INTERNAL_METADATA_BITS;
 
-    private IDCache $blockIDCache;
+	private IDCache $blockIDCache;
 	/**
 	 * @var Block[]
 	 * @phpstan-var array<string, Block>
@@ -51,17 +51,14 @@ final class CustomiesBlockFactory {
 	/** @var R12ToCurrentBlockMapEntry[] */
 	private array $legacyStateMap = [];
 
-	public function __construct() {
-		$this->increaseBlockFactoryLimits();
-	}
-
 	/**
 	 * Initializes the ID cache.
-	 * @param string $dataFolderPath
+	 * @param IDCache $blockIDCache
 	 */
-    public function initCache(string $dataFolderPath): void {
-        $this->blockIDCache = new IDCache(1000, $dataFolderPath . "blocks.cache");
-    }
+	public function __construct(IDCache $blockIDCache): void {
+		$this->increaseBlockFactoryLimits();
+		$this->blockIDCache = $blockIDCache;
+	}
 
 	/**
 	 * Modifies the properties in the BlockFactory instance to increase the SplFixedArrays to double the limit of blocks
@@ -78,10 +75,10 @@ final class CustomiesBlockFactory {
 			$array->setSize(self::NEW_BLOCK_FACTORY_SIZE);
 			$property->setValue($instance, $array);
 		}
-        $instance->light = SplFixedArray::fromArray(array_merge($instance->light->toArray(), array_fill(count($instance->light), self::NEW_BLOCK_FACTORY_SIZE, 0)));
-        $instance->lightFilter = SplFixedArray::fromArray(array_merge($instance->lightFilter->toArray(), array_fill(count($instance->lightFilter), self::NEW_BLOCK_FACTORY_SIZE, 1)));
-        $instance->blocksDirectSkyLight = SplFixedArray::fromArray(array_merge($instance->blocksDirectSkyLight->toArray(), array_fill(count($instance->blocksDirectSkyLight), self::NEW_BLOCK_FACTORY_SIZE, false)));
-        $instance->blastResistance = SplFixedArray::fromArray(array_merge($instance->blastResistance->toArray(), array_fill(count($instance->blastResistance), self::NEW_BLOCK_FACTORY_SIZE, 0.0)));
+		$instance->light = SplFixedArray::fromArray(array_merge($instance->light->toArray(), array_fill(count($instance->light), self::NEW_BLOCK_FACTORY_SIZE, 0)));
+		$instance->lightFilter = SplFixedArray::fromArray(array_merge($instance->lightFilter->toArray(), array_fill(count($instance->lightFilter), self::NEW_BLOCK_FACTORY_SIZE, 1)));
+		$instance->blocksDirectSkyLight = SplFixedArray::fromArray(array_merge($instance->blocksDirectSkyLight->toArray(), array_fill(count($instance->blocksDirectSkyLight), self::NEW_BLOCK_FACTORY_SIZE, false)));
+		$instance->blastResistance = SplFixedArray::fromArray(array_merge($instance->blastResistance->toArray(), array_fill(count($instance->blastResistance), self::NEW_BLOCK_FACTORY_SIZE, 0.0)));
 	}
 
 	/**
@@ -117,13 +114,13 @@ final class CustomiesBlockFactory {
 		return $this->blockPaletteEntries;
 	}
 
-    /**
-     * Returns the cache of string identifiers to block ids used for inter-runtime id saving.
-     * @return IDCache
-     */
-    public function getBlockIDCache(): IDCache {
-        return $this->blockIDCache;
-    }
+    	/**
+     	* Returns the cache of string identifiers to block ids used for inter-runtime id saving.
+     	* @return IDCache
+     	*/
+    	public function getBlockIDCache(): IDCache {
+		return $this->blockIDCache;
+   	 }
 
 	/**
 	 * Register a block to the BlockFactory and all the required mappings.
@@ -135,7 +132,7 @@ final class CustomiesBlockFactory {
 		}
 
 		/** @var Block $block */
-		$block = new $className(new BlockIdentifier($this->getNextAvailableId($identifier), 0), $name, $breakInfo);
+		$block = new $className(new BlockIdentifier($this->getNextAvailableBlockId($identifier), 0), $name, $breakInfo);
 
 		if(BlockFactory::getInstance()->isRegistered($block->getId())) {
 			throw new InvalidArgumentException("Block with ID " . $block->getId() . " is already registered");
@@ -149,20 +146,20 @@ final class CustomiesBlockFactory {
 		BlockPalette::getInstance()->insertState($blockState);
 
 		$propertiesTag = CompoundTag::create();
-        $components = CompoundTag::create()
-            ->setTag("minecraft:light_emission", CompoundTag::create()
-                ->setByte("emission", $block->getLightLevel()))
-            ->setTag("minecraft:block_light_filter", CompoundTag::create()
-                ->setByte("lightLevel", $block->getLightFilter()))
-            ->setTag("minecraft:destructible_by_mining", CompoundTag::create()
-                ->setFloat("value", $block->getBreakInfo()->getHardness()))//Says seconds_to_destroy in docs
-            ->setTag("minecraft:destructible_by_explosion", CompoundTag::create()
-                ->setFloat("value", $block->getBreakInfo()->getBlastResistance()))//Uses explosion_resistance in docs
-            ->setTag("minecraft:friction", CompoundTag::create()
-                ->setFloat("value", $block->getFrictionFactor()))
-            ->setTag("minecraft:flammable", CompoundTag::create()
-                ->setInt("catch_chance_modifier", $block->getFlameEncouragement())
-                ->setInt("destroy_chance_modifier", $block->getFlammability()));
+        	$components = CompoundTag::create()
+		    ->setTag("minecraft:light_emission", CompoundTag::create()
+			->setByte("emission", $block->getLightLevel()))
+		    ->setTag("minecraft:block_light_filter", CompoundTag::create()
+			->setByte("lightLevel", $block->getLightFilter()))
+		    ->setTag("minecraft:destructible_by_mining", CompoundTag::create()
+			->setFloat("value", $block->getBreakInfo()->getHardness()))//Says seconds_to_destroy in docs
+		    ->setTag("minecraft:destructible_by_explosion", CompoundTag::create()
+			->setFloat("value", $block->getBreakInfo()->getBlastResistance()))//Uses explosion_resistance in docs
+		    ->setTag("minecraft:friction", CompoundTag::create()
+			->setFloat("value", $block->getFrictionFactor()))
+		    ->setTag("minecraft:flammable", CompoundTag::create()
+			->setInt("catch_chance_modifier", $block->getFlameEncouragement())
+			->setInt("destroy_chance_modifier", $block->getFlammability()));
 
 		if($model !== null) {
 			foreach($model->toNBT() as $tagName => $tag){

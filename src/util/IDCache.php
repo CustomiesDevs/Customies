@@ -14,56 +14,79 @@ use function igbinary_unserialize;
 
 final class IDCache {
 
-	private int $nextID;
+	private int $nextBlockID;
+	private int $nextItemID;
 	private string $file;
 
 	/**
 	 * @var array
 	 */
-	private array $cache = [];
+	private array $itemCache = [];
 
-	public function __construct(int $startingID, string $cacheFile) {
-		$this->nextID = $startingID;
+	/**
+	 * @var array
+	 */
+	private array $blockCache = [];
+
+	public function __construct(int $startingBlockID, int $startingItemID, string $cacheFile) {
+		$this->nextBlockID = $startingBlockID;
+		$this->nextItemID = $startingItemID;
 		$this->file = $cacheFile;
 		if(file_exists($cacheFile)) {
-			$this->cache = igbinary_unserialize(gzuncompress(file_get_contents($cacheFile)));
+			$data = igbinary_unserialize(gzuncompress(file_get_contents($cacheFile)));
+			$this->blockCache = $data["blocks"];
+			$this->itemCache = $data["items"];
 		}
+	}
+
+	/**
+	 * Returns the next avilable block id.
+	 */
+	public function getNextAvailableBlockID(string $identifier){
+		return $this->getNextAvailableID($identifier, &$this->blockCache, &$this->nextBlockID;
+	}
+
+	/**
+	 * Returns the next avilable item id.
+	 */
+	public function getNextAvailableItemID(string $identifier){
+		return $this->getNextAvailableID($identifier, &$this->itemCache, &$this->nextItemID;
 	}
 
 	/**
 	 * Returns the lowest valid if for that specific identifier it hasn't already been cached. It
 	 * will then cache it. If the identifier has been cached it will return the associated cached numeric id.
 	 */
-	public function getNextAvailableID(string $identifier): int {
+	private function getNextAvailableID(string $identifier, array &$cache, int &$nextID): int {
 		// if it's cached then we just return the already cached id.
-		if(isset($this->cache[$identifier])) {
-			return $this->cache[$identifier];
+		if(isset($cache[$identifier])) {
+			return $cache[$identifier];
 		}
-		$id = ++$this->nextID;
+		$id = ++$nextID;
 		$previous = null;
-		foreach($this->cache as $key => $value){
+		foreach($cache as $key => $value){
 			if($value > $id) {
 				if($previous !== null) {
-					$id = $this->cache[$previous] + 1;
+					$id = $cache[$previous] + 1;
 					// if the id already exists increment by one and keep looking
 					if($id === $value) {
 						$id += 1;
 						continue;
 					}
-					$this->cache[$identifier] = $id;
+					$cache[$identifier] = $id;
 					break;
 				}
-				$this->nextID = $id;
+				$nextID = $id;
 			}
 			$previous = $key;
 		}
 		// we do this on the off chance that the id matches the greatest id inside of the cache.
-		if($this->cache[$previous] === $id) {
+		if($cache[$previous] === $id) {
 			$id += 1;
-			$this->cache[$identifier] = $id;
-			$this->nextID = $id;
+			$cache[$identifier] = $id;
+			$nextID = $id;
 		}
-		asort($this->cache);
+		asort($cache);
 		return $id;
 	}
 
@@ -71,6 +94,7 @@ final class IDCache {
 	 * Flushes the cache to disk in the appropriate format.
 	 */
 	public function save(): void {
-		Filesystem::safeFilePutContents($this->file, gzcompress(igbinary_serialize($this->cache)));
+		$data = ["items" => $this->itemCache, "blocks" => $this->blockCache];
+		Filesystem::safeFilePutContents($this->file, gzcompress(igbinary_serialize($data)));
 	}
 }

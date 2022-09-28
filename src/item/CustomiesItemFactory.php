@@ -34,11 +34,12 @@ final class CustomiesItemFactory {
 
 	/**
 	 * Initializes the item ID cache.
-	 * @param string $dataFolderPath
+	 * @param IDCache $cache
 	 */
-	public function initCache(string $dataFolderPath): void {
-		$this->itemIDCache = new IDCache(950, $dataFolderPath . "items.cache");
+	public function __construct(IDCache $cache): void {
+		$this->itemIDCache = $cache;	
 	}
+
 
 	/**
 	 * Get a custom item from its identifier. An exception will be thrown if the item is not registered.
@@ -86,7 +87,7 @@ final class CustomiesItemFactory {
 		}
 
 		/** @var Item $item */
-		$item = new $className(new ItemIdentifier($this->itemIDCache->getNextAvailableID($identifier), 0), $name);
+		$item = new $className(new ItemIdentifier($this->itemIDCache->getNextAvailableItemID($identifier), 0), $name);
 
 		if(ItemFactory::getInstance()->isRegistered($item->getId())) {
 			throw new RuntimeException("Item with ID " . $item->getId() . " is already registered");
