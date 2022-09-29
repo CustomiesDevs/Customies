@@ -5,7 +5,6 @@ namespace customiesdevs\customies;
 
 use Closure;
 use customiesdevs\customies\block\CustomiesBlockFactory;
-use customiesdevs\customies\item\CustomiesItemFactory;
 use customiesdevs\customies\world\LevelDB;
 use customiesdevs\customies\util\IDCache;
 use pocketmine\plugin\PluginBase;
@@ -13,11 +12,13 @@ use pocketmine\scheduler\ClosureTask;
 use pocketmine\world\format\io\WritableWorldProviderManagerEntry;
 
 final class Customies extends PluginBase {
+    /**
+     * @var IDCache
+     */
+    private static IDCache $cache;
 
 	protected function onLoad(): void {
-		$cache = new IDCache(1000, 950, $this->getDataFolder() . "idcache");
-		CustomiesItemFactory::setInstance(new CustomiesItemFactory($cache));
-		CustomiesBlockFactory::setInstance(new CustomiesBlockFactory($cache));
+		self::$cache = new IDCache(1000, 950, $this->getDataFolder() . "idcache");
 		$provider = new WritableWorldProviderManagerEntry(\Closure::fromCallable([LevelDB::class, 'isValid']), fn(string $path) => new LevelDB($path), Closure::fromCallable([LevelDB::class, 'generate']));
 		$this->getServer()->getWorldManager()->getProviderManager()->addProvider($provider, "leveldb", true);
 		$this->getServer()->getWorldManager()->getProviderManager()->setDefault($provider);
@@ -31,7 +32,15 @@ final class Customies extends PluginBase {
 			// register their custom blocks and entities in onEnable() before this is executed.
 			CustomiesBlockFactory::getInstance()->registerCustomRuntimeMappings();
 			CustomiesBlockFactory::getInstance()->addWorkerInitHook();
-			CustomiesItemFactory::getInstance()->getItemIDCache()->save();
+			self::$cache->save();
 		}), 0);
 	}
+
+    /**
+     * @return IDCache
+     * @internal
+     */
+	public static function getCache(): IDCache {
+	    return self::$cache;
+    }
 }

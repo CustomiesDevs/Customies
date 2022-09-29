@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies\item;
 
-use customiesdevs\customies\util\IDCache;
+use customiesdevs\customies\Customies;
 use InvalidArgumentException;
 use pocketmine\inventory\CreativeInventory;
 use pocketmine\item\Item;
@@ -22,7 +22,6 @@ use function array_values;
 final class CustomiesItemFactory {
 	use SingletonTrait;
 
-	private IDCache $itemIDCache;
 	/**
 	 * @var ItemTypeEntry[]
 	 */
@@ -31,15 +30,6 @@ final class CustomiesItemFactory {
 	 * @var ItemComponentPacketEntry[]
 	 */
 	private array $itemComponentEntries = [];
-
-	/**
-	 * Initializes the item ID cache.
-	 * @param IDCache $cache
-	 */
-	public function __construct(IDCache $cache) {
-		$this->itemIDCache = $cache;	
-	}
-
 
 	/**
 	 * Get a custom item from its identifier. An exception will be thrown if the item is not registered.
@@ -69,14 +59,6 @@ final class CustomiesItemFactory {
 	}
 
 	/**
-	 * Returns the cache of string identifiers to item ids used for inter-runtime id saving.
-	 * @return IDCache
-	 */
-	public function getItemIDCache(): IDCache {
-		return $this->itemIDCache;
-	}
-
-	/**
 	 * Registers the item to the item factory and assigns it an ID. It also updates the required mappings and stores the
 	 * item components if present.
 	 * @phpstan-param class-string $className
@@ -87,7 +69,7 @@ final class CustomiesItemFactory {
 		}
 
 		/** @var Item $item */
-		$item = new $className(new ItemIdentifier($this->itemIDCache->getNextAvailableItemID($identifier), 0), $name);
+		$item = new $className(new ItemIdentifier(Customies::getCache()->getNextAvailableItemID($identifier), 0), $name);
 
 		if(ItemFactory::getInstance()->isRegistered($item->getId())) {
 			throw new RuntimeException("Item with ID " . $item->getId() . " is already registered");

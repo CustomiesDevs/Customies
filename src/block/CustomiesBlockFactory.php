@@ -3,10 +3,10 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies\block;
 
+use customiesdevs\customies\Customies;
 use customiesdevs\customies\item\CreativeInventoryInfo;
 use customiesdevs\customies\item\CustomiesItemFactory;
 use customiesdevs\customies\task\AsyncRegisterBlocksTask;
-use customiesdevs\customies\util\IDCache;
 use customiesdevs\customies\world\LegacyBlockIdToStringIdMap;
 use InvalidArgumentException;
 use OutOfRangeException;
@@ -40,7 +40,6 @@ final class CustomiesBlockFactory {
 
 	private const NEW_BLOCK_FACTORY_SIZE = 2048 << Block::INTERNAL_METADATA_BITS;
 
-	private IDCache $blockIDCache;
 	/**
 	 * @var Block[]
 	 * @phpstan-var array<string, Block>
@@ -51,13 +50,8 @@ final class CustomiesBlockFactory {
 	/** @var R12ToCurrentBlockMapEntry[] */
 	private array $legacyStateMap = [];
 
-	/**
-	 * Initializes the ID cache.
-	 * @param IDCache $blockIDCache
-	 */
-	public function __construct(IDCache $blockIDCache) {
+	public function __construct() {
 		$this->increaseBlockFactoryLimits();
-		$this->blockIDCache = $blockIDCache;
 	}
 
 	/**
@@ -113,14 +107,6 @@ final class CustomiesBlockFactory {
 	public function getBlockPaletteEntries(): array {
 		return $this->blockPaletteEntries;
 	}
-
-    	/**
-     	* Returns the cache of string identifiers to block ids used for inter-runtime id saving.
-     	* @return IDCache
-     	*/
-    	public function getBlockIDCache(): IDCache {
-		return $this->blockIDCache;
-   	 }
 
 	/**
 	 * Register a block to the BlockFactory and all the required mappings.
@@ -257,7 +243,7 @@ final class CustomiesBlockFactory {
      * Returns the next available custom block id, an exception will be thrown if the block factory is full.
      */
     private function getNextAvailableId(string $identifier): int {
-        $id = $this->blockIDCache->getNextAvailableBlockID($identifier);
+        $id = Customies::getCache()->getNextAvailableBlockID($identifier);
         if($id > (self::NEW_BLOCK_FACTORY_SIZE / 16)) {
             throw new OutOfRangeException("All custom block ids are used up");
         }
