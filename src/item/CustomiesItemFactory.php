@@ -36,7 +36,7 @@ final class CustomiesItemFactory {
 	 * Initializes the item ID cache.
 	 * @param IDCache $cache
 	 */
-	public function __construct(IDCache $cache): void {
+	public function __construct(IDCache $cache) {
 		$this->itemIDCache = $cache;	
 	}
 

@@ -43,14 +43,14 @@ final class IDCache {
 	 * Returns the next avilable block id.
 	 */
 	public function getNextAvailableBlockID(string $identifier){
-		return $this->getNextAvailableID($identifier, &$this->blockCache, &$this->nextBlockID;
+		return $this->getNextAvailableID($identifier, $this->blockCache, $this->nextBlockID);
 	}
 
 	/**
 	 * Returns the next avilable item id.
 	 */
 	public function getNextAvailableItemID(string $identifier){
-		return $this->getNextAvailableID($identifier, &$this->itemCache, &$this->nextItemID;
+		return $this->getNextAvailableID($identifier, $this->itemCache, $this->nextItemID);
 	}
 
 	/**

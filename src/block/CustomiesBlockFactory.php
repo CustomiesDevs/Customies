@@ -55,7 +55,7 @@ final class CustomiesBlockFactory {
 	 * Initializes the ID cache.
 	 * @param IDCache $blockIDCache
 	 */
-	public function __construct(IDCache $blockIDCache): void {
+	public function __construct(IDCache $blockIDCache) {
 		$this->increaseBlockFactoryLimits();
 		$this->blockIDCache = $blockIDCache;
 	}
@@ -132,7 +132,7 @@ final class CustomiesBlockFactory {
 		}
 
 		/** @var Block $block */
-		$block = new $className(new BlockIdentifier($this->getNextAvailableBlockId($identifier), 0), $name, $breakInfo);
+		$block = new $className(new BlockIdentifier($this->getNextAvailableId($identifier), 0), $name, $breakInfo);
 
 		if(BlockFactory::getInstance()->isRegistered($block->getId())) {
 			throw new InvalidArgumentException("Block with ID " . $block->getId() . " is already registered");
@@ -146,20 +146,20 @@ final class CustomiesBlockFactory {
 		BlockPalette::getInstance()->insertState($blockState);
 
 		$propertiesTag = CompoundTag::create();
-        	$components = CompoundTag::create()
-		    ->setTag("minecraft:light_emission", CompoundTag::create()
-			->setByte("emission", $block->getLightLevel()))
-		    ->setTag("minecraft:block_light_filter", CompoundTag::create()
-			->setByte("lightLevel", $block->getLightFilter()))
-		    ->setTag("minecraft:destructible_by_mining", CompoundTag::create()
-			->setFloat("value", $block->getBreakInfo()->getHardness()))//Says seconds_to_destroy in docs
-		    ->setTag("minecraft:destructible_by_explosion", CompoundTag::create()
-			->setFloat("value", $block->getBreakInfo()->getBlastResistance()))//Uses explosion_resistance in docs
-		    ->setTag("minecraft:friction", CompoundTag::create()
-			->setFloat("value", $block->getFrictionFactor()))
-		    ->setTag("minecraft:flammable", CompoundTag::create()
-			->setInt("catch_chance_modifier", $block->getFlameEncouragement())
-			->setInt("destroy_chance_modifier", $block->getFlammability()));
+        $components = CompoundTag::create()
+            ->setTag("minecraft:light_emission", CompoundTag::create()
+                ->setByte("emission", $block->getLightLevel()))
+            ->setTag("minecraft:block_light_filter", CompoundTag::create()
+                ->setByte("lightLevel", $block->getLightFilter()))
+            ->setTag("minecraft:destructible_by_mining", CompoundTag::create()
+                ->setFloat("value", $block->getBreakInfo()->getHardness()))//Says seconds_to_destroy in docs
+            ->setTag("minecraft:destructible_by_explosion", CompoundTag::create()
+                ->setFloat("value", $block->getBreakInfo()->getBlastResistance()))//Uses explosion_resistance in docs
+            ->setTag("minecraft:friction", CompoundTag::create()
+                ->setFloat("value", $block->getFrictionFactor()))
+            ->setTag("minecraft:flammable", CompoundTag::create()
+                ->setInt("catch_chance_modifier", $block->getFlameEncouragement())
+                ->setInt("destroy_chance_modifier", $block->getFlammability()));
 
 		if($model !== null) {
 			foreach($model->toNBT() as $tagName => $tag){
@@ -257,7 +257,7 @@ final class CustomiesBlockFactory {
      * Returns the next available custom block id, an exception will be thrown if the block factory is full.
      */
     private function getNextAvailableId(string $identifier): int {
-        $id = $this->blockIDCache->getNextAvailableID($identifier);
+        $id = $this->blockIDCache->getNextAvailableBlockID($identifier);
         if($id > (self::NEW_BLOCK_FACTORY_SIZE / 16)) {
             throw new OutOfRangeException("All custom block ids are used up");
         }

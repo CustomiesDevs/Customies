@@ -7,7 +7,7 @@ use Closure;
 use customiesdevs\customies\block\CustomiesBlockFactory;
 use customiesdevs\customies\item\CustomiesItemFactory;
 use customiesdevs\customies\world\LevelDB;
-use customiesdevs\utils\IDCache;
+use customiesdevs\customies\util\IDCache;
 use pocketmine\plugin\PluginBase;
 use pocketmine\scheduler\ClosureTask;
 use pocketmine\world\format\io\WritableWorldProviderManagerEntry;
