@@ -76,4 +76,25 @@ trait ItemComponentsTrait {
 						->setString("texture", $texture))
 					->setInt("max_stack_size", $maxStackSize)));
 	}
+
+	/**
+	 * When a custom item has a texture that is not 16x16, the item will scale when held in a hand based on the size of
+	 * the texture. This method adds the minecraft:render_offsets component with the correct data for the provided width
+	 * and height of a texture to make the item scale correctly. An optional bool for hand equipped can be used if the
+	 * item is something like a tool or weapon.
+	 */
+	protected function setupRenderOffsets(int $width, int $height, bool $handEquipped = false): void {
+		$scaleTag = CompoundTag::create()
+			->setTag("scale", new ListTag([
+				new FloatTag(($handEquipped ? 0.075 : 0.1) / ($width / 16)),
+				new FloatTag(($handEquipped ? 0.125 : 0.1) / ($height / 16)),
+				new FloatTag(($handEquipped ? 0.075 : 0.1) / ($width / 16))
+			]));
+		$perspectivesTag = CompoundTag::create()
+			->setTag("first_person", $scaleTag)
+			->setTag("third_person", $scaleTag);
+		$this->addComponent("minecraft:render_offsets", CompoundTag::create()
+			->setTag("main_hand", $perspectivesTag)
+			->setTag("off_hand", $perspectivesTag));
+	}
 }
