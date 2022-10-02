@@ -117,11 +117,11 @@ final class CustomiesBlockFactory {
 			throw new InvalidArgumentException("Class returned from closure is not a Block");
 		}
 
-		if(BlockFactory::getInstance()->isRegistered($block->getId())) {
-			throw new InvalidArgumentException("Block with ID " . $block->getId() . " is already registered");
+		if(BlockFactory::getInstance()->isRegistered($id)) {
+			throw new InvalidArgumentException("Block with ID " . $id . " is already registered");
 		}
 		BlockFactory::getInstance()->register($block);
-		CustomiesItemFactory::getInstance()->registerBlockItem($identifier, $block->getId());
+		CustomiesItemFactory::getInstance()->registerBlockItem($identifier, $id);
 
 		$blockState = CompoundTag::create()
 			->setString("name", $identifier)
@@ -163,7 +163,7 @@ final class CustomiesBlockFactory {
 		$this->blockPaletteEntries[] = new BlockPaletteEntry($identifier, new CacheableNbt($propertiesTag));
 
 		$this->blockFuncs[$identifier] = $blockFunc;
-		LegacyBlockIdToStringIdMap::getInstance()->registerMapping($identifier, $block->getId());
+		LegacyBlockIdToStringIdMap::getInstance()->registerMapping($identifier, $id);
 	}
 
 	/**
