@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace customiesdevs\customies\block;
 
 use Closure;
+use customiesdevs\customies\Customies;
 use customiesdevs\customies\item\CreativeInventoryInfo;
 use customiesdevs\customies\item\CustomiesItemFactory;
 use customiesdevs\customies\task\AsyncRegisterBlocksTask;
@@ -110,7 +111,7 @@ final class CustomiesBlockFactory {
 	 * @phpstan-param (Closure(int): Block) $blockFunc
 	 */
 	public function registerBlock(Closure $blockFunc, string $identifier, ?Model $model = null, ?CreativeInventoryInfo $creativeInfo = null): void {
-		$id = $this->getNextAvailableId();
+		$id = $this->getNextAvailableId($identifier);
 		$block = $blockFunc($id);
 		if(!$block instanceof Block) {
 			throw new InvalidArgumentException("Class returned from closure is not a Block");
