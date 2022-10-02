@@ -4,10 +4,10 @@ declare(strict_types=1);
 namespace customiesdevs\customies\block;
 
 use Closure;
-use customiesdevs\customies\Customies;
 use customiesdevs\customies\item\CreativeInventoryInfo;
 use customiesdevs\customies\item\CustomiesItemFactory;
 use customiesdevs\customies\task\AsyncRegisterBlocksTask;
+use customiesdevs\customies\util\Cache;
 use customiesdevs\customies\world\LegacyBlockIdToStringIdMap;
 use InvalidArgumentException;
 use OutOfRangeException;
@@ -243,7 +243,7 @@ final class CustomiesBlockFactory {
      * Returns the next available custom block id, an exception will be thrown if the block factory is full.
      */
     private function getNextAvailableId(string $identifier): int {
-        $id = Customies::getCache()->getNextAvailableBlockID($identifier);
+        $id = Cache::getInstance()->getNextAvailableBlockID($identifier);
         if($id > (self::NEW_BLOCK_FACTORY_SIZE / 16)) {
             throw new OutOfRangeException("All custom block ids are used up");
         }

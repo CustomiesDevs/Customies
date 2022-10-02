@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies\item;
 
-use customiesdevs\customies\Customies;
+use customiesdevs\customies\util\Cache;
 use InvalidArgumentException;
 use pocketmine\inventory\CreativeInventory;
 use pocketmine\item\Item;
@@ -69,7 +69,7 @@ final class CustomiesItemFactory {
 		}
 
 		/** @var Item $item */
-		$item = new $className(new ItemIdentifier(Customies::getCache()->getNextAvailableItemID($identifier), 0), $name);
+		$item = new $className(new ItemIdentifier(Cache::getInstance()->getNextAvailableItemID($identifier), 0), $name);
 
 		if(ItemFactory::getInstance()->isRegistered($item->getId())) {
 			throw new RuntimeException("Item with ID " . $item->getId() . " is already registered");

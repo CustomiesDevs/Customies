@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace customiesdevs\customies\util;
 
 use pocketmine\utils\Filesystem;
+use pocketmine\utils\SingletonTrait;
 use function asort;
 use function file_exists;
 use function file_get_contents;
@@ -12,7 +13,8 @@ use function gzuncompress;
 use function igbinary_serialize;
 use function igbinary_unserialize;
 
-final class IDCache {
+final class Cache {
+    use SingletonTrait;
 
 	private int $nextBlockID;
 	private int $nextItemID;
