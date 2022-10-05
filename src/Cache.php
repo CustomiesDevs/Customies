@@ -57,17 +57,17 @@ final class Cache {
 	 * will then cache it. If the identifier has been cached it will return the associated cached numeric id.
 	 */
 	private function getNextAvailableID(string $identifier, array &$cache, int $startID): int {
-		// if it's cached we just return the already cached id.
+		// If the ID is cached, return it.
 		if(isset($cache[$identifier])) {
 			return $cache[$identifier];
 		}
 
 		$id = null;
 		if(count($cache) > 1) {
-			// make use of empty sections
-			// flip the array to have numeric ids as keys -- faster for isset
+			// To make use of the empty sections in the cache, we need to find the lowest available id.
+			// Flip the array to have numeric ids as keys.
 			$flipped = array_flip($cache);
-			// go through every number to find any empty sections
+			// Go through every number to find any empty ID.
 			for($i = array_key_first($flipped)+1, $iMax = array_key_last($flipped); $i < $iMax; $i++){
 				if(!isset($flipped[$i])) {
 					$id = $i;
