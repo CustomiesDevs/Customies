@@ -49,7 +49,7 @@ final class Cache {
 	}
 
 	/**
-	 * Returns the next avilable item id.
+	 * Returns the next available item id.
 	 */
 	public function getNextAvailableItemID(string $identifier){
 		return $this->getNextAvailableID($identifier, $this->itemCache, $this->nextItemID);
