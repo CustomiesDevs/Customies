@@ -56,7 +56,7 @@ final class Cache {
 	}
 
 	/**
-	 * Returns the lowest valid if for that specific identifier it hasn't already been cached. It
+	 * Returns the lowest valid id for that specific identifier if it hasn't already been cached. It
 	 * will then cache it. If the identifier has been cached it will return the associated cached numeric id.
 	 */
 	private function getNextAvailableID(string $identifier, array &$cache, int &$nextID): int {
