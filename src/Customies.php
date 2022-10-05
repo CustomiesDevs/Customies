@@ -14,10 +14,10 @@ use pocketmine\world\format\io\WritableWorldProviderManagerEntry;
 final class Customies extends PluginBase {
 
 	protected function onLoad(): void {
-	    Cache::setInstance(new Cache(1000, 950, $this->getDataFolder() . "idcache"));
-	    $provider = new WritableWorldProviderManagerEntry(\Closure::fromCallable([LevelDB::class, 'isValid']), fn(string $path) => new LevelDB($path), Closure::fromCallable([LevelDB::class, 'generate']));
-	    $this->getServer()->getWorldManager()->getProviderManager()->addProvider($provider, "leveldb", true);
-	    $this->getServer()->getWorldManager()->getProviderManager()->setDefault($provider);
+		Cache::setInstance(new Cache($this->getDataFolder() . "idcache"));
+		$provider = new WritableWorldProviderManagerEntry(\Closure::fromCallable([LevelDB::class, 'isValid']), fn(string $path) => new LevelDB($path), Closure::fromCallable([LevelDB::class, 'generate']));
+		$this->getServer()->getWorldManager()->getProviderManager()->addProvider($provider, "leveldb", true);
+		$this->getServer()->getWorldManager()->getProviderManager()->setDefault($provider);
 	}
 
 	protected function onEnable(): void {

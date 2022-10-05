@@ -21,18 +21,18 @@ final class Cache {
 	private string $file;
 
 	/**
-	 * @var array
+	 * @var array<string, int>
 	 */
 	private array $itemCache = [];
 
 	/**
-	 * @var array
+	 * @var array<string, int>
 	 */
 	private array $blockCache = [];
 
-	public function __construct(int $startingBlockID, int $startingItemID, string $cacheFile) {
-		$this->nextBlockID = $startingBlockID;
-		$this->nextItemID = $startingItemID;
+	public function __construct(string $cacheFile) {
+		$this->nextBlockID = 1000;
+		$this->nextItemID = 950;
 		$this->file = $cacheFile;
 		if(file_exists($cacheFile)) {
 			$data = igbinary_unserialize(gzuncompress(file_get_contents($cacheFile)));
