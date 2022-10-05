@@ -42,7 +42,7 @@ final class Cache {
 	}
 
 	/**
-	 * Returns the next avilable block id.
+	 * Returns the next available block id.
 	 */
 	public function getNextAvailableBlockID(string $identifier){
 		return $this->getNextAvailableID($identifier, $this->blockCache, $this->nextBlockID);
