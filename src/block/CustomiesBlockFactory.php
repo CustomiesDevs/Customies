@@ -7,6 +7,7 @@ use Closure;
 use customiesdevs\customies\item\CreativeInventoryInfo;
 use customiesdevs\customies\item\CustomiesItemFactory;
 use customiesdevs\customies\task\AsyncRegisterBlocksTask;
+use customiesdevs\customies\util\Cache;
 use customiesdevs\customies\world\LegacyBlockIdToStringIdMap;
 use InvalidArgumentException;
 use OutOfRangeException;
@@ -110,17 +111,17 @@ final class CustomiesBlockFactory {
 	 * @phpstan-param (Closure(int): Block) $blockFunc
 	 */
 	public function registerBlock(Closure $blockFunc, string $identifier, ?Model $model = null, ?CreativeInventoryInfo $creativeInfo = null): void {
-		$id = $this->getNextAvailableId();
+		$id = $this->getNextAvailableId($identifier);
 		$block = $blockFunc($id);
 		if(!$block instanceof Block) {
 			throw new InvalidArgumentException("Class returned from closure is not a Block");
 		}
 
-		if(BlockFactory::getInstance()->isRegistered($block->getId())) {
-			throw new InvalidArgumentException("Block with ID " . $block->getId() . " is already registered");
+		if(BlockFactory::getInstance()->isRegistered($id)) {
+			throw new InvalidArgumentException("Block with ID " . $id . " is already registered");
 		}
 		BlockFactory::getInstance()->register($block);
-		CustomiesItemFactory::getInstance()->registerBlockItem($identifier, $block->getId());
+		CustomiesItemFactory::getInstance()->registerBlockItem($identifier, $id);
 
 		$blockState = CompoundTag::create()
 			->setString("name", $identifier)
@@ -162,19 +163,7 @@ final class CustomiesBlockFactory {
 		$this->blockPaletteEntries[] = new BlockPaletteEntry($identifier, new CacheableNbt($propertiesTag));
 
 		$this->blockFuncs[$identifier] = $blockFunc;
-		LegacyBlockIdToStringIdMap::getInstance()->registerMapping($identifier, $block->getId());
-	}
-
-	/**
-	 * Returns the next available custom block id, an exception will be thrown if the block factory is full.
-	 */
-	private function getNextAvailableId(): int {
-		$id = 1000 + count($this->blockFuncs);
-		if($id > (self::NEW_BLOCK_FACTORY_SIZE / 16)) {
-			throw new OutOfRangeException("All custom block ids are used up");
-		}
-
-		return $id;
+		LegacyBlockIdToStringIdMap::getInstance()->registerMapping($identifier, $id);
 	}
 
 	/**
@@ -249,4 +238,15 @@ final class CustomiesBlockFactory {
 			}
 		}
 	}
+
+    /**
+     * Returns the next available custom block id, an exception will be thrown if the block factory is full.
+     */
+    private function getNextAvailableId(string $identifier): int {
+        $id = Cache::getInstance()->getNextAvailableBlockID($identifier);
+        if($id > (self::NEW_BLOCK_FACTORY_SIZE / 16)) {
+            throw new OutOfRangeException("All custom block ids are used up");
+        }
+        return $id;
+    }
 }

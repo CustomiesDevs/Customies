@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies\item;
 
+use customiesdevs\customies\util\Cache;
 use InvalidArgumentException;
 use pocketmine\inventory\CreativeInventory;
 use pocketmine\item\Item;
@@ -21,7 +22,6 @@ use function array_values;
 final class CustomiesItemFactory {
 	use SingletonTrait;
 
-	private int $nextItemID = 950;
 	/**
 	 * @var ItemTypeEntry[]
 	 */
@@ -67,8 +67,9 @@ final class CustomiesItemFactory {
 		if($className !== Item::class) {
 			Utils::testValidInstance($className, Item::class);
 		}
+
 		/** @var Item $item */
-		$item = new $className(new ItemIdentifier(++$this->nextItemID, 0), $name);
+		$item = new $className(new ItemIdentifier(Cache::getInstance()->getNextAvailableItemID($identifier), 0), $name);
 
 		if(ItemFactory::getInstance()->isRegistered($item->getId())) {
 			throw new RuntimeException("Item with ID " . $item->getId() . " is already registered");
