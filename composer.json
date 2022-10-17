@@ -1,0 +1,8 @@
+{
+    "name": "customiesdevs/customies",
+    "autoload": {
+        "psr-4": {
+            "customiesdevs\\customies\\": "src/"
+        }
+    }
+}
