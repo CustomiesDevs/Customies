@@ -27,7 +27,7 @@ final class Customies extends PluginBase {
 			// This task is scheduled with a 0-tick delay so it runs as soon as the server has started. Plugins should
 			// register their custom blocks and entities in onEnable() before this is executed.
 			CustomiesBlockFactory::getInstance()->registerCustomRuntimeMappings();
-			CustomiesBlockFactory::getInstance()->addWorkerInitHook();
+			CustomiesBlockFactory::getInstance()->addWorkerInitHook($this->getDataFolder() . "idcache");
 			Cache::getInstance()->save();
 		}), 0);
 	}
