@@ -41,14 +41,14 @@ final class Cache {
 	/**
 	 * Returns the next available block id.
 	 */
-	public function getNextAvailableBlockID(string $identifier) {
+	public function getNextAvailableBlockID(string $identifier): int {
 		return $this->getNextAvailableID($identifier, $this->blockCache, self::FIRST_BLOCK_ID);
 	}
 
 	/**
 	 * Returns the next available item id.
 	 */
-	public function getNextAvailableItemID(string $identifier) {
+	public function getNextAvailableItemID(string $identifier): int {
 		return $this->getNextAvailableID($identifier, $this->itemCache, self::FIRST_ITEM_ID);
 	}
 
@@ -63,12 +63,12 @@ final class Cache {
 		}
 
 		$id = null;
-		if(count($cache) > 1) {
+		if(count($cache) > 0) {
 			// To make use of the empty sections in the cache, we need to find the lowest available id.
 			// Flip the array to have numeric ids as keys.
 			$flipped = array_flip($cache);
 			// Go through every number to find any empty ID.
-			for($i = array_key_first($flipped)+1, $iMax = array_key_last($flipped); $i < $iMax; $i++){
+			for($i = array_key_first($flipped) + 1, $iMax = array_key_last($flipped) + 1; $i <= $iMax; $i++){
 				if(!isset($flipped[$i])) {
 					$id = $i;
 					break;
