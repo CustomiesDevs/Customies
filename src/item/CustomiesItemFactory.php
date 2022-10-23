@@ -5,6 +5,7 @@ namespace customiesdevs\customies\item;
 
 use customiesdevs\customies\util\Cache;
 use InvalidArgumentException;
+use pocketmine\block\Block;
 use pocketmine\inventory\CreativeInventory;
 use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
@@ -112,8 +113,8 @@ final class CustomiesItemFactory {
 	 * Registers the required mappings for the block to become an item that can be placed etc. It is assigned an ID that
 	 * correlates to its block ID.
 	 */
-	public function registerBlockItem(string $identifier, int $blockId): void {
-		$itemId = 255 - $blockId;
+	public function registerBlockItem(string $identifier, Block $block): void {
+		$itemId = $block->getIdInfo()->getItemId();
 		$this->registerCustomItemMapping($itemId);
 		$this->itemTableEntries[] = new ItemTypeEntry($identifier, $itemId, false);
 	}
