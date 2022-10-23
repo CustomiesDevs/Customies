@@ -35,7 +35,7 @@ final class CustomiesItemFactory {
 	 * Get a custom item from its identifier. An exception will be thrown if the item is not registered.
 	 */
 	public function get(string $identifier, int $amount = 1): Item {
-		$id = $this->itemTableEntries[$identifier]?->getNumericId();
+		$id = ($this->itemTableEntries[$identifier] ?? null)?->getNumericId();
 		if($id === null) {
 			throw new InvalidArgumentException("Custom item " . $identifier . " is not registered");
 		}
