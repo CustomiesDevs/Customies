@@ -4,10 +4,14 @@ declare(strict_types=1);
 namespace customiesdevs\customies\block;
 
 use Closure;
+use customiesdevs\customies\block\permutations\Permutable;
+use customiesdevs\customies\block\permutations\Permutation;
+use customiesdevs\customies\block\permutations\Permutations;
 use customiesdevs\customies\item\CreativeInventoryInfo;
 use customiesdevs\customies\item\CustomiesItemFactory;
 use customiesdevs\customies\task\AsyncRegisterBlocksTask;
 use customiesdevs\customies\util\Cache;
+use customiesdevs\customies\util\NBT;
 use customiesdevs\customies\world\LegacyBlockIdToStringIdMap;
 use InvalidArgumentException;
 use OutOfRangeException;
@@ -15,6 +19,7 @@ use pocketmine\block\Block;
 use pocketmine\block\BlockFactory;
 use pocketmine\inventory\CreativeInventory;
 use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\nbt\tag\ListTag;
 use pocketmine\network\mcpe\convert\GlobalItemTypeDictionary;
 use pocketmine\network\mcpe\convert\R12ToCurrentBlockMapEntry;
 use pocketmine\network\mcpe\convert\RuntimeBlockMapping;
@@ -29,6 +34,7 @@ use ReflectionClass;
 use RuntimeException;
 use SplFixedArray;
 use function array_fill;
+use function array_map;
 use function count;
 use function file_get_contents;
 use const pocketmine\BEDROCK_DATA_PATH;
@@ -121,12 +127,7 @@ final class CustomiesBlockFactory {
 			throw new InvalidArgumentException("Block with ID " . $id . " is already registered");
 		}
 		BlockFactory::getInstance()->register($block);
-		CustomiesItemFactory::getInstance()->registerBlockItem($identifier, $id);
-
-		$blockState = CompoundTag::create()
-			->setString("name", $identifier)
-			->setTag("states", CompoundTag::create());
-		BlockPalette::getInstance()->insertState($blockState);
+		CustomiesItemFactory::getInstance()->registerBlockItem($identifier, $block);
 
 		$propertiesTag = CompoundTag::create();
 		$components = CompoundTag::create()
@@ -135,9 +136,9 @@ final class CustomiesBlockFactory {
 			->setTag("minecraft:block_light_filter", CompoundTag::create()
 				->setByte("lightLevel", $block->getLightFilter()))
 			->setTag("minecraft:destructible_by_mining", CompoundTag::create()
-				->setFloat("value", $block->getBreakInfo()->getHardness()))//Says seconds_to_destroy in docs
+				->setFloat("value", $block->getBreakInfo()->getHardness()))
 			->setTag("minecraft:destructible_by_explosion", CompoundTag::create()
-				->setFloat("value", $block->getBreakInfo()->getBlastResistance()))//Uses explosion_resistance in docs
+				->setFloat("value", $block->getBreakInfo()->getBlastResistance()))
 			->setTag("minecraft:friction", CompoundTag::create()
 				->setFloat("value", $block->getFrictionFactor()))
 			->setTag("minecraft:flammable", CompoundTag::create()
@@ -150,6 +151,41 @@ final class CustomiesBlockFactory {
 			}
 		}
 
+		if($block instanceof Permutable) {
+			$blockPropertyNames = $blockPropertyValues = $blockProperties = [];
+			foreach($block->getBlockProperties() as $blockProperty){
+				$blockPropertyNames[] = $blockProperty->getName();
+				$blockPropertyValues[] = $blockProperty->getValues();
+				$blockProperties[] = $blockProperty->toNBT();
+			}
+			$permutations = array_map(static fn(Permutation $permutation) => $permutation->toNBT(), $block->getPermutations());
+
+			// The 'minecraft:on_player_placing' component is required for the client to predict block placement, making
+			// it a smoother experience for the end-user.
+			$components->setTag("minecraft:on_player_placing", CompoundTag::create());
+			$propertiesTag->setTag("permutations", new ListTag($permutations));
+			$propertiesTag->setTag("properties", new ListTag($blockProperties));
+
+			foreach(Permutations::getCartesianProduct($blockPropertyValues) as $meta => $permutations){
+				// We need to insert states for every possible permutation to allow for all blocks to be used and to
+				// keep in sync with the client's block palette.
+				$states = CompoundTag::create();
+				foreach($permutations as $i => $value){
+					$states->setTag($blockPropertyNames[$i], NBT::getTagType($value));
+				}
+				$blockState = CompoundTag::create()
+					->setString("name", $identifier)
+					->setTag("states", $states);
+				BlockPalette::getInstance()->insertState($blockState, $meta);
+			}
+		} else {
+			// If a block does not contain any permutations we can just insert the one state.
+			$blockState = CompoundTag::create()
+				->setString("name", $identifier)
+				->setTag("states", CompoundTag::create());
+			BlockPalette::getInstance()->insertState($blockState);
+		}
+
 		$creativeInfo ??= CreativeInventoryInfo::DEFAULT();
 		$components->setTag("minecraft:creative_category", CompoundTag::create()
 			->setString("category", $creativeInfo->getCategory())
@@ -158,10 +194,10 @@ final class CustomiesBlockFactory {
 		$propertiesTag->setTag("menu_category", CompoundTag::create()
 			->setString("category", $creativeInfo?->getCategory() ?? "")
 			->setString("group", $creativeInfo?->getGroup() ?? ""));
+		$propertiesTag->setInt("molangVersion", 1);
 		CreativeInventory::getInstance()->add($block->asItem());
 
 		$this->blockPaletteEntries[] = new BlockPaletteEntry($identifier, new CacheableNbt($propertiesTag));
-
 		$this->blockFuncs[$identifier] = $blockFunc;
 		LegacyBlockIdToStringIdMap::getInstance()->registerMapping($identifier, $id);
 	}
@@ -203,7 +239,7 @@ final class CustomiesBlockFactory {
 		}
 
 		foreach(BlockPalette::getInstance()->getCustomStates() as $state){
-			$legacyStateMap[] = new R12ToCurrentBlockMapEntry($state->getString("name"), 0, $state);
+			$legacyStateMap[] = $state;
 		}
 
 		/**
@@ -239,14 +275,14 @@ final class CustomiesBlockFactory {
 		}
 	}
 
-    /**
-     * Returns the next available custom block id, an exception will be thrown if the block factory is full.
-     */
-    private function getNextAvailableId(string $identifier): int {
-        $id = Cache::getInstance()->getNextAvailableBlockID($identifier);
-        if($id > (self::NEW_BLOCK_FACTORY_SIZE / 16)) {
-            throw new OutOfRangeException("All custom block ids are used up");
-        }
-        return $id;
-    }
+	/**
+	 * Returns the next available custom block id, an exception will be thrown if the block factory is full.
+	 */
+	private function getNextAvailableId(string $identifier): int {
+		$id = Cache::getInstance()->getNextAvailableBlockID($identifier);
+		if($id > (self::NEW_BLOCK_FACTORY_SIZE / 16)) {
+			throw new OutOfRangeException("All custom block ids are used up");
+		}
+		return $id;
+	}
 }

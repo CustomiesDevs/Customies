@@ -3,16 +3,11 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies\item;
 
-use pocketmine\nbt\tag\ByteTag;
+use customiesdevs\customies\util\NBT;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\FloatTag;
-use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\ListTag;
-use pocketmine\nbt\tag\StringTag;
-use pocketmine\nbt\tag\Tag;
 use RuntimeException;
-use function array_keys;
-use function is_int;
 
 trait ItemComponentsTrait {
 
@@ -24,40 +19,11 @@ trait ItemComponentsTrait {
 	 */
 	public function addProperty(string $key, $value): void {
 		$propertiesTag = $this->componentTag->getCompoundTag("components")->getCompoundTag("item_properties");
-		$tag = $this->getTagType($value);
+		$tag = NBT::getTagType($value);
 		if($tag === null) {
 			throw new RuntimeException("Failed to get tag type for property with key " . $key);
 		}
 		$propertiesTag->setTag($key, $tag);
-	}
-
-	/**
-	 * Attempts to return the correct Tag for the provided type.
-	 */
-	private function getTagType($type): ?Tag {
-		return match (true) {
-			is_array($type) => $this->getArrayTag($type),
-			is_bool($type) => new ByteTag($type ? 1 : 0),
-			is_float($type) => new FloatTag($type),
-			is_int($type) => new IntTag($type),
-			is_string($type) => new StringTag($type),
-			$type instanceof CompoundTag => $type,
-			default => null,
-		};
-	}
-
-	/**
-	 * Creates a Tag that is either a ListTag or CompoundTag based on the data types of the keys in the provided array.
-	 */
-	private function getArrayTag(array $array): Tag {
-		if(array_keys($array) === range(0, count($array) - 1)) {
-			return new ListTag($array);
-		}
-		$tag = CompoundTag::create();
-		foreach($array as $key => $value){
-			$tag->setTag($key, $this->getTagType($value));
-		}
-		return $tag;
 	}
 
 	/**
@@ -66,7 +32,7 @@ trait ItemComponentsTrait {
 	 */
 	public function addComponent(string $key, $value): void {
 		$componentsTag = $this->componentTag->getCompoundTag("components");
-		$tag = $this->getTagType($value);
+		$tag = NBT::getTagType($value);
 		if($tag === null) {
 			throw new RuntimeException("Failed to get tag type for component with key " . $key);
 		}
