@@ -14,7 +14,7 @@ class Permutations {
 
 	/**
 	 * Attempts to return an array of block properties from the provided meta value based on the possible permutations
-	 * of the block. an exception is thrown if the meta value does not match any combinations of all the block
+	 * of the block. An exception is thrown if the meta value does not match any combinations of all the block
 	 * properties.
 	 */
 	public static function fromMeta(Permutable $block, int $meta): array {
