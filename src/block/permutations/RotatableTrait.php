@@ -42,7 +42,7 @@ trait RotatableTrait {
 			(new Permutation("q.block_property('customies:rotation') == 4"))
 				->withComponent("minecraft:rotation", CompoundTag::create()
 					->setFloat("x", 0)
-					->setFloat("y", 45)
+					->setFloat("y", 90)
 					->setFloat("z", 0)),
 			(new Permutation("q.block_property('customies:rotation') == 5"))
 				->withComponent("minecraft:rotation", CompoundTag::create()
