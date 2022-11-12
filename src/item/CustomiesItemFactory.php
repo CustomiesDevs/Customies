@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies\item;
 
+use customiesdevs\customies\item\component\DisplayNameComponent;
 use customiesdevs\customies\util\Cache;
 use InvalidArgumentException;
 use pocketmine\block\Block;
@@ -79,6 +80,9 @@ final class CustomiesItemFactory {
 		ItemFactory::getInstance()->register($item);
 
 		if(($componentBased = $item instanceof ItemComponents)) {
+			if (!$item->hasComponent("minecraft:display_name")) {
+				$item->addComponent(new DisplayNameComponent($name));
+			}
 			$componentsTag = $item->getComponents();
 			$componentsTag->setInt("id", $item->getId());
 			$componentsTag->setString("name", $identifier);
