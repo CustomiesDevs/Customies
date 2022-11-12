@@ -11,6 +11,7 @@ use pocketmine\nbt\tag\ListTag;
 use pocketmine\nbt\tag\StringTag;
 use pocketmine\nbt\tag\Tag;
 use function array_keys;
+use function array_map;
 use function count;
 use function is_array;
 use function is_bool;
@@ -41,7 +42,7 @@ class NBT {
 	 */
 	private static function getArrayTag(array $array): Tag {
 		if(array_keys($array) === range(0, count($array) - 1)) {
-			return new ListTag($array);
+			return new ListTag(array_map(fn($value) => self::getTagType($value), $array));
 		}
 		$tag = CompoundTag::create();
 		foreach($array as $key => $value){

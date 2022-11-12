@@ -3,60 +3,58 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies\item;
 
+use customiesdevs\customies\item\component\CreativeCategoryComponent;
+use customiesdevs\customies\item\component\CreativeGroupComponent;
+use customiesdevs\customies\item\component\HandEquippedComponent;
+use customiesdevs\customies\item\component\IconComponent;
+use customiesdevs\customies\item\component\ItemComponent;
+use customiesdevs\customies\item\component\MaxStackSizeComponent;
+use customiesdevs\customies\item\component\RenderOffsetsComponent;
 use customiesdevs\customies\util\NBT;
 use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\nbt\tag\FloatTag;
-use pocketmine\nbt\tag\ListTag;
 use RuntimeException;
 
 trait ItemComponentsTrait {
 
-	private CompoundTag $componentTag;
+	/** @var ItemComponent[] */
+	private array $components;
 
-	/**
-	 * Attempts to set a property with the key and value provided. It will attempt to turn the value in to a Tag, but
-	 * will throw an exception if it cannot convert it.
-	 */
-	public function addProperty(string $key, $value): void {
-		$propertiesTag = $this->componentTag->getCompoundTag("components")->getCompoundTag("item_properties");
-		$tag = NBT::getTagType($value);
-		if($tag === null) {
-			throw new RuntimeException("Failed to get tag type for property with key " . $key);
-		}
-		$propertiesTag->setTag($key, $tag);
+	public function addComponent(ItemComponent $component): void {
+		$this->components[$component->getName()] = $component;
 	}
 
-	/**
-	 * Attempts to set a component with the key and value provided. It will attempt to turn the value in to a Tag, but
-	 * will throw an exception if it cannot convert it.
-	 */
-	public function addComponent(string $key, $value): void {
-		$componentsTag = $this->componentTag->getCompoundTag("components");
-		$tag = NBT::getTagType($value);
-		if($tag === null) {
-			throw new RuntimeException("Failed to get tag type for component with key " . $key);
-		}
-		$componentsTag->setTag($key, $tag);
+	public function hasComponent(string $name): bool {
+		return isset($this->components, $name);
 	}
 
 	public function getComponents(): CompoundTag {
-		return $this->componentTag;
+		$components = CompoundTag::create();
+		$properties = CompoundTag::create();
+		foreach($this->components as $component) {
+			$tag = NBT::getTagType($component->getValue());
+			if ($tag === null) {
+				throw new RuntimeException("Failed to get tag type for component " . $component->getName());
+			}
+			if($component->isProperty()) {
+				$properties->setTag($component->getName(), $tag);
+				continue;
+			}
+			$components->setTag($component->getName(), $tag);
+		}
+		$components->setTag("item_properties", $properties);
+		return CompoundTag::create()
+			->setTag("components", $components);
 	}
 
 	/**
-	 * Initializes the components and creates the base CompoundTag required for the components to be sent to a client.
-	 * This must be called before any properties or components are added otherwise it will break.
+	 * Initializes the item with default components that are required for the item to function correctly.
 	 */
 	protected function initComponent(string $texture, int $maxStackSize, ?CreativeInventoryInfo $creativeInfo = null): void {
 		$creativeInfo ??= CreativeInventoryInfo::DEFAULT();
-		$this->componentTag = CompoundTag::create()
-			->setTag("components", CompoundTag::create()
-				->setTag("item_properties", CompoundTag::create()
-					->setInt("creative_category", $creativeInfo->getNumericCategory())
-					->setString("creative_group", $creativeInfo->getGroup())
-					->setTag("minecraft:icon", CompoundTag::create()
-						->setString("texture", $texture))
-					->setInt("max_stack_size", $maxStackSize)));
+		$this->addComponent(new CreativeCategoryComponent($creativeInfo));
+		$this->addComponent(new CreativeGroupComponent($creativeInfo));
+		$this->addComponent(new IconComponent($texture));
+		$this->addComponent(new MaxStackSizeComponent($maxStackSize));
 	}
 
 	/**
@@ -66,17 +64,7 @@ trait ItemComponentsTrait {
 	 * item is something like a tool or weapon.
 	 */
 	protected function setupRenderOffsets(int $width, int $height, bool $handEquipped = false): void {
-		$scaleTag = CompoundTag::create()
-			->setTag("scale", new ListTag([
-				new FloatTag(($handEquipped ? 0.075 : 0.1) / ($width / 16)),
-				new FloatTag(($handEquipped ? 0.125 : 0.1) / ($height / 16)),
-				new FloatTag(($handEquipped ? 0.075 : 0.1) / ($width / 16))
-			]));
-		$perspectivesTag = CompoundTag::create()
-			->setTag("first_person", $scaleTag)
-			->setTag("third_person", $scaleTag);
-		$this->addComponent("minecraft:render_offsets", CompoundTag::create()
-			->setTag("main_hand", $perspectivesTag)
-			->setTag("off_hand", $perspectivesTag));
+		$this->addComponent(new HandEquippedComponent($handEquipped));
+		$this->addComponent(new RenderOffsetsComponent($width, $height, $handEquipped));
 	}
 }
