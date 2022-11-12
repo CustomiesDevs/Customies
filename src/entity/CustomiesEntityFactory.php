@@ -20,18 +20,19 @@ class CustomiesEntityFactory {
 	use SingletonTrait;
 
 	/**
-	 * Register an entity to the EntityFactory and all the required mappings.
+	 * Register an entity to the EntityFactory and all the required mappings. An optional behaviour identifier can be
+	 * provided if you want to have your entity behave like a vanilla entity.
 	 * @phpstan-param class-string<Entity> $className
 	 * @phpstan-param Closure(World $world, CompoundTag $nbt) : Entity $creationFunc
 	 */
-	public function registerEntity(string $className, string $identifier, ?Closure $creationFunc = null): void {
+	public function registerEntity(string $className, string $identifier, ?Closure $creationFunc = null, string $behaviourId = ""): void {
 		EntityFactory::getInstance()->register($className, $creationFunc ?? static function (World $world, CompoundTag $nbt) use ($className): Entity {
 			return new $className(EntityDataHelper::parseLocation($nbt, $world), $nbt);
 		}, [$identifier]);
-		$this->updateStaticPacketCache($identifier);
+		$this->updateStaticPacketCache($identifier, $behaviourId);
 	}
 
-	public function updateStaticPacketCache(string $identifier): void {
+	private function updateStaticPacketCache(string $identifier, string $behaviourId): void {
 		$instance = StaticPacketCache::getInstance();
 		$staticPacketCache = new ReflectionClass($instance);
 		$property = $staticPacketCache->getProperty("availableActorIdentifiers");
@@ -41,7 +42,9 @@ class CustomiesEntityFactory {
 		/** @var CompoundTag $root */
 		$root = $packet->identifiers->getRoot();
 		$idList = $root->getListTag("idlist") ?? new ListTag();
-		$idList->push(CompoundTag::create()->setString("id", $identifier));
+		$idList->push(CompoundTag::create()
+			->setString("id", $identifier)
+			->setString("bid", $behaviourId));
 		$packet->identifiers = new CacheableNbt($root);
 	}
 }
