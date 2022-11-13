@@ -7,7 +7,7 @@ final class AllowOffHandComponent implements ItemComponent {
 
 	private bool $offHand;
 
-	public function __construct(bool $offHand) {
+	public function __construct(bool $offHand = true) {
 		$this->offHand = $offHand;
 	}
 

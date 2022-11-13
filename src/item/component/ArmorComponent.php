@@ -18,7 +18,7 @@ final class ArmorComponent implements ItemComponent {
 	private int $protection;
 	private string $textureType;
 
-	public function __construct(int $protection, string $textureType) {
+	public function __construct(int $protection, string $textureType = self::TEXTURE_TYPE_NONE) {
 		$this->protection = $protection;
 		$this->textureType = $textureType;
 	}

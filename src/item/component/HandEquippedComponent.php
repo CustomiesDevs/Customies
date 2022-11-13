@@ -7,7 +7,7 @@ final class HandEquippedComponent implements ItemComponent {
 
 	private bool $handEquipped;
 
-	public function __construct(bool $handEquipped) {
+	public function __construct(bool $handEquipped = true) {
 		$this->handEquipped = $handEquipped;
 	}
 

@@ -7,7 +7,7 @@ final class FoilComponent implements ItemComponent {
 
 	private bool $foil;
 
-	public function __construct(bool $foil) {
+	public function __construct(bool $foil = true) {
 		$this->foil = $foil;
 	}
 

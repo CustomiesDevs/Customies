@@ -7,7 +7,7 @@ final class FoodComponent implements ItemComponent {
 
 	private bool $canAlwaysEat;
 
-	public function __construct(bool $canAlwaysEat) {
+	public function __construct(bool $canAlwaysEat = false) {
 		$this->canAlwaysEat = $canAlwaysEat;
 	}
 

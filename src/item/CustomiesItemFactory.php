@@ -80,9 +80,6 @@ final class CustomiesItemFactory {
 		ItemFactory::getInstance()->register($item);
 
 		if(($componentBased = $item instanceof ItemComponents)) {
-			if (!$item->hasComponent("minecraft:display_name")) {
-				$item->addComponent(new DisplayNameComponent($name));
-			}
 			$componentsTag = $item->getComponents();
 			$componentsTag->setInt("id", $item->getId());
 			$componentsTag->setString("name", $identifier);
