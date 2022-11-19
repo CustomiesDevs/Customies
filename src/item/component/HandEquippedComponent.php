@@ -12,7 +12,7 @@ final class HandEquippedComponent implements ItemComponent {
 	}
 
 	public function getName(): string {
-		return "minecraft:hand_equipped";
+		return "hand_equipped";
 	}
 
 	public function getValue(): bool {
