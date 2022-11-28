@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies\block\permutations;
 
+use customiesdevs\customies\util\NBT;
 use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\nbt\tag\Tag;
 
 final class Permutation {
 
@@ -19,8 +19,8 @@ final class Permutation {
 	/**
 	 * Returns the permutation with the provided component added to the current list of components.
 	 */
-	public function withComponent(string $component, Tag $tag) : self {
-		$this->components->setTag($component, $tag);
+	public function withComponent(string $component, mixed $value) : self {
+		$this->components->setTag($component, NBT::getTagType($value));
 		return $this;
 	}
 
