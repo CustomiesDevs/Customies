@@ -77,7 +77,7 @@ trait ItemComponentsTrait {
 		if($this instanceof Armor) {
 			$slot = match ($this->getArmorSlot()) {
 				ArmorInventory::SLOT_HEAD => WearableComponent::SLOT_ARMOR_HEAD,
-				ArmorInventory::SLOT_CHEST => WearableComponent::SLOT_CHEST,
+				ArmorInventory::SLOT_CHEST => WearableComponent::SLOT_ARMOR_CHEST,
 				ArmorInventory::SLOT_LEGS => WearableComponent::SLOT_ARMOR_LEGS,
 				ArmorInventory::SLOT_FEET => WearableComponent::SLOT_ARMOR_FEET,
 				default => WearableComponent::SLOT_ARMOR
