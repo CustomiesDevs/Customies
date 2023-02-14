@@ -3,20 +3,22 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies\item;
 
+use customiesdevs\customies\item\component\DisplayNameComponent;
 use customiesdevs\customies\util\Cache;
 use InvalidArgumentException;
 use pocketmine\block\Block;
 use pocketmine\inventory\CreativeInventory;
 use pocketmine\item\Item;
+use pocketmine\item\ItemFactory;
 use pocketmine\item\ItemIdentifier;
-use pocketmine\item\StringToItemParser;
-use pocketmine\network\mcpe\convert\GlobalItemTypeDictionary;
+use pocketmine\network\mcpe\convert\ItemTranslator;
 use pocketmine\network\mcpe\protocol\types\CacheableNbt;
 use pocketmine\network\mcpe\protocol\types\ItemComponentPacketEntry;
 use pocketmine\network\mcpe\protocol\types\ItemTypeEntry;
 use pocketmine\utils\SingletonTrait;
 use pocketmine\utils\Utils;
 use ReflectionClass;
+use RuntimeException;
 use function array_values;
 
 final class CustomiesItemFactory {
@@ -35,11 +37,11 @@ final class CustomiesItemFactory {
 	 * Get a custom item from its identifier. An exception will be thrown if the item is not registered.
 	 */
 	public function get(string $identifier, int $amount = 1): Item {
-		$item = StringToItemParser::getInstance()->parse($identifier);
-		if($item === null) {
+		$id = ($this->itemTableEntries[$identifier] ?? null)?->getNumericId();
+		if($id === null) {
 			throw new InvalidArgumentException("Custom item " . $identifier . " is not registered");
 		}
-		return $item->setCount($amount);
+		return ItemFactory::getInstance()->get($id, 0, $amount);
 	}
 
 	/**
@@ -68,10 +70,14 @@ final class CustomiesItemFactory {
 			Utils::testValidInstance($className, Item::class);
 		}
 
-		$itemId = Cache::getInstance()->getNextAvailableItemID($identifier);
-		$item = new $className(new ItemIdentifier($itemId), $name);
-		StringToItemParser::getInstance()->register("$identifier", fn() => $item);
-		$this->registerCustomItemMapping($identifier, $itemId);
+		/** @var Item $item */
+		$item = new $className(new ItemIdentifier(Cache::getInstance()->getNextAvailableItemID($identifier), 0), $name);
+
+		if(ItemFactory::getInstance()->isRegistered($item->getId())) {
+			throw new RuntimeException("Item with ID " . $item->getId() . " is already registered");
+		}
+		$this->registerCustomItemMapping($item->getId());
+		ItemFactory::getInstance()->register($item);
 
 		if(($componentBased = $item instanceof ItemComponents)) {
 			$componentsTag = $item->getComponents();
@@ -85,23 +91,23 @@ final class CustomiesItemFactory {
 	}
 
 	/**
-	 * Registers a custom item ID to the required mappings in the global ItemTypeDictionary instance.
+	 * Registers a custom item ID to the required mappings in the ItemTranslator instance.
 	 */
-	private function registerCustomItemMapping(string $name, int $id): void {
-		$dictionary = GlobalItemTypeDictionary::getInstance()->getDictionary();
-		$reflection = new ReflectionClass($dictionary);
+	private function registerCustomItemMapping(int $id): void {
+		$translator = ItemTranslator::getInstance();
+		$reflection = new ReflectionClass($translator);
 
-		$intToString = $reflection->getProperty("intToStringIdMap");
-		$intToString->setAccessible(true);
+		$reflectionProperty = $reflection->getProperty("simpleCoreToNetMapping");
+		$reflectionProperty->setAccessible(true);
 		/** @var int[] $value */
-		$value = $intToString->getValue($dictionary);
-		$intToString->setValue($dictionary, $value + [$id => $name]);
+		$value = $reflectionProperty->getValue($translator);
+		$reflectionProperty->setValue($translator, $value + [$id => $id]);
 
-		$stringToInt = $reflection->getProperty("stringToIntIdMap");
-		$stringToInt->setAccessible(true);
+		$reflectionProperty = $reflection->getProperty("simpleNetToCoreMapping");
+		$reflectionProperty->setAccessible(true);
 		/** @var int[] $value */
-		$value = $stringToInt->getValue($dictionary);
-		$stringToInt->setValue($dictionary, $value + [$name => $id]);
+		$value = $reflectionProperty->getValue($translator);
+		$reflectionProperty->setValue($translator, $value + [$id => $id]);
 	}
 
 	/**
@@ -109,8 +115,8 @@ final class CustomiesItemFactory {
 	 * correlates to its block ID.
 	 */
 	public function registerBlockItem(string $identifier, Block $block): void {
-		$itemId = $block->getIdInfo()->getBlockTypeId();
-		$this->registerCustomItemMapping($identifier, $itemId);
+		$itemId = $block->getIdInfo()->getItemId();
+		$this->registerCustomItemMapping($itemId);
 		$this->itemTableEntries[] = new ItemTypeEntry($identifier, $itemId, false);
 	}
 }
