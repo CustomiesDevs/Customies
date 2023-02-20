@@ -6,6 +6,7 @@ namespace customiesdevs\customies\item;
 use customiesdevs\customies\util\Cache;
 use InvalidArgumentException;
 use pocketmine\block\Block;
+use pocketmine\data\bedrock\item\SavedItemData;
 use pocketmine\inventory\CreativeInventory;
 use pocketmine\item\Item;
 use pocketmine\item\ItemIdentifier;
@@ -16,6 +17,7 @@ use pocketmine\network\mcpe\protocol\types\ItemComponentPacketEntry;
 use pocketmine\network\mcpe\protocol\types\ItemTypeEntry;
 use pocketmine\utils\SingletonTrait;
 use pocketmine\utils\Utils;
+use pocketmine\world\format\io\GlobalItemDataHandlers;
 use ReflectionClass;
 use function array_values;
 
@@ -70,24 +72,23 @@ final class CustomiesItemFactory {
 
 		$itemId = Cache::getInstance()->getNextAvailableItemID($identifier);
 		$item = new $className(new ItemIdentifier($itemId), $name);
-		StringToItemParser::getInstance()->register("$identifier", fn() => $item);
-		$this->registerCustomItemMapping($identifier, $itemId);
+		$this->registerCustomItemMapping($item, $identifier, $itemId);
 
 		if(($componentBased = $item instanceof ItemComponents)) {
 			$componentsTag = $item->getComponents();
-			$componentsTag->setInt("id", $item->getId());
+			$componentsTag->setInt("id", $itemId);
 			$componentsTag->setString("name", $identifier);
 			$this->itemComponentEntries[$identifier] = new ItemComponentPacketEntry($identifier, new CacheableNbt($componentsTag));
 		}
 
-		$this->itemTableEntries[$identifier] = new ItemTypeEntry($identifier, $item->getId(), $componentBased);
+		$this->itemTableEntries[$identifier] = new ItemTypeEntry($identifier, $itemId, $componentBased);
 		CreativeInventory::getInstance()->add($item);
 	}
 
 	/**
 	 * Registers a custom item ID to the required mappings in the global ItemTypeDictionary instance.
 	 */
-	private function registerCustomItemMapping(string $name, int $id): void {
+	private function registerCustomItemMapping(Item $item, string $name, int $id): void {
 		$dictionary = GlobalItemTypeDictionary::getInstance()->getDictionary();
 		$reflection = new ReflectionClass($dictionary);
 
@@ -97,11 +98,15 @@ final class CustomiesItemFactory {
 		$value = $intToString->getValue($dictionary);
 		$intToString->setValue($dictionary, $value + [$id => $name]);
 
-		$stringToInt = $reflection->getProperty("stringToIntIdMap");
+		$stringToInt = $reflection->getProperty("stringToIntMap");
 		$stringToInt->setAccessible(true);
 		/** @var int[] $value */
 		$value = $stringToInt->getValue($dictionary);
 		$stringToInt->setValue($dictionary, $value + [$name => $id]);
+
+		GlobalItemDataHandlers::getDeserializer()->map($name, fn() => clone $item);
+		GlobalItemDataHandlers::getSerializer()->map($item, fn() => new SavedItemData($name));
+		StringToItemParser::getInstance()->register($name, fn() => clone $item);
 	}
 
 	/**
@@ -110,7 +115,7 @@ final class CustomiesItemFactory {
 	 */
 	public function registerBlockItem(string $identifier, Block $block): void {
 		$itemId = $block->getIdInfo()->getBlockTypeId();
-		$this->registerCustomItemMapping($identifier, $itemId);
+		//$this->registerCustomItemMapping($identifier, $itemId);
 		$this->itemTableEntries[] = new ItemTypeEntry($identifier, $itemId, false);
 	}
 }
