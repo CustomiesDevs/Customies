@@ -12,5 +12,5 @@ final class ProjectileComponent extends BasicComponent {
         parent::__construct("minecraft:projectile", [
             "entity" => $projectileEntity
         ], false);
-	}
+    }
 }

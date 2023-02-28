@@ -14,5 +14,5 @@ final class UseAnimationComponent extends BasicComponent {
      */
     public function __construct(int $animation) {
         parent::__construct("use_animation", $animation, true);
-	}
+    }
 }

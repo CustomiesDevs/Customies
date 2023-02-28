@@ -12,5 +12,5 @@ final class ChargeableComponent extends BasicComponent {
         parent::__construct("minecraft:chargeable", [
             "movement_modifier" => $movementModifier
         ], false);
-	}
+    }
 }

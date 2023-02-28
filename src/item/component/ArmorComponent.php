@@ -16,5 +16,5 @@ final class ArmorComponent extends BasicComponent {
             "protection" => $protection,
             "texture_type" => $textureType->value
         ], false);
-	}
+    }
 }

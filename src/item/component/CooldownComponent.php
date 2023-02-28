@@ -14,5 +14,5 @@ final class CooldownComponent extends BasicComponent {
             "category" => $category,
             "duration" => $duration
         ], false);
-	}
+    }
 }

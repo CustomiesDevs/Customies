@@ -12,5 +12,5 @@ final class FuelComponent extends BasicComponent {
         parent::__construct("minecraft:fuel", [
             "duration" => $duration
         ], false);
-	}
+    }
 }

@@ -10,5 +10,5 @@ final class UseDurationComponent extends BasicComponent {
      */
     public function __construct(int $duration) {
         parent::__construct("use_duration", $duration, true);
-	}
+    }
 }

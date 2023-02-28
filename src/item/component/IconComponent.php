@@ -12,5 +12,5 @@ final class IconComponent extends BasicComponent {
         parent::__construct("minecraft:icon", [
             "texture" => $texture
         ], true);
-	}
+    }
 }

@@ -12,5 +12,5 @@ final class ThrowableComponent extends BasicComponent {
         parent::__construct("minecraft:throwable", [
             "do_swing_animation" => $doSwingAnimation
         ], false);
-	}
+    }
 }

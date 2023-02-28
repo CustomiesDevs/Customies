@@ -10,5 +10,5 @@ final class AllowOffHandComponent extends BasicComponent {
      */
     public function __construct(bool $offHand = true) {
         parent::__construct("allow_off_hand", $offHand, true);
-	}
+    }
 }
