@@ -11,7 +11,7 @@ final class ArmorComponent extends BasicComponent {
      * @param int $protection
      * @param ArmorComponentTextureType $textureType
      */
-	public function __construct(int $protection, ArmorComponentTextureType $textureType = ArmorComponentTextureType::NONE) {
+    public function __construct(int $protection, ArmorComponentTextureType $textureType = ArmorComponentTextureType::NONE) {
         parent::__construct("minecraft:armor", [
             "protection" => $protection,
             "texture_type" => $textureType->value

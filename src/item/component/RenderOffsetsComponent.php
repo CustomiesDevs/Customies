@@ -10,7 +10,7 @@ final class RenderOffsetsComponent extends BasicComponent {
      * @param int $textureHeight
      * @param bool $handEquipped
      */
-	public function __construct(int $textureWidth, int $textureHeight, bool $handEquipped = false) {
+    public function __construct(int $textureWidth, int $textureHeight, bool $handEquipped = false) {
 
         $horizontal = ($handEquipped ? 0.075 : 0.1) / ($textureWidth / 16);
         $vertical = ($handEquipped ? 0.125 : 0.1) / ($textureHeight / 16);
@@ -29,5 +29,5 @@ final class RenderOffsetsComponent extends BasicComponent {
             "main_hand" => $perspectives,
             "off_hand" => $perspectives
         ], false);
-	}
+    }
 }

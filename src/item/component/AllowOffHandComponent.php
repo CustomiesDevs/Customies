@@ -8,7 +8,7 @@ final class AllowOffHandComponent extends BasicComponent {
     /**
      * @param bool $offHand
      */
-	public function __construct(bool $offHand = true) {
+    public function __construct(bool $offHand = true) {
         parent::__construct("allow_off_hand", $offHand, true);
 	}
 }

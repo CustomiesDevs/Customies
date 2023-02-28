@@ -8,8 +8,7 @@ final class UseDurationComponent extends BasicComponent {
     /**
      * @param int $duration
      */
-	public function __construct(int $duration) {
-		$this->duration = $duration;
+    public function __construct(int $duration) {
         parent::__construct("use_duration", $duration, true);
 	}
 }

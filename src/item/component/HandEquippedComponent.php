@@ -5,6 +5,9 @@ namespace customiesdevs\customies\item\component;
 
 final class HandEquippedComponent extends BasicComponent {
 
+    /**
+     * @param bool $handEquipped
+     */
     public function __construct(bool $handEquipped = true) {
         parent::__construct("hand_equipped", $handEquipped, true);
     }
