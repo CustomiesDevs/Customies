@@ -3,23 +3,12 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies\item\component;
 
-final class MaxStackSizeComponent implements ItemComponent {
+final class MaxStackSizeComponent extends BasicComponent {
 
-	private int $maxStackSize;
-
-	public function __construct(int $maxStackSize) {
-		$this->maxStackSize = $maxStackSize;
-	}
-
-	public function getName(): string {
-		return "max_stack_size";
-	}
-
-	public function getValue(): int {
-		return $this->maxStackSize;
-	}
-
-	public function isProperty(): bool {
-		return true;
-	}
+    /**
+     * @param int $maxStackSize
+     */
+    public function __construct(int $maxStackSize) {
+        parent::__construct("max_stack_size", $maxStackSize, true);
+    }
 }

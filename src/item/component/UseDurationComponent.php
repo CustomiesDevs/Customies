@@ -3,23 +3,13 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies\item\component;
 
-final class UseDurationComponent implements ItemComponent {
+final class UseDurationComponent extends BasicComponent {
 
-	private int $duration;
-
+    /**
+     * @param int $duration
+     */
 	public function __construct(int $duration) {
 		$this->duration = $duration;
-	}
-
-	public function getName(): string {
-		return "use_duration";
-	}
-
-	public function getValue(): int {
-		return $this->duration;
-	}
-
-	public function isProperty(): bool {
-		return true;
+        parent::__construct("use_duration", $duration, true);
 	}
 }

@@ -27,14 +27,27 @@ final class LegacyBlockIdToStringIdMap {
 		$this->legacyToString = array_flip($this->stringToLegacy);
 	}
 
+    /**
+     * @param int $legacy
+     * @return string|null
+     */
 	public function legacyToString(int $legacy): ?string {
 		return $this->legacyToString[$legacy] ?? null;
 	}
 
+    /**
+     * @param string $string
+     * @return int|null
+     */
 	public function stringToLegacy(string $string): ?int {
 		return $this->stringToLegacy[$string] ?? null;
 	}
 
+    /**
+     * @param string $string
+     * @param int $legacy
+     * @return void
+     */
 	public function registerMapping(string $string, int $legacy): void {
 		$this->legacyToString[$legacy] = $string;
 		$this->stringToLegacy[$string] = $legacy;

@@ -3,23 +3,12 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies\item\component;
 
-final class FoilComponent implements ItemComponent {
+final class FoilComponent extends BasicComponent {
 
-	private bool $foil;
-
-	public function __construct(bool $foil = true) {
-		$this->foil = $foil;
-	}
-
-	public function getName(): string {
-		return "foil";
-	}
-
-	public function getValue(): bool {
-		return $this->foil;
-	}
-
-	public function isProperty(): bool {
-		return true;
-	}
+    /**
+     * @param bool $foil
+     */
+    public function __construct(bool $foil = true) {
+        parent::__construct("foil", $foil, true);
+    }
 }

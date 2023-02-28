@@ -14,6 +14,7 @@ use customiesdevs\customies\item\component\{
     ItemComponent, MaxStackSizeComponent, ProjectileComponent, RenderOffsetsComponent, ThrowableComponent,
     UseAnimationComponent, UseDurationComponent, WearableComponent
 };
+use customiesdevs\customies\item\enum\Slot;
 use customiesdevs\customies\util\NBT;
 
 use RuntimeException;
@@ -99,11 +100,11 @@ trait ItemComponentsTrait {
 		if($this instanceof Armor) {
 
 			$slot = match ($this->getArmorSlot()) {
-				ArmorInventory::SLOT_HEAD => WearableComponent::SLOT_ARMOR_HEAD,
-				ArmorInventory::SLOT_CHEST => WearableComponent::SLOT_ARMOR_CHEST,
-				ArmorInventory::SLOT_LEGS => WearableComponent::SLOT_ARMOR_LEGS,
-				ArmorInventory::SLOT_FEET => WearableComponent::SLOT_ARMOR_FEET,
-				default => WearableComponent::SLOT_ARMOR
+				ArmorInventory::SLOT_HEAD => Slot::ARMOR_HEAD,
+				ArmorInventory::SLOT_CHEST => Slot::ARMOR_CHEST,
+				ArmorInventory::SLOT_LEGS => Slot::ARMOR_LEGS,
+				ArmorInventory::SLOT_FEET => Slot::ARMOR_FEET,
+				default => Slot::ARMOR
 			};
 
 			$this->addComponents(new ArmorComponent($this->getDefensePoints()), new WearableComponent($slot));

@@ -3,28 +3,23 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies\item\component;
 
-use customiesdevs\customies\world\LegacyBlockIdToStringIdMap;
 use pocketmine\block\Block;
+
+use customiesdevs\customies\world\LegacyBlockIdToStringIdMap;
 use function array_map;
 use function implode;
 
-final class DiggerComponent implements ItemComponent {
+final class DiggerComponent extends BasicComponent {
 
-	private array $destroySpeeds;
+    /** @var array $destroySpeeds */
+	private array $destroySpeeds = [];
 
-	public function getName(): string {
-		return "minecraft:digger";
-	}
-
-	public function getValue(): array {
-		return [
-			"destroy_speeds" => $this->destroySpeeds
-		];
-	}
-
-	public function isProperty(): bool {
-		return false;
-	}
+    public function __construct()
+    {
+        parent::__construct("minecraft:digger", [
+            "destroy_speeds" => $this->destroySpeeds
+        ], false);
+    }
 
 	public function withBlocks(int $speed, Block ...$blocks): DiggerComponent {
 		foreach($blocks as $block)

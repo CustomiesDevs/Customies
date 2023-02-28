@@ -3,43 +3,31 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies\item\component;
 
-final class RenderOffsetsComponent implements ItemComponent {
+final class RenderOffsetsComponent extends BasicComponent {
 
-	private int $textureWidth;
-	private int $textureHeight;
-	private bool $handEquipped;
-
+    /**
+     * @param int $textureWidth
+     * @param int $textureHeight
+     * @param bool $handEquipped
+     */
 	public function __construct(int $textureWidth, int $textureHeight, bool $handEquipped = false) {
-		$this->textureWidth = $textureWidth;
-		$this->textureHeight = $textureHeight;
-		$this->handEquipped = $handEquipped;
-	}
 
-	public function getName(): string {
-		return "minecraft:render_offsets";
-	}
-
-	public function getValue(): array {
-
-		$horizontal = ($this->handEquipped ? 0.075 : 0.1) / ($this->textureWidth / 16);
-		$vertical = ($this->handEquipped ? 0.125 : 0.1) / ($this->textureHeight / 16);
+        $horizontal = ($handEquipped ? 0.075 : 0.1) / ($textureWidth / 16);
+        $vertical = ($handEquipped ? 0.125 : 0.1) / ($textureHeight / 16);
         $scale = [$horizontal, $vertical, $horizontal];
 
-		$perspectives = [
-			"first_person" => [
-				"scale" => $scale,
-			],
-			"third_person" => [
-				"scale" => $scale
-			]
-		];
-		return [
-			"main_hand" => $perspectives,
-			"off_hand" => $perspectives
-		];
-	}
+        $perspectives = [
+            "first_person" => [
+                "scale" => $scale,
+            ],
+            "third_person" => [
+                "scale" => $scale
+            ]
+        ];
 
-	public function isProperty(): bool {
-		return false;
+        parent::__construct("minecraft:render_offsets", [
+            "main_hand" => $perspectives,
+            "off_hand" => $perspectives
+        ], false);
 	}
 }

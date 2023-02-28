@@ -21,6 +21,13 @@ class CustomiesEntityFactory {
     /**
      * Register an entity to the EntityFactory and all the required mappings. An optional behaviour identifier can be
      * provided if you want to have your entity behave like a vanilla entity.
+     *
+     * @param string $className
+     * @param string $identifier
+     * @param Closure|null $creationFunc
+     * @param string $behaviourId
+     * @return void
+     *
      * @phpstan-param class-string<Entity> $className
      * @phpstan-param Closure(World $world, CompoundTag $nbt) : Entity $creationFunc
      * @throws ReflectionException
@@ -35,6 +42,9 @@ class CustomiesEntityFactory {
 	}
 
     /**
+     * @param string $identifier
+     * @param string $behaviourId
+     * @return void
      * @throws ReflectionException
      */
     private function updateStaticPacketCache(string $identifier, string $behaviourId): void {
