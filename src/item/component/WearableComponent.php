@@ -10,7 +10,7 @@ final class WearableComponent extends BasicComponent {
     /**
      * @param Slot $slot
      */
-	public function __construct(Slot $slot) {
+    public function __construct(Slot $slot) {
         parent::__construct("minecraft:wearable", [
             "slot" => $slot->value
         ], false);

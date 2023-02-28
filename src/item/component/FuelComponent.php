@@ -5,7 +5,10 @@ namespace customiesdevs\customies\item\component;
 
 final class FuelComponent extends BasicComponent {
 
-	public function __construct(float $duration) {
+    /**
+     * @param float $duration
+     */
+    public function __construct(float $duration) {
         parent::__construct("minecraft:fuel", [
             "duration" => $duration
         ], false);

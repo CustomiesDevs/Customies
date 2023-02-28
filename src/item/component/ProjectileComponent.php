@@ -5,7 +5,10 @@ namespace customiesdevs\customies\item\component;
 
 final class ProjectileComponent extends BasicComponent {
 
-	public function __construct(string $projectileEntity) {
+    /**
+     * @param string $projectileEntity
+     */
+    public function __construct(string $projectileEntity) {
         parent::__construct("minecraft:projectile", [
             "entity" => $projectileEntity
         ], false);
