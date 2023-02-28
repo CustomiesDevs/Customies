@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies\item\component;
 
+
 final class UseAnimationComponent implements ItemComponent {
 
 	public const ANIMATION_EAT = 1;

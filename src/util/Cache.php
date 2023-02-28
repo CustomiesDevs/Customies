@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies\util;
 
-use pocketmine\utils\Filesystem;
-use pocketmine\utils\SingletonTrait;
+use pocketmine\utils\{Filesystem, SingletonTrait};
+
 use function file_exists;
 use function file_get_contents;
 use function gzcompress;
@@ -13,28 +13,31 @@ use function igbinary_serialize;
 use function igbinary_unserialize;
 
 final class Cache {
+
 	use SingletonTrait;
 
 	private const FIRST_BLOCK_ID = 1000;
 	private const FIRST_ITEM_ID = 950;
 
-	/**
-	 * @var array<string, int>
-	 */
+	/** @var array<string, int> */
 	private array $itemCache = [];
 
-	/**
-	 * @var array<string, int>
-	 */
+	/** @var array<string, int> $blockCache */
 	private array $blockCache = [];
+
+    /** @var string $file */
 	private string $file;
 
 	public function __construct(string $cacheFile) {
+
 		$this->file = $cacheFile;
+
 		if(file_exists($cacheFile)) {
+
 			$data = igbinary_unserialize(gzuncompress(file_get_contents($cacheFile)));
 			$this->blockCache = $data["blocks"];
 			$this->itemCache = $data["items"];
+
 		}
 	}
 
@@ -52,17 +55,22 @@ final class Cache {
 		return $this->getNextAvailableID($identifier, $this->itemCache, self::FIRST_ITEM_ID);
 	}
 
-	/**
-	 * Returns the lowest valid id for that specific identifier if it hasn't already been cached. It
-	 * will then cache it. If the identifier has been cached it will return the associated cached numeric id.
-	 */
+    /**
+     * Returns the lowest valid id for that specific identifier if it hasn't already been cached. It
+     * will then cache it. If the identifier has been cached it will return the associated cached numeric id.
+     *
+     * @param string $identifier
+     * @param array $cache
+     * @param int $startID
+     * @return int
+     */
 	private function getNextAvailableID(string $identifier, array &$cache, int $startID): int {
 		// If the ID is cached, return it.
-		if(isset($cache[$identifier])) {
-			return $cache[$identifier];
-		}
+		if(isset($cache[$identifier]))
+            return $cache[$identifier];
 
 		$id = null;
+
 		if(count($cache) > 0) {
 			// To make use of the empty sections in the cache, we need to find the lowest available id.
 			// Flip the array to have numeric ids as keys.
@@ -75,15 +83,18 @@ final class Cache {
 				}
 			}
 		}
+
 		$cache[$identifier] = ($id ??= $startID);
+
 		return $id;
 	}
 
-	/**
-	 * Flushes the cache to disk in the appropriate format.
-	 */
+    /**
+     * Flushes the cache to disk in the appropriate format.
+     *
+     * @return void
+     */
 	public function save(): void {
-		$data = ["items" => $this->itemCache, "blocks" => $this->blockCache];
-		Filesystem::safeFilePutContents($this->file, gzcompress(igbinary_serialize($data)));
+		Filesystem::safeFilePutContents($this->file, gzcompress(igbinary_serialize(["items" => $this->itemCache, "blocks" => $this->blockCache])));
 	}
 }

@@ -22,6 +22,7 @@ use ReflectionClass;
 use function array_values;
 
 final class CustomiesItemFactory {
+
 	use SingletonTrait;
 
 	/**

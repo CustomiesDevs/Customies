@@ -20,14 +20,17 @@ final class RenderOffsetsComponent implements ItemComponent {
 	}
 
 	public function getValue(): array {
+
 		$horizontal = ($this->handEquipped ? 0.075 : 0.1) / ($this->textureWidth / 16);
 		$vertical = ($this->handEquipped ? 0.125 : 0.1) / ($this->textureHeight / 16);
+        $scale = [$horizontal, $vertical, $horizontal];
+
 		$perspectives = [
 			"first_person" => [
-				"scale" => [$horizontal, $vertical, $horizontal],
+				"scale" => $scale,
 			],
 			"third_person" => [
-				"scale" => [$horizontal, $vertical, $horizontal]
+				"scale" => $scale
 			]
 		];
 		return [

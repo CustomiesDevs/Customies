@@ -3,22 +3,24 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies\item\component;
 
+enum ArmorComponentTextureType: string {
+    case CHAIN = "chain";
+    case DIAMOND = "diamond";
+    case ELYTRA = "elytra";
+    case GOLD = "gold";
+    case IRON = "iron";
+    case LEATHER = "leather";
+    case NETHERITE = "netherite";
+    case NONE = "none";
+    case TURTLE = "turtle";
+}
+
 final class ArmorComponent implements ItemComponent {
 
-	public const TEXTURE_TYPE_CHAIN = "chain";
-	public const TEXTURE_TYPE_DIAMOND = "diamond";
-	public const TEXTURE_TYPE_ELYTRA = "elytra";
-	public const TEXTURE_TYPE_GOLD = "gold";
-	public const TEXTURE_TYPE_IRON = "iron";
-	public const TEXTURE_TYPE_LEATHER = "leather";
-	public const TEXTURE_TYPE_NETHERITE = "netherite";
-	public const TEXTURE_TYPE_NONE = "none";
-	public const TEXTURE_TYPE_TURTLE = "turtle";
-
 	private int $protection;
-	private string $textureType;
+	private ArmorComponentTextureType $textureType;
 
-	public function __construct(int $protection, string $textureType = self::TEXTURE_TYPE_NONE) {
+	public function __construct(int $protection, ArmorComponentTextureType $textureType = ArmorComponentTextureType::NONE) {
 		$this->protection = $protection;
 		$this->textureType = $textureType;
 	}

@@ -27,25 +27,25 @@ final class DiggerComponent implements ItemComponent {
 	}
 
 	public function withBlocks(int $speed, Block ...$blocks): DiggerComponent {
-		foreach($blocks as $block){
-			$this->destroySpeeds[] = [
+		foreach($blocks as $block)
+            $this->destroySpeeds[] = [
 				"block" => [
-					"name" => LegacyBlockIdToStringIdMap::getInstance()->legacyToString($block->getId())
+					"name" => LegacyBlockIdToStringIdMap::getInstance()->legacyToString($block->getTypeId())
 				],
 				"speed" => $speed
 			];
-		}
+
 		return $this;
 	}
 
 	public function withTags(int $speed, string ...$tags): DiggerComponent {
-		$query = implode(",", array_map(fn($tag) => "'" . $tag . "'", $tags));
 		$this->destroySpeeds[] = [
 			"block" => [
-				"tags" => "query.any_tag(" . $query . ")"
+				"tags" => "query.any_tag(" . implode(",", array_map(fn($tag) => "'" . $tag . "'", $tags)) . ")"
 			],
 			"speed" => $speed
 		];
+
 		return $this;
 	}
 }
