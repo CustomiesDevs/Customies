@@ -38,6 +38,8 @@ final class CustomiesListener implements Listener {
     /**
      * @param DataPacketSendEvent $event
      * @return void
+     *
+     * @noinspection PhpUnused
      */
 	public function onDataPacketSend(DataPacketSendEvent $event): void {
 		foreach($event->getPackets() as $packet){

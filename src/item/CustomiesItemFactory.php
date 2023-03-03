@@ -84,7 +84,13 @@ final class CustomiesItemFactory {
 
 		$itemId = Cache::getInstance()->getNextAvailableItemID($identifier);
 		$item = new $className(new ItemIdentifier($itemId), $name);
-		$this->registerCustomItemMapping($item, $identifier, $itemId);
+		$this->registerCustomItemMapping($identifier, $itemId);
+
+        GlobalItemDataHandlers::getDeserializer()->map($identifier, fn() => clone $item);
+        GlobalItemDataHandlers::getSerializer()->map($item, fn() => new SavedItemData($name));
+
+        StringToItemParser::getInstance()->register($identifier, fn() => clone $item);
+        CreativeInventory::getInstance()->add($item);
 
 		if(($componentBased = $item instanceof ItemComponents))
             $this->itemComponentEntries[$identifier] = new ItemComponentPacketEntry($identifier,
@@ -95,19 +101,18 @@ final class CustomiesItemFactory {
             );
 
 		$this->itemTableEntries[$identifier] = new ItemTypeEntry($identifier, $itemId, $componentBased);
-		CreativeInventory::getInstance()->add($item);
 	}
 
     /**
      * Registers a custom item ID to the required mappings in the global ItemTypeDictionary instance.
      *
-     * @param Item $item
-     * @param string $name
-     * @param int $id
+     * @param string $identifier
+     * @param int $itemId
      * @return void
      * @throws ReflectionException
      */
-	private function registerCustomItemMapping(Item $item, string $name, int $id): void {
+	private function registerCustomItemMapping(string $identifier, int $itemId): void {
+
 		$dictionary = GlobalItemTypeDictionary::getInstance()->getDictionary();
 		$reflection = new ReflectionClass($dictionary);
 
@@ -115,17 +120,14 @@ final class CustomiesItemFactory {
 		$intToString->setAccessible(true);
 		/** @var int[] $value */
 		$value = $intToString->getValue($dictionary);
-		$intToString->setValue($dictionary, $value + [$id => $name]);
+		$intToString->setValue($dictionary, $value + [$itemId => $identifier]);
 
 		$stringToInt = $reflection->getProperty("stringToIntMap");
 		$stringToInt->setAccessible(true);
 		/** @var int[] $value */
 		$value = $stringToInt->getValue($dictionary);
-		$stringToInt->setValue($dictionary, $value + [$name => $id]);
+		$stringToInt->setValue($dictionary, $value + [$identifier => $itemId]);
 
-		GlobalItemDataHandlers::getDeserializer()->map($name, fn() => clone $item);
-		GlobalItemDataHandlers::getSerializer()->map($item, fn() => new SavedItemData($name));
-		StringToItemParser::getInstance()->register($name, fn() => clone $item);
 	}
 
     /**
@@ -139,9 +141,10 @@ final class CustomiesItemFactory {
      */
 	public function registerBlockItem(string $identifier, Block $block): void {
 		$itemId = $block->getIdInfo()->getBlockTypeId();
-        $item = $block->asItem();
+		$this->registerCustomItemMapping($identifier, $itemId);
 
-		$this->registerCustomItemMapping($item, $item->getName(), $itemId);
+        StringToItemParser::getInstance()->registerBlock($identifier, fn() => clone $block);
+
 		$this->itemTableEntries[] = new ItemTypeEntry($identifier, $itemId, false);
 	}
 }

@@ -15,16 +15,7 @@ final class CreativeInventoryInfo {
 		return new self(Category::ALL, Group::NONE);
 	}
 
-    /** @var Category $category */
-	private Category $category;
-
-    /** @var Group $group */
-	private Group $group;
-
-	public function __construct(Category $category = Category::NONE, Group $group = Group::NONE) {
-		$this->category = $category;
-		$this->group = $group;
-	}
+	public function __construct(private readonly Category $category = Category::NONE, private readonly Group $group = Group::NONE) {}
 
     /**
      * Returns the category the item is part of.

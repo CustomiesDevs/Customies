@@ -16,12 +16,11 @@ use customiesdevs\customies\world\LegacyBlockIdToStringIdMap;
 use InvalidArgumentException;
 use OutOfRangeException;
 use pocketmine\block\Block;
-use pocketmine\block\BlockFactory;
+use pocketmine\block\RuntimeBlockStateRegistry;
 use pocketmine\inventory\CreativeInventory;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\ListTag;
 use pocketmine\network\mcpe\convert\GlobalItemTypeDictionary;
-use pocketmine\network\mcpe\convert\R12ToCurrentBlockMapEntry;
 use pocketmine\network\mcpe\convert\RuntimeBlockMapping;
 use pocketmine\network\mcpe\protocol\serializer\NetworkNbtSerializer;
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
@@ -31,6 +30,7 @@ use pocketmine\network\mcpe\protocol\types\CacheableNbt;
 use pocketmine\Server;
 use pocketmine\utils\SingletonTrait;
 use ReflectionClass;
+use ReflectionException;
 use RuntimeException;
 use SplFixedArray;
 use function array_fill;
@@ -42,7 +42,7 @@ use const pocketmine\BEDROCK_DATA_PATH;
 final class CustomiesBlockFactory {
 	use SingletonTrait;
 
-	private const NEW_BLOCK_FACTORY_SIZE = 2048 << Block::INTERNAL_METADATA_BITS;
+	private const NEW_BLOCK_FACTORY_SIZE = 2048 << Block::INTERNAL_STATE_DATA_BITS;
 
 	/**
 	 * @var Closure[]
@@ -54,36 +54,44 @@ final class CustomiesBlockFactory {
 	/** @var R12ToCurrentBlockMapEntry[] */
 	private array $legacyStateMap = [];
 
-	public function __construct() {
+    /**
+     * @throws ReflectionException
+     */
+    public function __construct() {
 		$this->increaseBlockFactoryLimits();
 	}
 
-	/**
-	 * Modifies the properties in the BlockFactory instance to increase the SplFixedArrays to double the limit of blocks
-	 * that can be registered.
-	 */
+    /**
+     * Modifies the properties in the BlockFactory instance to increase the SplFixedArrays to double the limit of blocks
+     * that can be registered.
+     * @throws ReflectionException
+     */
 	public function increaseBlockFactoryLimits(): void {
-		$instance = BlockFactory::getInstance();
-		$blockFactory = new ReflectionClass($instance);
-		foreach(["fullList", "mappedStateIds"] as $propertyName){
-			$property = $blockFactory->getProperty($propertyName);
-			$property->setAccessible(true);
-			/** @var SplFixedArray $array */
-			$array = $property->getValue($instance);
-			$array->setSize(self::NEW_BLOCK_FACTORY_SIZE);
-			$property->setValue($instance, $array);
-		}
-		$instance->light = SplFixedArray::fromArray(array_merge($instance->light->toArray(), array_fill(count($instance->light), self::NEW_BLOCK_FACTORY_SIZE, 0)));
-		$instance->lightFilter = SplFixedArray::fromArray(array_merge($instance->lightFilter->toArray(), array_fill(count($instance->lightFilter), self::NEW_BLOCK_FACTORY_SIZE, 1)));
-		$instance->blocksDirectSkyLight = SplFixedArray::fromArray(array_merge($instance->blocksDirectSkyLight->toArray(), array_fill(count($instance->blocksDirectSkyLight), self::NEW_BLOCK_FACTORY_SIZE, false)));
-		$instance->blastResistance = SplFixedArray::fromArray(array_merge($instance->blastResistance->toArray(), array_fill(count($instance->blastResistance), self::NEW_BLOCK_FACTORY_SIZE, 0.0)));
+
+		$instance = RuntimeBlockStateRegistry::getInstance();
+		$runtimeBlockStateRegistry = new ReflectionClass($instance);
+        $property = $runtimeBlockStateRegistry->getProperty("fullList");
+        $property->setAccessible(true);
+        /** @var SplFixedArray $array */
+        $array = $property->getValue($instance);
+        $array->setSize(self::NEW_BLOCK_FACTORY_SIZE);
+        $property->setValue($instance, $array);
+
+		$instance->light = array_merge($instance->light, array_fill(count($instance->light), self::NEW_BLOCK_FACTORY_SIZE, 0));
+		$instance->lightFilter = array_merge($instance->lightFilter, array_fill(count($instance->lightFilter), self::NEW_BLOCK_FACTORY_SIZE, 1));
+		$instance->blocksDirectSkyLight = array_merge($instance->blocksDirectSkyLight, array_fill(count($instance->blocksDirectSkyLight), self::NEW_BLOCK_FACTORY_SIZE, false));
+		$instance->blastResistance = array_merge($instance->blastResistance, array_fill(count($instance->blastResistance), self::NEW_BLOCK_FACTORY_SIZE, 0.0));
+
 	}
 
-	/**
-	 * Adds a worker initialize hook to the async pool to sync the BlockFactory for every thread worker that is created.
-	 * It is especially important for the workers that deal with chunk encoding, as using the wrong runtime ID mappings
-	 * can result in massive issues with almost every block showing as the wrong thing and causing lag to clients.
-	 */
+    /**
+     * Adds a worker initialize hook to the async pool to sync the BlockFactory for every thread worker that is created.
+     * It is especially important for the workers that deal with chunk encoding, as using the wrong runtime ID mappings
+     * can result in massive issues with almost every block showing as the wrong thing and causing lag to clients.
+     *
+     * @param string $cachePath
+     * @return void
+     */
 	public function addWorkerInitHook(string $cachePath): void {
 		$server = Server::getInstance();
 		$blocks = $this->blockFuncs;
@@ -96,12 +104,10 @@ final class CustomiesBlockFactory {
 	 * Get a custom block from its identifier. An exception will be thrown if the block is not registered.
 	 */
 	public function get(string $identifier): Block {
-		$id = LegacyBlockIdToStringIdMap::getInstance()->stringToLegacy($identifier) ?? -1;
-		if($id < 0) {
-			throw new InvalidArgumentException("Custom block " . $identifier . " is not registered");
-		}
-
-		return BlockFactory::getInstance()->get($id, 0);
+		return RuntimeBlockStateRegistry::getInstance()->fromTypeId(
+            LegacyBlockIdToStringIdMap::getInstance()->stringToLegacy($identifier) ??
+                throw new InvalidArgumentException("Custom block " . $identifier . " is not registered")
+        );
 	}
 
 	/**
@@ -112,21 +118,23 @@ final class CustomiesBlockFactory {
 		return $this->blockPaletteEntries;
 	}
 
-	/**
-	 * Register a block to the BlockFactory and all the required mappings.
-	 * @phpstan-param (Closure(int): Block) $blockFunc
-	 */
+    /**
+     * Register a block to the BlockFactory and all the required mappings.
+     * @phpstan-param (Closure(int): Block) $blockFunc
+     * @throws ReflectionException
+     */
 	public function registerBlock(Closure $blockFunc, string $identifier, ?Model $model = null, ?CreativeInventoryInfo $creativeInfo = null): void {
+
 		$id = $this->getNextAvailableId($identifier);
 		$block = $blockFunc($id);
-		if(!$block instanceof Block) {
-			throw new InvalidArgumentException("Class returned from closure is not a Block");
-		}
 
-		if(BlockFactory::getInstance()->isRegistered($id)) {
-			throw new InvalidArgumentException("Block with ID " . $id . " is already registered");
-		}
-		BlockFactory::getInstance()->register($block);
+		if(!$block instanceof Block)
+            throw new InvalidArgumentException("Class returned from closure is not a Block");
+
+		if(RuntimeBlockStateRegistry::getInstance()->isRegistered($id))
+            throw new InvalidArgumentException("Block with ID " . $id . " is already registered");
+
+        RuntimeBlockStateRegistry::getInstance()->register($block);
 		CustomiesItemFactory::getInstance()->registerBlockItem($identifier, $block);
 
 		$propertiesTag = CompoundTag::create();
@@ -145,19 +153,22 @@ final class CustomiesBlockFactory {
 				->setInt("catch_chance_modifier", $block->getFlameEncouragement())
 				->setInt("destroy_chance_modifier", $block->getFlammability()));
 
-		if($model !== null) {
-			foreach($model->toNBT() as $tagName => $tag){
-				$components->setTag($tagName, $tag);
-			}
-		}
+		if($model !== null)
+			foreach($model->toNBT() as $tagName => $tag)
+                $components->setTag($tagName, $tag);
 
 		if($block instanceof Permutable) {
+
 			$blockPropertyNames = $blockPropertyValues = $blockProperties = [];
+
 			foreach($block->getBlockProperties() as $blockProperty){
+
 				$blockPropertyNames[] = $blockProperty->getName();
 				$blockPropertyValues[] = $blockProperty->getValues();
 				$blockProperties[] = $blockProperty->toNBT();
+
 			}
+
 			$permutations = array_map(static fn(Permutation $permutation) => $permutation->toNBT(), $block->getPermutations());
 
 			// The 'minecraft:on_player_placing' component is required for the client to predict block placement, making
@@ -170,13 +181,14 @@ final class CustomiesBlockFactory {
 				// We need to insert states for every possible permutation to allow for all blocks to be used and to
 				// keep in sync with the client's block palette.
 				$states = CompoundTag::create();
-				foreach($permutations as $i => $value){
-					$states->setTag($blockPropertyNames[$i], NBT::getTagType($value));
-				}
+				foreach($permutations as $i => $value)
+                    $states->setTag($blockPropertyNames[$i], NBT::getTagType($value));
+
 				$blockState = CompoundTag::create()
 					->setString("name", $identifier)
 					->setTag("states", $states);
 				BlockPalette::getInstance()->insertState($blockState, $meta);
+
 			}
 		} else {
 			// If a block does not contain any permutations we can just insert the one state.
@@ -184,28 +196,34 @@ final class CustomiesBlockFactory {
 				->setString("name", $identifier)
 				->setTag("states", CompoundTag::create());
 			BlockPalette::getInstance()->insertState($blockState);
+
 		}
 
 		$creativeInfo ??= CreativeInventoryInfo::DEFAULT();
-		$components->setTag("minecraft:creative_category", CompoundTag::create()
-			->setString("category", $creativeInfo->getCategory())
-			->setString("group", $creativeInfo->getGroup()));
-		$propertiesTag->setTag("components", $components);
-		$propertiesTag->setTag("menu_category", CompoundTag::create()
-			->setString("category", $creativeInfo?->getCategory() ?? "")
-			->setString("group", $creativeInfo?->getGroup() ?? ""));
-		$propertiesTag->setInt("molangVersion", 1);
+		$propertiesTag->setTag("components",
+            $components->setTag("minecraft:creative_category", CompoundTag::create()
+                ->setString("category", $creativeInfo->getCategory()->value)
+                ->setString("group", $creativeInfo->getGroup()->value)))
+            ->setTag("menu_category", CompoundTag::create()
+                ->setString("category", $creativeInfo->getCategory()->value ?? "")
+                ->setString("group", $creativeInfo->getGroup()->value ?? ""))
+            ->setInt("molangVersion", 1);
+
 		CreativeInventory::getInstance()->add($block->asItem());
 
 		$this->blockPaletteEntries[] = new BlockPaletteEntry($identifier, new CacheableNbt($propertiesTag));
 		$this->blockFuncs[$identifier] = $blockFunc;
+
 		LegacyBlockIdToStringIdMap::getInstance()->registerMapping($identifier, $id);
+
 	}
 
-	/**
-	 * Registers the custom block runtime mappings to tell PocketMine about the custom blocks.
-	 */
+    /**
+     * Registers the custom block runtime mappings to tell PocketMine about the custom blocks.
+     * @throws ReflectionException
+     */
 	public function registerCustomRuntimeMappings(): void {
+
 		$instance = RuntimeBlockMapping::getInstance();
 		$runtimeBlockMapping = new ReflectionClass($instance);
 
@@ -218,9 +236,8 @@ final class CustomiesBlockFactory {
 		$registerMappingMethod = $runtimeBlockMapping->getMethod("registerMapping");
 		$registerMappingMethod->setAccessible(true);
 		$registerMapping = $registerMappingMethod->getClosure($instance);
-		if($registerMapping === null) {
-			throw new RuntimeException("Unable to access mapping registration");
-		}
+		if($registerMapping === null)
+            throw new RuntimeException("Unable to access mapping registration");
 
 		$legacyIdMap = LegacyBlockIdToStringIdMap::getInstance();
 		/** @var R12ToCurrentBlockMapEntry[] $legacyStateMap */
@@ -238,51 +255,56 @@ final class CustomiesBlockFactory {
 			$legacyStateMap[] = new R12ToCurrentBlockMapEntry($id, $meta, $state);
 		}
 
-		foreach(BlockPalette::getInstance()->getCustomStates() as $state){
-			$legacyStateMap[] = $state;
-		}
+		foreach(BlockPalette::getInstance()->getCustomStates() as $state)
+            $legacyStateMap[] = $state;
 
 		/**
 		 * @var int[][] $idToStatesMap string id -> int[] list of candidate state indices
 		 */
 		$idToStatesMap = [];
 		$states = BlockPalette::getInstance()->getStates();
-		foreach($states as $k => $state){
-			$idToStatesMap[$state->getString("name")][] = $k;
-		}
 
+		foreach($states as $k => $state)
+            $idToStatesMap[$state->getString("name")][] = $k;
 		foreach($legacyStateMap as $pair){
+
 			$id = $legacyIdMap->stringToLegacy($pair->getId());
-			if($id === null) {
-				throw new RuntimeException("No legacy ID matches " . $pair->getId());
-			}
+
+			if($id === null)
+                throw new RuntimeException("No legacy ID matches " . $pair->getId());
+
 			$data = $pair->getMeta();
-			if($data > 15) {
-				continue;
-			}
+
+			if($data > 15)
+                continue;
 			$mappedState = $pair->getBlockState();
 			$mappedName = $mappedState->getString("name");
-			if(!isset($idToStatesMap[$mappedName])) {
-				continue;
-			}
+
+			if(!isset($idToStatesMap[$mappedName]))
+                continue;
 			foreach($idToStatesMap[$mappedName] as $k){
+
 				$networkState = $states[$k];
+
 				if($mappedState->equals($networkState)) {
+
 					$registerMapping($k, $id, $data);
+
 					continue 2;
 				}
 			}
 		}
 	}
 
-	/**
-	 * Returns the next available custom block id, an exception will be thrown if the block factory is full.
-	 */
+    /**
+     * Returns the next available custom block id, an exception will be thrown if the block factory is full.
+     *
+     * @param string $identifier
+     * @return int
+     */
 	private function getNextAvailableId(string $identifier): int {
 		$id = Cache::getInstance()->getNextAvailableBlockID($identifier);
-		if($id > (self::NEW_BLOCK_FACTORY_SIZE / 16)) {
-			throw new OutOfRangeException("All custom block ids are used up");
-		}
-		return $id;
+
+		return $id > (self::NEW_BLOCK_FACTORY_SIZE / 16) ? throw new OutOfRangeException("All custom block ids are used up") : $id;
 	}
 }

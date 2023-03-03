@@ -25,13 +25,8 @@ final class Cache {
 	/** @var array<string, int> $blockCache */
 	private array $blockCache = [];
 
-    /** @var string $file */
-	private string $file;
 
-	public function __construct(string $cacheFile) {
-
-		$this->file = $cacheFile;
-
+	public function __construct(private readonly string $cacheFile) {
 		if(file_exists($cacheFile)) {
 
 			$data = igbinary_unserialize(gzuncompress(file_get_contents($cacheFile)));
@@ -95,6 +90,6 @@ final class Cache {
      * @return void
      */
 	public function save(): void {
-		Filesystem::safeFilePutContents($this->file, gzcompress(igbinary_serialize(["items" => $this->itemCache, "blocks" => $this->blockCache])));
+		Filesystem::safeFilePutContents($this->cacheFile, gzcompress(igbinary_serialize(["items" => $this->itemCache, "blocks" => $this->blockCache])));
 	}
 }
