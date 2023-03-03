@@ -22,7 +22,7 @@ final class Customies extends PluginBase {
 
 	}
 
-    /**
+	/**
      * @return void
      */
 	protected function onEnable(): void {

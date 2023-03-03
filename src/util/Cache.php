@@ -26,6 +26,9 @@ final class Cache {
 	private array $blockCache = [];
 
 
+	/**
+	 * @param string $cacheFile
+	 */
 	public function __construct(private readonly string $cacheFile) {
 		if(file_exists($cacheFile)) {
 
@@ -50,7 +53,7 @@ final class Cache {
 		return $this->getNextAvailableID($identifier, $this->itemCache, self::FIRST_ITEM_ID);
 	}
 
-    /**
+	/**
      * Returns the lowest valid id for that specific identifier if it hasn't already been cached. It
      * will then cache it. If the identifier has been cached it will return the associated cached numeric id.
      *
@@ -62,18 +65,22 @@ final class Cache {
 	private function getNextAvailableID(string $identifier, array &$cache, int $startID): int {
 		// If the ID is cached, return it.
 		if(isset($cache[$identifier]))
-            return $cache[$identifier];
+			return $cache[$identifier];
 
 		$id = null;
 
 		if(count($cache) > 0) {
-			// To make use of the empty sections in the cache, we need to find the lowest available id.
-			// Flip the array to have numeric ids as keys.
+			/**
+			 * To make use of the empty sections in the cache, we need to find the lowest available id.
+			 * Flip the array to have numeric ids as keys.
+			 */
 			$flipped = array_flip($cache);
+
 			// Go through every number to find any empty ID.
 			for($i = array_key_first($flipped) + 1, $iMax = array_key_last($flipped) + 1; $i <= $iMax; $i++){
 				if(!isset($flipped[$i])) {
 					$id = $i;
+
 					break;
 				}
 			}
@@ -84,7 +91,7 @@ final class Cache {
 		return $id;
 	}
 
-    /**
+	/**
      * Flushes the cache to disk in the appropriate format.
      *
      * @return void

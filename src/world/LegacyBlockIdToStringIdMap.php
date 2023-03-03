@@ -27,7 +27,7 @@ final class LegacyBlockIdToStringIdMap {
 		$this->legacyToString = array_flip($this->stringToLegacy);
 	}
 
-    /**
+	/**
      * @param int $legacy
      * @return string|null
      */
@@ -35,7 +35,7 @@ final class LegacyBlockIdToStringIdMap {
 		return $this->legacyToString[$legacy] ?? null;
 	}
 
-    /**
+	/**
      * @param string $string
      * @return int|null
      */
@@ -43,7 +43,7 @@ final class LegacyBlockIdToStringIdMap {
 		return $this->stringToLegacy[$string] ?? null;
 	}
 
-    /**
+	/**
      * @param string $string
      * @param int $legacy
      * @return void
