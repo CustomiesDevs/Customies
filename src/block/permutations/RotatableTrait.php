@@ -12,13 +12,15 @@ use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\player\Player;
 use pocketmine\world\BlockTransaction;
 
-trait RotatableTrait {
+trait RotatableTrait
+{
 	use HorizontalFacingTrait;
 
 	/**
 	 * @return BlockProperty[]
 	 */
-	public function getBlockProperties(): array {
+	public function getBlockProperties(): array
+	{
 		return [
 			new BlockProperty("customies:rotation", [2, 3, 4, 5]),
 		];
@@ -27,7 +29,8 @@ trait RotatableTrait {
 	/**
 	 * @return Permutation[]
 	 */
-	public function getPermutations(): array {
+	public function getPermutations(): array
+	{
 		return [
 			(new Permutation("q.block_property('customies:rotation') == 2"))
 				->withComponent("minecraft:rotation", CompoundTag::create()
@@ -52,25 +55,30 @@ trait RotatableTrait {
 		];
 	}
 
-	public function getCurrentBlockProperties(): array {
+	public function getCurrentBlockProperties(): array
+	{
 		return [$this->facing];
 	}
 
-	protected function writeStateToMeta(): int {
+	protected function writeStateToMeta(): int
+	{
 		return Permutations::toMeta($this);
 	}
 
-	public function readStateFromData(int $id, int $stateMeta): void {
+	public function readStateFromData(int $id, int $stateMeta): void
+	{
 		$blockProperties = Permutations::fromMeta($this, $stateMeta);
 		$this->facing = $blockProperties[0] ?? Facing::NORTH;
 	}
 
-	public function getStateBitmask(): int {
+	public function getStateBitmask(): int
+	{
 		return Permutations::getStateBitmask($this);
 	}
 
-	public function place(BlockTransaction $tx, Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, ?Player $player = null): bool {
-		if($player !== null) {
+	public function place(BlockTransaction $tx, Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, ?Player $player = null): bool
+	{
+		if ($player !== null) {
 			$this->facing = $player->getHorizontalFacing();
 		}
 		return parent::place($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);

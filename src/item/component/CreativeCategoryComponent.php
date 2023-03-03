@@ -5,12 +5,14 @@ namespace customiesdevs\customies\item\component;
 
 use customiesdevs\customies\item\CreativeInventoryInfo;
 
-final class CreativeCategoryComponent extends BasicComponent {
+final class CreativeCategoryComponent extends BasicComponent
+{
 
-    /**
-     * @param CreativeInventoryInfo $creativeInventoryInfo
-     */
-    public function __construct(CreativeInventoryInfo $creativeInventoryInfo) {
-        parent::__construct("creative_category", $creativeInventoryInfo->getNumericCategory(), true);
-    }
+	/**
+	 * @param CreativeInventoryInfo $creativeInventoryInfo
+	 */
+	public function __construct(CreativeInventoryInfo $creativeInventoryInfo)
+	{
+		parent::__construct("creative_category", $creativeInventoryInfo->getNumericCategory(), true);
+	}
 }

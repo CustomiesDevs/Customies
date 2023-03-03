@@ -3,20 +3,21 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies\item\component;
 
-interface ItemComponent {
+interface ItemComponent
+{
 
-    /**
-     * @return string
-     */
+	/**
+	 * @return string
+	 */
 	public function getName(): string;
 
-    /**
-     * @return mixed
-     */
+	/**
+	 * @return mixed
+	 */
 	public function getValue(): mixed;
 
-    /**
-     * @return bool
-     */
+	/**
+	 * @return bool
+	 */
 	public function isProperty(): bool;
 }

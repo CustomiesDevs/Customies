@@ -3,7 +3,8 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies\block\permutations;
 
-interface Permutable {
+interface Permutable
+{
 
 	/**
 	 * Returns an array of the different block properties the block has. When the block is registered, it is registered

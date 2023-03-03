@@ -5,7 +5,8 @@ namespace customiesdevs\customies\block;
 
 use pocketmine\nbt\tag\CompoundTag;
 
-final class Material {
+final class Material
+{
 
 	public const TARGET_ALL = "*";
 	public const TARGET_SIDES = "sides";
@@ -26,7 +27,8 @@ final class Material {
 	private bool $faceDimming;
 	private bool $ambientOcclusion;
 
-	public function __construct(string $target, string $texture, string $renderMethod, bool $faceDimming = true, bool $ambientOcclusion = true) {
+	public function __construct(string $target, string $texture, string $renderMethod, bool $faceDimming = true, bool $ambientOcclusion = true)
+	{
 		$this->target = $target;
 		$this->texture = $texture;
 		$this->renderMethod = $renderMethod;
@@ -37,14 +39,16 @@ final class Material {
 	/**
 	 * Returns the targeted face for the material.
 	 */
-	public function getTarget(): string {
+	public function getTarget(): string
+	{
 		return $this->target;
 	}
 
 	/**
 	 * Returns the material in the correct NBT format supported by the client.
 	 */
-	public function toNBT(): CompoundTag {
+	public function toNBT(): CompoundTag
+	{
 		return CompoundTag::create()
 			->setString("texture", $this->texture)
 			->setString("render_method", $this->renderMethod)
