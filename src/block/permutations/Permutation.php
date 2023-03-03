@@ -9,12 +9,10 @@ use pocketmine\nbt\tag\CompoundTag;
 final class Permutation
 {
 
-	private string $condition;
 	private CompoundTag $components;
 
-	public function __construct(string $condition)
+	public function __construct(private readonly string $condition)
 	{
-		$this->condition = $condition;
 		$this->components = CompoundTag::create();
 	}
 
@@ -24,6 +22,7 @@ final class Permutation
 	public function withComponent(string $component, mixed $value): self
 	{
 		$this->components->setTag($component, NBT::getTagType($value));
+
 		return $this;
 	}
 

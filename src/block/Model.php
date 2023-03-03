@@ -4,9 +4,7 @@ declare(strict_types=1);
 namespace customiesdevs\customies\block;
 
 use pocketmine\math\Vector3;
-use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\nbt\tag\FloatTag;
-use pocketmine\nbt\tag\ListTag;
+use pocketmine\nbt\tag\{CompoundTag, FloatTag, ListTag};
 
 final class Model
 {
@@ -35,9 +33,9 @@ final class Model
 	public function toNBT(): array
 	{
 		$materials = CompoundTag::create();
-		foreach ($this->materials as $material) {
-			$materials->setTag($material->getTarget(), $material->toNBT());
-		}
+
+		foreach ($this->materials as $material)
+			$materials->setTag($material->getTarget()->value, $material->toNBT());
 
 		return [
 			"minecraft:material_instances" => CompoundTag::create()

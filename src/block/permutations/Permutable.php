@@ -23,6 +23,7 @@ interface Permutable
 	/**
 	 * Returns an array of the current block property values in the same order as those in getBlockProperties(). It is
 	 * used to convert the current properties in to a meta value that can be stored on disk in the world.
+	 * @return BlockProperty[]
 	 */
 	public function getCurrentBlockProperties(): array;
 }

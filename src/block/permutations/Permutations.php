@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace customiesdevs\customies\block\permutations;
 
 use pocketmine\block\utils\InvalidBlockStateException;
+
 use function array_map;
 use function count;
 use function current;
@@ -59,17 +60,19 @@ class Permutations
 	public static function getCartesianProduct(array $arrays): array
 	{
 		$result = [];
-		$count = count($arrays) - 1;
-		$combinations = array_product(array_map(static fn(array $array) => count($array), $arrays));
-		for ($i = 0; $i < $combinations; $i++) {
+
+		for ($i = 0; $i < array_product(array_map(static fn(array $array) => count($array), $arrays)); $i++) {
+
 			$result[] = array_map(static fn(array $array) => current($array), $arrays);
-			for ($j = $count; $j >= 0; $j--) {
-				if (next($arrays[$j])) {
+
+			for ($j = count($arrays) - 1; $j >= 0; $j--) {
+				if (next($arrays[$j]))
 					break;
-				}
 				reset($arrays[$j]);
+
 			}
 		}
+
 		return $result;
 	}
 }

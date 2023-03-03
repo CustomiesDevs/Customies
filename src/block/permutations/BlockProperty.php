@@ -3,25 +3,21 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies\block\permutations;
 
+use pocketmine\nbt\tag\{CompoundTag, ListTag};
+
 use customiesdevs\customies\util\NBT;
-use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\nbt\tag\ListTag;
+
 use function array_map;
 
 final class BlockProperty
 {
 
-	private string $name;
-	private array $values;
-
-	public function __construct(string $name, array $values)
-	{
-		$this->name = $name;
-		$this->values = $values;
-	}
+	public function __construct(private readonly string $name, private readonly array $values) {}
 
 	/**
 	 * Returns the name of the block property provided in the constructor.
+	 *
+	 * @return string
 	 */
 	public function getName(): string
 	{
@@ -30,6 +26,8 @@ final class BlockProperty
 
 	/**
 	 * Returns the array of possible values of the block property provided in the constructor.
+	 *
+	 * @return array
 	 */
 	public function getValues(): array
 	{
