@@ -86,19 +86,19 @@ final class CustomiesItemFactory {
 		$item = new $className(new ItemIdentifier($itemId), $name);
 		$this->registerCustomItemMapping($identifier, $itemId);
 
-        GlobalItemDataHandlers::getDeserializer()->map($identifier, fn() => clone $item);
-        GlobalItemDataHandlers::getSerializer()->map($item, fn() => new SavedItemData($name));
+		GlobalItemDataHandlers::getDeserializer()->map($identifier, fn() => clone $item);
+		GlobalItemDataHandlers::getSerializer()->map($item, fn() => new SavedItemData($name));
 
-        StringToItemParser::getInstance()->register($identifier, fn() => clone $item);
-        CreativeInventory::getInstance()->add($item);
+		StringToItemParser::getInstance()->register($identifier, fn() => clone $item);
+		CreativeInventory::getInstance()->add($item);
 
 		if(($componentBased = $item instanceof ItemComponents))
-            $this->itemComponentEntries[$identifier] = new ItemComponentPacketEntry($identifier,
-                new CacheableNbt($item->getComponents()
-                    ->setInt("id", $itemId)
-                    ->setString("name", $identifier)
-                )
-            );
+			$this->itemComponentEntries[$identifier] = new ItemComponentPacketEntry($identifier,
+				new CacheableNbt($item->getComponents()
+					->setInt("id", $itemId)
+					->setString("name", $identifier)
+				)
+			);
 
 		$this->itemTableEntries[$identifier] = new ItemTypeEntry($identifier, $itemId, $componentBased);
 	}
@@ -124,6 +124,7 @@ final class CustomiesItemFactory {
 
 		$stringToInt = $reflection->getProperty("stringToIntMap");
 		$stringToInt->setAccessible(true);
+
 		/** @var int[] $value */
 		$value = $stringToInt->getValue($dictionary);
 		$stringToInt->setValue($dictionary, $value + [$identifier => $itemId]);
@@ -143,7 +144,7 @@ final class CustomiesItemFactory {
 		$itemId = $block->getIdInfo()->getBlockTypeId();
 		$this->registerCustomItemMapping($identifier, $itemId);
 
-        StringToItemParser::getInstance()->registerBlock($identifier, fn() => clone $block);
+		StringToItemParser::getInstance()->registerBlock($identifier, fn() => clone $block);
 
 		$this->itemTableEntries[] = new ItemTypeEntry($identifier, $itemId, false);
 	}

@@ -3,36 +3,31 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies\block;
 
-use Closure;
-use customiesdevs\customies\block\permutations\Permutable;
-use customiesdevs\customies\block\permutations\Permutation;
-use customiesdevs\customies\block\permutations\Permutations;
-use customiesdevs\customies\item\CreativeInventoryInfo;
-use customiesdevs\customies\item\CustomiesItemFactory;
-use customiesdevs\customies\task\AsyncRegisterBlocksTask;
-use customiesdevs\customies\util\Cache;
-use customiesdevs\customies\util\NBT;
-use customiesdevs\customies\world\LegacyBlockIdToStringIdMap;
-use InvalidArgumentException;
-use OutOfRangeException;
-use pocketmine\block\Block;
-use pocketmine\block\RuntimeBlockStateRegistry;
-use pocketmine\inventory\CreativeInventory;
-use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\nbt\tag\ListTag;
-use pocketmine\network\mcpe\convert\GlobalItemTypeDictionary;
-use pocketmine\network\mcpe\convert\RuntimeBlockMapping;
-use pocketmine\network\mcpe\protocol\serializer\NetworkNbtSerializer;
-use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
-use pocketmine\network\mcpe\protocol\serializer\PacketSerializerContext;
-use pocketmine\network\mcpe\protocol\types\BlockPaletteEntry;
-use pocketmine\network\mcpe\protocol\types\CacheableNbt;
 use pocketmine\Server;
+use pocketmine\inventory\CreativeInventory;
+use pocketmine\block\{Block, RuntimeBlockStateRegistry};
+use pocketmine\nbt\tag\{CompoundTag, ListTag};
+use pocketmine\network\mcpe\convert\{GlobalItemTypeDictionary, RuntimeBlockMapping};
+use pocketmine\network\mcpe\protocol\{
+	serializer\NetworkNbtSerializer, serializer\PacketSerializer, serializer\PacketSerializerContext,
+	types\BlockPaletteEntry, types\CacheableNbt
+};
 use pocketmine\utils\SingletonTrait;
+
+use customiesdevs\customies\block\permutations\{Permutable, Permutation, Permutations};
+use customiesdevs\customies\item\{CreativeInventoryInfo, CustomiesItemFactory};
+use customiesdevs\customies\util\{Cache, NBT};
+use customiesdevs\customies\task\AsyncRegisterBlocksTask;
+use customiesdevs\customies\world\LegacyBlockIdToStringIdMap;
+
+use Closure;
 use ReflectionClass;
 use ReflectionException;
 use RuntimeException;
 use SplFixedArray;
+use InvalidArgumentException;
+use OutOfRangeException;
+
 use function array_fill;
 use function array_map;
 use function count;
@@ -40,6 +35,7 @@ use function file_get_contents;
 use const pocketmine\BEDROCK_DATA_PATH;
 
 final class CustomiesBlockFactory {
+
 	use SingletonTrait;
 
 	private const NEW_BLOCK_FACTORY_SIZE = 2048 << Block::INTERNAL_STATE_DATA_BITS;
@@ -106,7 +102,7 @@ final class CustomiesBlockFactory {
 	public function get(string $identifier): Block {
 		return RuntimeBlockStateRegistry::getInstance()->fromTypeId(
             LegacyBlockIdToStringIdMap::getInstance()->stringToLegacy($identifier) ??
-                throw new InvalidArgumentException("Custom block " . $identifier . " is not registered")
+			throw new InvalidArgumentException("Custom block " . $identifier . " is not registered")
         );
 	}
 
@@ -129,12 +125,12 @@ final class CustomiesBlockFactory {
 		$block = $blockFunc($id);
 
 		if(!$block instanceof Block)
-            throw new InvalidArgumentException("Class returned from closure is not a Block");
+			throw new InvalidArgumentException("Class returned from closure is not a Block");
 
 		if(RuntimeBlockStateRegistry::getInstance()->isRegistered($id))
-            throw new InvalidArgumentException("Block with ID " . $id . " is already registered");
+			throw new InvalidArgumentException("Block with ID " . $id . " is already registered");
 
-        RuntimeBlockStateRegistry::getInstance()->register($block);
+		RuntimeBlockStateRegistry::getInstance()->register($block);
 		CustomiesItemFactory::getInstance()->registerBlockItem($identifier, $block);
 
 		$propertiesTag = CompoundTag::create();
@@ -155,7 +151,7 @@ final class CustomiesBlockFactory {
 
 		if($model !== null)
 			foreach($model->toNBT() as $tagName => $tag)
-                $components->setTag($tagName, $tag);
+				$components->setTag($tagName, $tag);
 
 		if($block instanceof Permutable) {
 
@@ -171,18 +167,22 @@ final class CustomiesBlockFactory {
 
 			$permutations = array_map(static fn(Permutation $permutation) => $permutation->toNBT(), $block->getPermutations());
 
-			// The 'minecraft:on_player_placing' component is required for the client to predict block placement, making
-			// it a smoother experience for the end-user.
+			/**
+			 * The 'minecraft:on_player_placing' component is required for the client to predict block placement, making
+			 * it a smoother experience for the end-user.
+			 */
 			$components->setTag("minecraft:on_player_placing", CompoundTag::create());
 			$propertiesTag->setTag("permutations", new ListTag($permutations));
 			$propertiesTag->setTag("properties", new ListTag($blockProperties));
 
 			foreach(Permutations::getCartesianProduct($blockPropertyValues) as $meta => $permutations){
-				// We need to insert states for every possible permutation to allow for all blocks to be used and to
-				// keep in sync with the client's block palette.
+				/**
+				 * We need to insert states for every possible permutation to allow for all blocks to be used and to
+				 * keep in sync with the client's block palette.
+				 */
 				$states = CompoundTag::create();
 				foreach($permutations as $i => $value)
-                    $states->setTag($blockPropertyNames[$i], NBT::getTagType($value));
+					$states->setTag($blockPropertyNames[$i], NBT::getTagType($value));
 
 				$blockState = CompoundTag::create()
 					->setString("name", $identifier)
@@ -201,13 +201,13 @@ final class CustomiesBlockFactory {
 
 		$creativeInfo ??= CreativeInventoryInfo::DEFAULT();
 		$propertiesTag->setTag("components",
-            $components->setTag("minecraft:creative_category", CompoundTag::create()
-                ->setString("category", $creativeInfo->getCategory()->value)
-                ->setString("group", $creativeInfo->getGroup()->value)))
-            ->setTag("menu_category", CompoundTag::create()
-                ->setString("category", $creativeInfo->getCategory()->value ?? "")
-                ->setString("group", $creativeInfo->getGroup()->value ?? ""))
-            ->setInt("molangVersion", 1);
+			$components->setTag("minecraft:creative_category", CompoundTag::create()
+				->setString("category", $creativeInfo->getCategory()->value)
+				->setString("group", $creativeInfo->getGroup()->value)))
+			->setTag("menu_category", CompoundTag::create()
+				->setString("category", $creativeInfo->getCategory()->value ?? "")
+				->setString("group", $creativeInfo->getGroup()->value ?? ""))
+			->setInt("molangVersion", 1);
 
 		CreativeInventory::getInstance()->add($block->asItem());
 
@@ -303,8 +303,8 @@ final class CustomiesBlockFactory {
      * @return int
      */
 	private function getNextAvailableId(string $identifier): int {
-		$id = Cache::getInstance()->getNextAvailableBlockID($identifier);
-
-		return $id > (self::NEW_BLOCK_FACTORY_SIZE / 16) ? throw new OutOfRangeException("All custom block ids are used up") : $id;
+		return ($id = Cache::getInstance()->getNextAvailableBlockID($identifier)) > (self::NEW_BLOCK_FACTORY_SIZE / 16) ?
+			throw new OutOfRangeException("All custom block ids are used up") :
+			$id;
 	}
 }
