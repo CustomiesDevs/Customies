@@ -3,24 +3,26 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies\task;
 
-use Closure;
-use customiesdevs\customies\{block\CustomiesBlockFactory, util\Cache};
 use pocketmine\block\Block;
 use pocketmine\scheduler\AsyncTask;
+
+use customiesdevs\customies\{block\CustomiesBlockFactory, util\Cache};
+
+use Closure;
 use ReflectionException;
-use Threaded;
+use ThreadedArray;
 
 final class AsyncRegisterBlocksTask extends AsyncTask
 {
 
-	/** @var Threaded $blockFuncs */
-	private Threaded $blockFuncs;
+	/** @var ThreadedArray $blockFuncs */
+	private ThreadedArray $blockFuncs;
 
-	/** @var Threaded $objectToState */
-	private Threaded $objectToState;
+	/** @var ThreadedArray $objectToState */
+	private ThreadedArray $objectToState;
 
-	/** @var Threaded $stateToObject */
-	private Threaded $stateToObject;
+	/** @var ThreadedArray $stateToObject */
+	private ThreadedArray $stateToObject;
 
 	/**
 	 * @param string $cachePath
@@ -30,9 +32,9 @@ final class AsyncRegisterBlocksTask extends AsyncTask
 	public function __construct(private readonly string $cachePath, array $blockFuncs)
 	{
 
-		$this->blockFuncs = new Threaded();
-		$this->objectToState = new Threaded();
-		$this->stateToObject = new Threaded();
+		$this->blockFuncs = new ThreadedArray();
+		$this->objectToState = new ThreadedArray();
+		$this->stateToObject = new ThreadedArray();
 
 		foreach($blockFuncs as $identifier => [$blockFunc, $objectToState, $stateToObject]) {
 
