@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace customiesdevs\customies\block;
 
 use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\network\mcpe\convert\R12ToCurrentBlockMapEntry;
+use pocketmine\network\mcpe\convert\BlockStateDictionaryEntry;
 use pocketmine\network\mcpe\convert\RuntimeBlockMapping;
 use pocketmine\utils\SingletonTrait;
 
@@ -60,8 +60,9 @@ final class BlockPalette
 		if ($state->getCompoundTag("states") === null) {
 			throw new RuntimeException("Block state must contain a CompoundTag called 'states'");
 		}
-		$this->sortWith($state);
-		$this->customStates[] = new R12ToCurrentBlockMapEntry($state->getString("name"), $meta, $state);
+		$entry = new BlockStateDictionaryEntry(BlockStateData::fromNbt($state), $meta);
+		$this->sortWith($entry);
+		$this->customStates[] = $entry;
 	}
 
 	/**
