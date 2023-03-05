@@ -3,9 +3,10 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies;
 
-use customiesdevs\customies\{block\CustomiesBlockFactory, util\Cache};
 use pocketmine\plugin\PluginBase;
 use pocketmine\scheduler\ClosureTask;
+
+use customiesdevs\customies\{block\CustomiesBlockFactory, util\Cache};
 
 final class Customies extends PluginBase
 {
@@ -15,9 +16,7 @@ final class Customies extends PluginBase
 	 */
 	protected function onLoad(): void
 	{
-
 		Cache::setInstance(new Cache($this->getDataFolder() . "idcache"));
-
 	}
 
 	/**
@@ -34,7 +33,6 @@ final class Customies extends PluginBase
 			 * register their custom blocks and entities in onEnable() before this is executed.
 			 */
 			Cache::getInstance()->save();
-			CustomiesBlockFactory::getInstance()->registerCustomRuntimeMappings();
 			CustomiesBlockFactory::getInstance()->addWorkerInitHook($cachePath);
 
 		}), 0);

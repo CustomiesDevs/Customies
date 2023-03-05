@@ -16,6 +16,12 @@ final class AsyncRegisterBlocksTask extends AsyncTask
 	/** @var Threaded $blockFuncs */
 	private Threaded $blockFuncs;
 
+	/** @var Threaded $objectToState */
+	private Threaded $objectToState;
+
+	/** @var Threaded $stateToObject */
+	private Threaded $stateToObject;
+
 	/**
 	 * @param string $cachePath
 	 * @param Closure[] $blockFuncs
@@ -25,9 +31,16 @@ final class AsyncRegisterBlocksTask extends AsyncTask
 	{
 
 		$this->blockFuncs = new Threaded();
+		$this->objectToState = new Threaded();
+		$this->stateToObject = new Threaded();
 
-		foreach ($blockFuncs as $identifier => $blockFunc)
+		foreach($blockFuncs as $identifier => [$blockFunc, $objectToState, $stateToObject]) {
+
 			$this->blockFuncs[$identifier] = $blockFunc;
+			$this->objectToState[$identifier] = $objectToState;
+			$this->stateToObject[$identifier] = $stateToObject;
+
+		}
 	}
 
 	/**
@@ -42,9 +55,7 @@ final class AsyncRegisterBlocksTask extends AsyncTask
 		 *  the main thread.
 		 */
 		foreach ($this->blockFuncs as $identifier => $blockFunc)
-			CustomiesBlockFactory::getInstance()->registerBlock($blockFunc, $identifier);
-
-		CustomiesBlockFactory::getInstance()->registerCustomRuntimeMappings();
+			CustomiesBlockFactory::getInstance()->registerBlock($blockFunc, $identifier, objectToState: $this->objectToState[$identifier], stateToObject: $this->stateToObject[$identifier]);
 
 	}
 }

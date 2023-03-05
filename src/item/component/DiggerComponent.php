@@ -3,8 +3,9 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies\item\component;
 
-use customiesdevs\customies\world\LegacyBlockIdToStringIdMap;
 use pocketmine\block\Block;
+use pocketmine\world\format\io\GlobalBlockStateHandlers;
+
 use function array_map;
 use function implode;
 
@@ -26,7 +27,7 @@ final class DiggerComponent extends BasicComponent
 		foreach ($blocks as $block)
 			$this->destroySpeeds[] = [
 				"block" => [
-					"name" => LegacyBlockIdToStringIdMap::getInstance()->legacyToString($block->getTypeId())
+					"name" => GlobalBlockStateHandlers::getSerializer()->serialize($block->getStateId())->getName()
 				],
 				"speed" => $speed
 			];

@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies;
 
-use customiesdevs\customies\{block\CustomiesBlockFactory, item\CustomiesItemFactory};
 use pocketmine\event\{Listener, server\DataPacketSendEvent};
 use pocketmine\network\mcpe\protocol\{BiomeDefinitionListPacket,
 	ItemComponentPacket,
@@ -12,6 +11,9 @@ use pocketmine\network\mcpe\protocol\{BiomeDefinitionListPacket,
 	types\BlockPaletteEntry,
 	types\Experiments,
 	types\ItemTypeEntry};
+
+use customiesdevs\customies\{block\CustomiesBlockFactory, item\CustomiesItemFactory};
+
 use function array_merge;
 
 final class CustomiesListener implements Listener
@@ -65,13 +67,13 @@ final class CustomiesListener implements Listener
 					 * registered before they are cached for the rest of the runtime.
 					 */
 
-					$this->cachedItemTable = array_merge($packet->itemTable, CustomiesItemFactory::getInstance()->getItemTableEntries());
+					$this->cachedItemTable = CustomiesItemFactory::getInstance()->getItemTableEntries();
 					$this->cachedBlockPalette = CustomiesBlockFactory::getInstance()->getBlockPaletteEntries();
 
 				}
 
 				$packet->levelSettings->experiments = $this->experiments;
-				$packet->itemTable = $this->cachedItemTable;
+				$packet->itemTable = array_merge($packet->itemTable, $this->cachedItemTable);
 				$packet->blockPalette = $this->cachedBlockPalette;
 
 			} else if ($packet instanceof ResourcePackStackPacket)
