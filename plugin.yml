@@ -15,4 +15,4 @@ contributors:
   - abimek
 
 extensions:
-  Core: >=8.1
+  Core: ">=8.1"
