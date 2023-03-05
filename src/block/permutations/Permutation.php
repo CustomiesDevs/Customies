@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies\block\permutations;
 
-use customiesdevs\customies\util\NBT;
 use pocketmine\nbt\tag\CompoundTag;
+use customiesdevs\customies\util\NBT;
 
 final class Permutation
 {

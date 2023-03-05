@@ -7,6 +7,7 @@ use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\network\mcpe\convert\R12ToCurrentBlockMapEntry;
 use pocketmine\network\mcpe\convert\RuntimeBlockMapping;
 use pocketmine\utils\SingletonTrait;
+
 use ReflectionClass;
 use ReflectionProperty;
 use RuntimeException;
@@ -71,9 +72,8 @@ final class BlockPalette
 		// To sort the block palette we first have to split the palette up in to groups of states. We only want to sort
 		// using the name of the block, and keeping the order of the existing states.
 		$states = [];
-		foreach ($this->states as $state) {
+		foreach ($this->states as $state)
 			$states[$state->getString("name")][] = $state;
-		}
 		// Append the new state we are sorting with at the end to preserve existing order.
 		$states[$newState->getString("name")][] = $newState;
 
@@ -81,12 +81,12 @@ final class BlockPalette
 		// As of 1.18.30, blocks are sorted using a fnv164 hash of their names.
 		usort($names, static fn(string $a, string $b) => strcmp(hash("fnv164", $a), hash("fnv164", $b)));
 		$sortedStates = [];
-		foreach ($names as $name) {
+
+		foreach ($names as $name)
 			// With the sorted list of names, we can now go back and add all the states for each block in the correct order.
-			foreach ($states[$name] as $state) {
+			foreach ($states[$name] as $state)
 				$sortedStates[] = $state;
-			}
-		}
+
 		$this->states = $sortedStates;
 		$this->bedrockKnownStates->setValue($this->runtimeBlockMapping, $sortedStates);
 	}

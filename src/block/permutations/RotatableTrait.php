@@ -3,13 +3,11 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies\block\permutations;
 
-use pocketmine\block\Block;
-use pocketmine\block\utils\HorizontalFacingTrait;
-use pocketmine\item\Item;
-use pocketmine\math\Facing;
-use pocketmine\math\Vector3;
-use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\player\Player;
+use pocketmine\item\Item;
+use pocketmine\block\{Block, utils\HorizontalFacingTrait};
+use pocketmine\math\{Facing, Vector3};
+use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\world\BlockTransaction;
 
 trait RotatableTrait
