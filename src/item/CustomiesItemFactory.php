@@ -3,7 +3,10 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies\item;
 
+use customiesdevs\customies\item\component\DisplayNameComponent;
+use customiesdevs\customies\util\Cache;
 use InvalidArgumentException;
+use pocketmine\block\Block;
 use pocketmine\inventory\CreativeInventory;
 use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
@@ -21,7 +24,6 @@ use function array_values;
 final class CustomiesItemFactory {
 	use SingletonTrait;
 
-	private int $nextItemID = 950;
 	/**
 	 * @var ItemTypeEntry[]
 	 */
@@ -35,7 +37,7 @@ final class CustomiesItemFactory {
 	 * Get a custom item from its identifier. An exception will be thrown if the item is not registered.
 	 */
 	public function get(string $identifier, int $amount = 1): Item {
-		$id = $this->itemTableEntries[$identifier]?->getNumericId();
+		$id = ($this->itemTableEntries[$identifier] ?? null)?->getNumericId();
 		if($id === null) {
 			throw new InvalidArgumentException("Custom item " . $identifier . " is not registered");
 		}
@@ -67,8 +69,9 @@ final class CustomiesItemFactory {
 		if($className !== Item::class) {
 			Utils::testValidInstance($className, Item::class);
 		}
+
 		/** @var Item $item */
-		$item = new $className(new ItemIdentifier(++$this->nextItemID, 0), $name);
+		$item = new $className(new ItemIdentifier(Cache::getInstance()->getNextAvailableItemID($identifier), 0), $name);
 
 		if(ItemFactory::getInstance()->isRegistered($item->getId())) {
 			throw new RuntimeException("Item with ID " . $item->getId() . " is already registered");
@@ -111,8 +114,8 @@ final class CustomiesItemFactory {
 	 * Registers the required mappings for the block to become an item that can be placed etc. It is assigned an ID that
 	 * correlates to its block ID.
 	 */
-	public function registerBlockItem(string $identifier, int $blockId): void {
-		$itemId = 255 - $blockId;
+	public function registerBlockItem(string $identifier, Block $block): void {
+		$itemId = $block->getIdInfo()->getItemId();
 		$this->registerCustomItemMapping($itemId);
 		$this->itemTableEntries[] = new ItemTypeEntry($identifier, $itemId, false);
 	}

@@ -3,18 +3,23 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies\block;
 
+use Closure;
+use customiesdevs\customies\block\permutations\Permutable;
+use customiesdevs\customies\block\permutations\Permutation;
+use customiesdevs\customies\block\permutations\Permutations;
 use customiesdevs\customies\item\CreativeInventoryInfo;
 use customiesdevs\customies\item\CustomiesItemFactory;
 use customiesdevs\customies\task\AsyncRegisterBlocksTask;
+use customiesdevs\customies\util\Cache;
+use customiesdevs\customies\util\NBT;
 use customiesdevs\customies\world\LegacyBlockIdToStringIdMap;
 use InvalidArgumentException;
 use OutOfRangeException;
 use pocketmine\block\Block;
-use pocketmine\block\BlockBreakInfo;
 use pocketmine\block\BlockFactory;
-use pocketmine\block\BlockIdentifier;
 use pocketmine\inventory\CreativeInventory;
 use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\nbt\tag\ListTag;
 use pocketmine\network\mcpe\convert\GlobalItemTypeDictionary;
 use pocketmine\network\mcpe\convert\R12ToCurrentBlockMapEntry;
 use pocketmine\network\mcpe\convert\RuntimeBlockMapping;
@@ -25,11 +30,11 @@ use pocketmine\network\mcpe\protocol\types\BlockPaletteEntry;
 use pocketmine\network\mcpe\protocol\types\CacheableNbt;
 use pocketmine\Server;
 use pocketmine\utils\SingletonTrait;
-use pocketmine\utils\Utils;
 use ReflectionClass;
 use RuntimeException;
 use SplFixedArray;
 use function array_fill;
+use function array_map;
 use function count;
 use function file_get_contents;
 use const pocketmine\BEDROCK_DATA_PATH;
@@ -40,10 +45,10 @@ final class CustomiesBlockFactory {
 	private const NEW_BLOCK_FACTORY_SIZE = 2048 << Block::INTERNAL_METADATA_BITS;
 
 	/**
-	 * @var Block[]
-	 * @phpstan-var array<string, Block>
+	 * @var Closure[]
+	 * @phpstan-var array<string, Closure(int): Block>
 	 */
-	private array $customBlocks = [];
+	private array $blockFuncs = [];
 	/** @var BlockPaletteEntry[] */
 	private array $blockPaletteEntries = [];
 	/** @var R12ToCurrentBlockMapEntry[] */
@@ -68,10 +73,10 @@ final class CustomiesBlockFactory {
 			$array->setSize(self::NEW_BLOCK_FACTORY_SIZE);
 			$property->setValue($instance, $array);
 		}
-        $instance->light = SplFixedArray::fromArray(array_merge($instance->light->toArray(), array_fill(count($instance->light), self::NEW_BLOCK_FACTORY_SIZE, 0)));
-        $instance->lightFilter = SplFixedArray::fromArray(array_merge($instance->lightFilter->toArray(), array_fill(count($instance->lightFilter), self::NEW_BLOCK_FACTORY_SIZE, 1)));
-        $instance->blocksDirectSkyLight = SplFixedArray::fromArray(array_merge($instance->blocksDirectSkyLight->toArray(), array_fill(count($instance->blocksDirectSkyLight), self::NEW_BLOCK_FACTORY_SIZE, false)));
-        $instance->blastResistance = SplFixedArray::fromArray(array_merge($instance->blastResistance->toArray(), array_fill(count($instance->blastResistance), self::NEW_BLOCK_FACTORY_SIZE, 0.0)));
+		$instance->light = SplFixedArray::fromArray(array_merge($instance->light->toArray(), array_fill(count($instance->light), self::NEW_BLOCK_FACTORY_SIZE, 0)));
+		$instance->lightFilter = SplFixedArray::fromArray(array_merge($instance->lightFilter->toArray(), array_fill(count($instance->lightFilter), self::NEW_BLOCK_FACTORY_SIZE, 1)));
+		$instance->blocksDirectSkyLight = SplFixedArray::fromArray(array_merge($instance->blocksDirectSkyLight->toArray(), array_fill(count($instance->blocksDirectSkyLight), self::NEW_BLOCK_FACTORY_SIZE, false)));
+		$instance->blastResistance = SplFixedArray::fromArray(array_merge($instance->blastResistance->toArray(), array_fill(count($instance->blastResistance), self::NEW_BLOCK_FACTORY_SIZE, 0.0)));
 	}
 
 	/**
@@ -79,11 +84,11 @@ final class CustomiesBlockFactory {
 	 * It is especially important for the workers that deal with chunk encoding, as using the wrong runtime ID mappings
 	 * can result in massive issues with almost every block showing as the wrong thing and causing lag to clients.
 	 */
-	public function addWorkerInitHook(): void {
-		$blocks = serialize($this->customBlocks);
+	public function addWorkerInitHook(string $cachePath): void {
 		$server = Server::getInstance();
-		$server->getAsyncPool()->addWorkerStartHook(static function (int $worker) use ($server, $blocks): void {
-			$server->getAsyncPool()->submitTaskToWorker(new AsyncRegisterBlocksTask($blocks), $worker);
+		$blocks = $this->blockFuncs;
+		$server->getAsyncPool()->addWorkerStartHook(static function (int $worker) use ($cachePath, $server, $blocks): void {
+			$server->getAsyncPool()->submitTaskToWorker(new AsyncRegisterBlocksTask($cachePath, $blocks), $worker);
 		});
 	}
 
@@ -109,42 +114,36 @@ final class CustomiesBlockFactory {
 
 	/**
 	 * Register a block to the BlockFactory and all the required mappings.
-	 * @phpstan-param class-string $className
+	 * @phpstan-param (Closure(int): Block) $blockFunc
 	 */
-	public function registerBlock(string $className, string $identifier, string $name, BlockBreakInfo $breakInfo, ?Model $model = null, ?CreativeInventoryInfo $creativeInfo = null): void {
-		if($className !== Block::class) {
-			Utils::testValidInstance($className, Block::class);
+	public function registerBlock(Closure $blockFunc, string $identifier, ?Model $model = null, ?CreativeInventoryInfo $creativeInfo = null): void {
+		$id = $this->getNextAvailableId($identifier);
+		$block = $blockFunc($id);
+		if(!$block instanceof Block) {
+			throw new InvalidArgumentException("Class returned from closure is not a Block");
 		}
 
-		/** @var Block $block */
-		$block = new $className(new BlockIdentifier($this->getNextAvailableId(), 0), $name, $breakInfo);
-
-		if(BlockFactory::getInstance()->isRegistered($block->getId())) {
-			throw new InvalidArgumentException("Block with ID " . $block->getId() . " is already registered");
+		if(BlockFactory::getInstance()->isRegistered($id)) {
+			throw new InvalidArgumentException("Block with ID " . $id . " is already registered");
 		}
 		BlockFactory::getInstance()->register($block);
-		CustomiesItemFactory::getInstance()->registerBlockItem($identifier, $block->getId());
-
-		$blockState = CompoundTag::create()
-			->setString("name", $identifier)
-			->setTag("states", CompoundTag::create());
-		BlockPalette::getInstance()->insertState($blockState);
+		CustomiesItemFactory::getInstance()->registerBlockItem($identifier, $block);
 
 		$propertiesTag = CompoundTag::create();
-        $components = CompoundTag::create()
-            ->setTag("minecraft:light_emission", CompoundTag::create()
-                ->setByte("emission", $block->getLightLevel()))
-            ->setTag("minecraft:block_light_filter", CompoundTag::create()
-                ->setByte("lightLevel", $block->getLightFilter()))
-            ->setTag("minecraft:destructible_by_mining", CompoundTag::create()
-                ->setFloat("value", $block->getBreakInfo()->getHardness()))//Says seconds_to_destroy in docs
-            ->setTag("minecraft:destructible_by_explosion", CompoundTag::create()
-                ->setFloat("value", $block->getBreakInfo()->getBlastResistance()))//Uses explosion_resistance in docs
-            ->setTag("minecraft:friction", CompoundTag::create()
-                ->setFloat("value", $block->getFrictionFactor()))
-            ->setTag("minecraft:flammable", CompoundTag::create()
-                ->setInt("catch_chance_modifier", $block->getFlameEncouragement())
-                ->setInt("destroy_chance_modifier", $block->getFlammability()));
+		$components = CompoundTag::create()
+			->setTag("minecraft:light_emission", CompoundTag::create()
+				->setByte("emission", $block->getLightLevel()))
+			->setTag("minecraft:block_light_filter", CompoundTag::create()
+				->setByte("lightLevel", $block->getLightFilter()))
+			->setTag("minecraft:destructible_by_mining", CompoundTag::create()
+				->setFloat("value", $block->getBreakInfo()->getHardness()))
+			->setTag("minecraft:destructible_by_explosion", CompoundTag::create()
+				->setFloat("value", $block->getBreakInfo()->getBlastResistance()))
+			->setTag("minecraft:friction", CompoundTag::create()
+				->setFloat("value", $block->getFrictionFactor()))
+			->setTag("minecraft:flammable", CompoundTag::create()
+				->setInt("catch_chance_modifier", $block->getFlameEncouragement())
+				->setInt("destroy_chance_modifier", $block->getFlammability()));
 
 		if($model !== null) {
 			foreach($model->toNBT() as $tagName => $tag){
@@ -152,29 +151,55 @@ final class CustomiesBlockFactory {
 			}
 		}
 
+		if($block instanceof Permutable) {
+			$blockPropertyNames = $blockPropertyValues = $blockProperties = [];
+			foreach($block->getBlockProperties() as $blockProperty){
+				$blockPropertyNames[] = $blockProperty->getName();
+				$blockPropertyValues[] = $blockProperty->getValues();
+				$blockProperties[] = $blockProperty->toNBT();
+			}
+			$permutations = array_map(static fn(Permutation $permutation) => $permutation->toNBT(), $block->getPermutations());
+
+			// The 'minecraft:on_player_placing' component is required for the client to predict block placement, making
+			// it a smoother experience for the end-user.
+			$components->setTag("minecraft:on_player_placing", CompoundTag::create());
+			$propertiesTag->setTag("permutations", new ListTag($permutations));
+			$propertiesTag->setTag("properties", new ListTag($blockProperties));
+
+			foreach(Permutations::getCartesianProduct($blockPropertyValues) as $meta => $permutations){
+				// We need to insert states for every possible permutation to allow for all blocks to be used and to
+				// keep in sync with the client's block palette.
+				$states = CompoundTag::create();
+				foreach($permutations as $i => $value){
+					$states->setTag($blockPropertyNames[$i], NBT::getTagType($value));
+				}
+				$blockState = CompoundTag::create()
+					->setString("name", $identifier)
+					->setTag("states", $states);
+				BlockPalette::getInstance()->insertState($blockState, $meta);
+			}
+		} else {
+			// If a block does not contain any permutations we can just insert the one state.
+			$blockState = CompoundTag::create()
+				->setString("name", $identifier)
+				->setTag("states", CompoundTag::create());
+			BlockPalette::getInstance()->insertState($blockState);
+		}
+
 		$creativeInfo ??= CreativeInventoryInfo::DEFAULT();
 		$components->setTag("minecraft:creative_category", CompoundTag::create()
 			->setString("category", $creativeInfo->getCategory())
 			->setString("group", $creativeInfo->getGroup()));
 		$propertiesTag->setTag("components", $components);
+		$propertiesTag->setTag("menu_category", CompoundTag::create()
+			->setString("category", $creativeInfo?->getCategory() ?? "")
+			->setString("group", $creativeInfo?->getGroup() ?? ""));
+		$propertiesTag->setInt("molangVersion", 1);
 		CreativeInventory::getInstance()->add($block->asItem());
 
 		$this->blockPaletteEntries[] = new BlockPaletteEntry($identifier, new CacheableNbt($propertiesTag));
-
-		$this->customBlocks[$identifier] = $block;
-		LegacyBlockIdToStringIdMap::getInstance()->registerMapping($identifier, $block->getId());
-	}
-
-	/**
-	 * Returns the next available custom block id, an exception will be thrown if the block factory is full.
-	 */
-	private function getNextAvailableId(): int {
-		$id = 1000 + count($this->customBlocks);
-		if($id > (self::NEW_BLOCK_FACTORY_SIZE / 16)) {
-			throw new OutOfRangeException("All custom block ids are used up");
-		}
-
-		return $id;
+		$this->blockFuncs[$identifier] = $blockFunc;
+		LegacyBlockIdToStringIdMap::getInstance()->registerMapping($identifier, $id);
 	}
 
 	/**
@@ -214,7 +239,7 @@ final class CustomiesBlockFactory {
 		}
 
 		foreach(BlockPalette::getInstance()->getCustomStates() as $state){
-			$legacyStateMap[] = new R12ToCurrentBlockMapEntry($state->getString("name"), 0, $state);
+			$legacyStateMap[] = $state;
 		}
 
 		/**
@@ -248,5 +273,16 @@ final class CustomiesBlockFactory {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Returns the next available custom block id, an exception will be thrown if the block factory is full.
+	 */
+	private function getNextAvailableId(string $identifier): int {
+		$id = Cache::getInstance()->getNextAvailableBlockID($identifier);
+		if($id > (self::NEW_BLOCK_FACTORY_SIZE / 16)) {
+			throw new OutOfRangeException("All custom block ids are used up");
+		}
+		return $id;
 	}
 }

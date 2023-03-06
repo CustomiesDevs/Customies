@@ -8,9 +8,13 @@ use pocketmine\nbt\tag\CompoundTag;
 final class Material {
 
 	public const TARGET_ALL = "*";
+	public const TARGET_SIDES = "sides";
 	public const TARGET_UP = "up";
 	public const TARGET_DOWN = "down";
-	public const TARGET_SIDES = "sides";
+	public const TARGET_NORTH = "north";
+	public const TARGET_EAST = "east";
+	public const TARGET_SOUTH = "south";
+	public const TARGET_WEST = "west";
 
 	public const RENDER_METHOD_ALPHA_TEST = "alpha_test";
 	public const RENDER_METHOD_BLEND = "blend";
