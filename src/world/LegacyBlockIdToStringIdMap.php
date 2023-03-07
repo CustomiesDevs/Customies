@@ -3,7 +3,7 @@
 namespace customiesdevs\customies\world;
 
 use pocketmine\utils\SingletonTrait;
-use const pocketmine\BEDROCK_DATA_PATH;
+use const pocketmine\PATH;
 
 final class LegacyBlockIdToStringIdMap {
 	use SingletonTrait;
@@ -21,7 +21,7 @@ final class LegacyBlockIdToStringIdMap {
 
 	public function __construct() {
 		/** @phpstan-var array<string, int> $blockIdMap */
-		$blockIdMap = json_decode((string)file_get_contents(BEDROCK_DATA_PATH . "block_id_map.json"), true);
+		$blockIdMap = json_decode((string)file_get_contents(PATH . "vendor/pocketmine/bedrock-block-upgrade-schema/block_legacy_id_map.json"), true);
 		$this->stringToLegacy = $blockIdMap;
 		/** @phpstan-var array<int, string> $flipped */
 		$flipped = array_flip($this->stringToLegacy);
