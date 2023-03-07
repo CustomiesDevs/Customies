@@ -3,7 +3,7 @@ description: A PocketMine-MP plugin that implements support for custom blocks, i
 
 main: customiesdevs\customies\Customies
 src-namespace-prefix: customiesdevs\customies
-version: 1.2.0
+version: 1.2.1
 api: 4.0.0
 
 authors:
