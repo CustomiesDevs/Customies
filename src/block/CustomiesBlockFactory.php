@@ -164,8 +164,8 @@ final class CustomiesBlockFactory {
 					->setString("category", $creativeInfo->getCategory()->value)
 					->setString("group", $creativeInfo->getGroup()->value)))
 			->setTag("menu_category", CompoundTag::create()
-				->setString("category", $creativeInfo->getCategory() ?? "")
-				->setString("group", $creativeInfo->getGroup() ?? ""))
+				->setString("category", $creativeInfo->getCategory()->value ?? "")
+				->setString("group", $creativeInfo->getGroup()->value ?? ""))
 			->setInt("molangVersion", 1);
 
 		CreativeInventory::getInstance()->add($block->asItem());
