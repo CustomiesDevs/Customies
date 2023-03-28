@@ -2,8 +2,7 @@
 
 namespace customiesdevs\customies\item\enum;
 
-enum Category: string
-{
+enum Category: string {
 	case NONE = "none";
 	case ALL = "all";
 	case COMMANDS = "commands";

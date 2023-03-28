@@ -3,28 +3,33 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies\block;
 
-use pocketmine\Server;
-use pocketmine\inventory\CreativeInventory;
-use pocketmine\block\{Block, RuntimeBlockStateRegistry};
-use pocketmine\data\bedrock\block\convert\{BlockStateReader, BlockStateWriter};
-use pocketmine\nbt\tag\{CompoundTag, ListTag};
-use pocketmine\network\mcpe\protocol\{types\BlockPaletteEntry, types\CacheableNbt};
-use pocketmine\world\format\io\GlobalBlockStateHandlers;
-use pocketmine\utils\SingletonTrait;
-
-use customiesdevs\customies\block\permutations\{Permutable, Permutation, Permutations};
-use customiesdevs\customies\item\{CreativeInventoryInfo, CustomiesItemFactory};
-use customiesdevs\customies\task\AsyncRegisterBlocksTask;
-use customiesdevs\customies\util\{Cache, NBT};
-
 use Closure;
+use customiesdevs\customies\block\permutations\Permutable;
+use customiesdevs\customies\block\permutations\Permutation;
+use customiesdevs\customies\block\permutations\Permutations;
+use customiesdevs\customies\item\CreativeInventoryInfo;
+use customiesdevs\customies\item\CustomiesItemFactory;
+use customiesdevs\customies\task\AsyncRegisterBlocksTask;
+use customiesdevs\customies\util\Cache;
+use customiesdevs\customies\util\NBT;
 use InvalidArgumentException;
-use ReflectionException;
+use pocketmine\block\Block;
+use pocketmine\block\RuntimeBlockStateRegistry;
+use pocketmine\data\bedrock\block\convert\BlockStateReader;
+use pocketmine\data\bedrock\block\convert\BlockStateWriter;
+use pocketmine\inventory\CreativeInventory;
+use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\nbt\tag\ListTag;
+use pocketmine\network\mcpe\protocol\types\BlockPaletteEntry;
+use pocketmine\network\mcpe\protocol\types\CacheableNbt;
+use pocketmine\Server;
+use pocketmine\utils\SingletonTrait;
+use pocketmine\world\format\io\GlobalBlockStateHandlers;
 use function array_map;
+use function array_reverse;
+use function get_class;
 
-final class CustomiesBlockFactory
-{
-
+final class CustomiesBlockFactory {
 	use SingletonTrait;
 
 	/**
@@ -53,8 +58,7 @@ final class CustomiesBlockFactory
 	/**
 	 * Get a custom block from its identifier. An exception will be thrown if the block is not registered.
 	 */
-	public function get(string $identifier): Block
-	{
+	public function get(string $identifier): Block {
 		return RuntimeBlockStateRegistry::getInstance()->fromTypeId(
 			$this->stringIdToTypedIds[$identifier] ??
 			throw new InvalidArgumentException("Custom block " . $identifier . " is not registered")
@@ -65,27 +69,24 @@ final class CustomiesBlockFactory
 	 * Returns all the block palette entries that need to be sent to the client.
 	 * @return BlockPaletteEntry[]
 	 */
-	public function getBlockPaletteEntries(): array
-	{
+	public function getBlockPaletteEntries(): array {
 		return $this->blockPaletteEntries;
 	}
 
 	/**
 	 * Register a block to the BlockFactory and all the required mappings.
 	 * @phpstan-param (Closure(int): Block) $blockFunc
-	 * @throws ReflectionException
 	 */
 	public function registerBlock(Closure $blockFunc, string $identifier, ?Model $model = null, ?CreativeInventoryInfo $creativeInfo = null, ?Closure $objectToState = null, ?Closure $stateToObject = null): void {
-
 		$id = $this->getNextAvailableId($identifier);
 		$block = $blockFunc($id);
-
-		if(!$block instanceof Block)
+		if(!$block instanceof Block) {
 			throw new InvalidArgumentException("Class returned from closure is not a Block");
+		}
 
-		if(RuntimeBlockStateRegistry::getInstance()->isRegistered($id))
+		if(RuntimeBlockStateRegistry::getInstance()->isRegistered($id)) {
 			throw new InvalidArgumentException("Block with ID " . $id . " is already registered");
-
+		}
 		RuntimeBlockStateRegistry::getInstance()->register($block);
 		CustomiesItemFactory::getInstance()->registerBlockItem($identifier, $block);
 		$this->stringIdToTypedIds[$identifier] = $id;
@@ -113,15 +114,11 @@ final class CustomiesBlockFactory
 		}
 
 		if($block instanceof Permutable) {
-
 			$blockPropertyNames = $blockPropertyValues = $blockProperties = [];
-
 			foreach($block->getBlockProperties() as $blockProperty){
-
 				$blockPropertyNames[] = $blockProperty->getName();
 				$blockPropertyValues[] = $blockProperty->getValues();
 				$blockProperties[] = $blockProperty->toNBT();
-
 			}
 			$permutations = array_map(static fn(Permutation $permutation) => $permutation->toNBT(), $block->getPermutations());
 
@@ -136,9 +133,9 @@ final class CustomiesBlockFactory
 				// We need to insert states for every possible permutation to allow for all blocks to be used and to
 				// keep in sync with the client's block palette.
 				$states = CompoundTag::create();
-				foreach($permutations as $i => $value)
+				foreach($permutations as $i => $value){
 					$states->setTag($blockPropertyNames[$i], NBT::getTagType($value));
-
+				}
 				$blockState = CompoundTag::create()
 					->setString("name", $identifier)
 					->setTag("states", $states);
@@ -147,17 +144,14 @@ final class CustomiesBlockFactory
 
 			GlobalBlockStateHandlers::getSerializer()->map($block, $objectToState ?? throw new InvalidArgumentException("Serializer for " . get_class($block) . " cannot be null"));
 			GlobalBlockStateHandlers::getDeserializer()->map($identifier, $stateToObject ?? throw new InvalidArgumentException("Deserializer for " . get_class($block) . " cannot be null"));
-
 		} else {
 			// If a block does not contain any permutations we can just insert the one state.
 			$blockState = CompoundTag::create()
 				->setString("name", $identifier)
 				->setTag("states", CompoundTag::create());
-
 			BlockPalette::getInstance()->insertState($blockState);
 			GlobalBlockStateHandlers::getSerializer()->map($block, $objectToState ??= static fn() => new BlockStateWriter($identifier));
 			GlobalBlockStateHandlers::getDeserializer()->map($identifier, $stateToObject ??= static fn(BlockStateReader $in) => $block);
-
 		}
 
 		$creativeInfo ??= CreativeInventoryInfo::DEFAULT();
@@ -178,17 +172,12 @@ final class CustomiesBlockFactory
 
 		$this->blockPaletteEntries[] = new BlockPaletteEntry($identifier, new CacheableNbt($propertiesTag));
 		$this->blockFuncs[$identifier] = [$blockFunc, $objectToState, $stateToObject];
-
 	}
 
 	/**
 	 * Returns the next available custom block id, an exception will be thrown if the block factory is full.
-	 *
-	 * @param string $identifier
-	 * @return int
 	 */
-	private function getNextAvailableId(string $identifier): int
-	{
+	private function getNextAvailableId(string $identifier): int {
 		return Cache::getInstance()->getNextAvailableBlockID($identifier);
 	}
 }

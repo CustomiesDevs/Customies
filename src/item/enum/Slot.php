@@ -2,8 +2,7 @@
 
 namespace customiesdevs\customies\item\enum;
 
-enum Slot: string
-{
+enum Slot: string {
 	case NONE = "none";
 	case ARMOR = "slot.armor";
 	case ARMOR_CHEST = "slot.armor.chest";

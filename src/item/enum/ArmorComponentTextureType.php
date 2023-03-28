@@ -2,8 +2,7 @@
 
 namespace customiesdevs\customies\item\enum;
 
-enum ArmorComponentTextureType: string
-{
+enum ArmorComponentTextureType: string {
 	case NONE = "none";
 	case CHAIN = "chain";
 	case DIAMOND = "diamond";

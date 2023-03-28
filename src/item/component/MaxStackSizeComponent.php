@@ -3,14 +3,9 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies\item\component;
 
-final class MaxStackSizeComponent extends BasicComponent
-{
+final class MaxStackSizeComponent extends BasicComponent {
 
-	/**
-	 * @param int $maxStackSize
-	 */
-	public function __construct(int $maxStackSize)
-	{
+	public function __construct(int $maxStackSize) {
 		parent::__construct("max_stack_size", $maxStackSize, true);
 	}
 }

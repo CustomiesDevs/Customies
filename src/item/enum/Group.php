@@ -2,9 +2,7 @@
 
 namespace customiesdevs\customies\item\enum;
 
-enum Group: string
-{
-
+enum Group: string {
 	case NONE = "none";
 	case ANVIL = "itemGroup.name.anvil";
 	case ARROW = "itemGroup.name.arrow";
@@ -80,5 +78,4 @@ enum Group: string
 	case WOOL_CARPET = "itemGroup.name.woolCarpet";
 	case CANDLES = "itemGroup.name.candles";
 	case GOAT_HORN = "itemGroup.name.goatHorn";
-
 }

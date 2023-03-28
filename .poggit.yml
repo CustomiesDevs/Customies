@@ -1,7 +1,8 @@
 --- # Poggit-CI Manifest. Open the CI at https://poggit.pmmp.io/ci/TwistedAsylumMC/Customies
 build-by-default: true
 branches:
-  - master
+- master
 projects:
   Customies:
     path: ""
+...

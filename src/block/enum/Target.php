@@ -2,8 +2,7 @@
 
 namespace customiesdevs\customies\block\enum;
 
-enum Target: string
-{
+enum Target: string {
 	case ALL = "*";
 	case SIDES = "sides";
 	case UP = "up";

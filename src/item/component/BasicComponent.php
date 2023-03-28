@@ -1,42 +1,24 @@
 <?php
+declare(strict_types=1);
 
 namespace customiesdevs\customies\item\component;
 
-class BasicComponent implements ItemComponent
-{
+class BasicComponent implements ItemComponent {
 
 	/**
 	 * Basic Component allows you to create your own components
-	 *
-	 * @param string $name
-	 * @param mixed $value
-	 * @param bool $property
 	 */
-	public function __construct(private string $name, private mixed $value, private bool $property)
-	{
-	}
+	public function __construct(private string $name, private mixed $value, private bool $property) { }
 
-	/**
-	 * @return string
-	 */
-	public function getName(): string
-	{
+	public function getName(): string {
 		return $this->name;
 	}
 
-	/**
-	 * @return mixed
-	 */
-	public function getValue(): mixed
-	{
+	public function getValue(): mixed {
 		return $this->value;
 	}
 
-	/**
-	 * @return bool
-	 */
-	public function isProperty(): bool
-	{
+	public function isProperty(): bool {
 		return $this->property;
 	}
 }

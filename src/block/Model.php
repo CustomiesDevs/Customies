@@ -4,10 +4,11 @@ declare(strict_types=1);
 namespace customiesdevs\customies\block;
 
 use pocketmine\math\Vector3;
-use pocketmine\nbt\tag\{CompoundTag, FloatTag, ListTag};
+use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\nbt\tag\FloatTag;
+use pocketmine\nbt\tag\ListTag;
 
-final class Model
-{
+final class Model {
 
 	/** @var Material[] */
 	private array $materials;
@@ -18,8 +19,7 @@ final class Model
 	/**
 	 * @param Material[] $materials
 	 */
-	public function __construct(array $materials, string $geometry, Vector3 $origin, Vector3 $size)
-	{
+	public function __construct(array $materials, string $geometry, Vector3 $origin, Vector3 $size) {
 		$this->materials = $materials;
 		$this->geometry = $geometry;
 		$this->origin = $origin;
@@ -30,12 +30,11 @@ final class Model
 	 * Returns the model in the correct NBT format supported by the client.
 	 * @return CompoundTag[]
 	 */
-	public function toNBT(): array
-	{
+	public function toNBT(): array {
 		$materials = CompoundTag::create();
-
-		foreach ($this->materials as $material)
+		foreach($this->materials as $material){
 			$materials->setTag($material->getTarget()->value, $material->toNBT());
+		}
 
 		return [
 			"minecraft:material_instances" => CompoundTag::create()
