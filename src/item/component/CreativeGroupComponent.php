@@ -5,9 +5,23 @@ namespace customiesdevs\customies\item\component;
 
 use customiesdevs\customies\item\CreativeInventoryInfo;
 
-final class CreativeGroupComponent extends BasicComponent {
+final class CreativeGroupComponent implements ItemComponent {
+
+	private CreativeInventoryInfo $creativeInfo;
 
 	public function __construct(CreativeInventoryInfo $creativeInfo) {
-		parent::__construct("creative_group", $creativeInfo->getGroup()->value, true);
+		$this->creativeInfo = $creativeInfo;
+	}
+
+	public function getName(): string {
+		return "creative_group";
+	}
+
+	public function getValue(): string {
+		return $this->creativeInfo->getGroup()->value;
+	}
+
+	public function isProperty(): bool {
+		return true;
 	}
 }

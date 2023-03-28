@@ -3,11 +3,25 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies\item\component;
 
-final class IconComponent extends BasicComponent {
+final class IconComponent implements ItemComponent {
+
+	private string $texture;
 
 	public function __construct(string $texture) {
-		parent::__construct("minecraft:icon", [
-			"texture" => $texture
-		], true);
+		$this->texture = $texture;
+	}
+
+	public function getName(): string {
+		return "minecraft:icon";
+	}
+
+	public function getValue(): array {
+		return [
+			"texture" => $this->texture
+		];
+	}
+
+	public function isProperty(): bool {
+		return true;
 	}
 }

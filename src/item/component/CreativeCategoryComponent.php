@@ -5,9 +5,23 @@ namespace customiesdevs\customies\item\component;
 
 use customiesdevs\customies\item\CreativeInventoryInfo;
 
-final class CreativeCategoryComponent extends BasicComponent {
+final class CreativeCategoryComponent implements ItemComponent {
 
-	public function __construct(CreativeInventoryInfo $creativeInventoryInfo) {
-		parent::__construct("creative_category", $creativeInventoryInfo->getNumericCategory(), true);
+	private CreativeInventoryInfo $creativeInfo;
+
+	public function __construct(CreativeInventoryInfo $creativeInfo) {
+		$this->creativeInfo = $creativeInfo;
+	}
+
+	public function getName(): string {
+		return "creative_category";
+	}
+
+	public function getValue(): int {
+		return $this->creativeInfo->getNumericCategory();
+	}
+
+	public function isProperty(): bool {
+		return true;
 	}
 }

@@ -8,14 +8,22 @@ use pocketmine\world\format\io\GlobalBlockStateHandlers;
 use function array_map;
 use function implode;
 
-final class DiggerComponent extends BasicComponent {
+final class DiggerComponent implements ItemComponent {
 
-	private array $destroySpeeds = [];
+	private array $destroySpeeds;
 
-	public function __construct() {
-		parent::__construct("minecraft:digger", [
+	public function getName(): string {
+		return "minecraft:digger";
+	}
+
+	public function getValue(): array {
+		return [
 			"destroy_speeds" => $this->destroySpeeds
-		], false);
+		];
+	}
+
+	public function isProperty(): bool {
+		return false;
 	}
 
 	public function withBlocks(int $speed, Block ...$blocks): DiggerComponent {

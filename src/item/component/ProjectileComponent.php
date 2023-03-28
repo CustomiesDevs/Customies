@@ -3,11 +3,25 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies\item\component;
 
-final class ProjectileComponent extends BasicComponent {
+final class ProjectileComponent implements ItemComponent {
+
+	private string $projectileEntity;
 
 	public function __construct(string $projectileEntity) {
-		parent::__construct("minecraft:projectile", [
-			"entity" => $projectileEntity
-		], false);
+		$this->projectileEntity = $projectileEntity;
+	}
+
+	public function getName(): string {
+		return "minecraft:projectile";
+	}
+
+	public function getValue(): array {
+		return [
+			"projectile_entity" => $this->projectileEntity
+		];
+	}
+
+	public function isProperty(): bool {
+		return false;
 	}
 }
