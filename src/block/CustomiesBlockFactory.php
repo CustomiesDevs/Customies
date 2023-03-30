@@ -156,16 +156,16 @@ final class CustomiesBlockFactory {
 
 		$creativeInfo ??= CreativeInventoryInfo::DEFAULT();
 		$components->setTag("minecraft:creative_category", CompoundTag::create()
-			->setString("category", $creativeInfo->getCategory()->value)
-			->setString("group", $creativeInfo->getGroup()->value));
+			->setString("category", $creativeInfo->getCategory())
+			->setString("group", $creativeInfo->getGroup()));
 		$propertiesTag
 			->setTag("components",
 				$components->setTag("minecraft:creative_category", CompoundTag::create()
-					->setString("category", $creativeInfo->getCategory()->value)
-					->setString("group", $creativeInfo->getGroup()->value)))
+					->setString("category", $creativeInfo->getCategory())
+					->setString("group", $creativeInfo->getGroup())))
 			->setTag("menu_category", CompoundTag::create()
-				->setString("category", $creativeInfo->getCategory()->value ?? "")
-				->setString("group", $creativeInfo->getGroup()->value ?? ""))
+				->setString("category", $creativeInfo->getCategory() ?? "")
+				->setString("group", $creativeInfo->getGroup() ?? ""))
 			->setInt("molangVersion", 1);
 
 		CreativeInventory::getInstance()->add($block->asItem());

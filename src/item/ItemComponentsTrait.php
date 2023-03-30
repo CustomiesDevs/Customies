@@ -22,7 +22,6 @@ use customiesdevs\customies\item\component\ThrowableComponent;
 use customiesdevs\customies\item\component\UseAnimationComponent;
 use customiesdevs\customies\item\component\UseDurationComponent;
 use customiesdevs\customies\item\component\WearableComponent;
-use customiesdevs\customies\item\enum\Slot;
 use customiesdevs\customies\util\NBT;
 use pocketmine\entity\Consumable;
 use pocketmine\inventory\ArmorInventory;
@@ -85,11 +84,11 @@ trait ItemComponentsTrait {
 
 		if($this instanceof Armor) {
 			$slot = match ($this->getArmorSlot()) {
-				ArmorInventory::SLOT_HEAD => Slot::ARMOR_HEAD,
-				ArmorInventory::SLOT_CHEST => Slot::ARMOR_CHEST,
-				ArmorInventory::SLOT_LEGS => Slot::ARMOR_LEGS,
-				ArmorInventory::SLOT_FEET => Slot::ARMOR_FEET,
-				default => Slot::ARMOR
+				ArmorInventory::SLOT_HEAD => WearableComponent::SLOT_ARMOR_HEAD,
+				ArmorInventory::SLOT_CHEST => WearableComponent::SLOT_ARMOR_CHEST,
+				ArmorInventory::SLOT_LEGS => WearableComponent::SLOT_ARMOR_LEGS,
+				ArmorInventory::SLOT_FEET => WearableComponent::SLOT_ARMOR_FEET,
+				default => WearableComponent::SLOT_ARMOR
 			};
 
 			$this->addComponents(new ArmorComponent($this->getDefensePoints()), new WearableComponent($slot));

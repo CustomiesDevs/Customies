@@ -18,7 +18,7 @@ final class CreativeGroupComponent implements ItemComponent {
 	}
 
 	public function getValue(): string {
-		return $this->creativeInfo->getGroup()->value;
+		return $this->creativeInfo->getGroup();
 	}
 
 	public function isProperty(): bool {

@@ -33,7 +33,7 @@ final class Model {
 	public function toNBT(): array {
 		$materials = CompoundTag::create();
 		foreach($this->materials as $material){
-			$materials->setTag($material->getTarget()->value, $material->toNBT());
+			$materials->setTag($material->getTarget(), $material->toNBT());
 		}
 
 		return [
