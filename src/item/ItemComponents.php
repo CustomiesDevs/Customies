@@ -15,12 +15,6 @@ interface ItemComponents {
 	public function addComponent(ItemComponent $component): void;
 
 	/**
-	 * Add components adds multiple components to the item that can be returned in the getComponents() method to be
-	 * sent over the network.
-	 */
-	public function addComponents(ItemComponent ...$components): void;
-
-	/**
 	 * Returns if the item has the component with the provided name.
 	 */
 	public function hasComponent(string $name): bool;

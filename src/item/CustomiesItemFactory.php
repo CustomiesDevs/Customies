@@ -3,13 +3,13 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies\item;
 
-use customiesdevs\customies\util\Cache;
 use InvalidArgumentException;
 use pocketmine\block\Block;
 use pocketmine\data\bedrock\item\SavedItemData;
 use pocketmine\inventory\CreativeInventory;
 use pocketmine\item\Item;
 use pocketmine\item\ItemIdentifier;
+use pocketmine\item\ItemTypeIds;
 use pocketmine\item\StringToItemParser;
 use pocketmine\network\mcpe\convert\GlobalItemTypeDictionary;
 use pocketmine\network\mcpe\protocol\types\CacheableNbt;
@@ -67,12 +67,12 @@ final class CustomiesItemFactory {
 			Utils::testValidInstance($className, Item::class);
 		}
 
-		$itemId = Cache::getInstance()->getNextAvailableItemID($identifier);
+		$itemId = ItemTypeIds::newId();
 		$item = new $className(new ItemIdentifier($itemId), $name);
 		$this->registerCustomItemMapping($identifier, $itemId);
 
 		GlobalItemDataHandlers::getDeserializer()->map($identifier, fn() => clone $item);
-		GlobalItemDataHandlers::getSerializer()->map($item, fn() => new SavedItemData($name));
+		GlobalItemDataHandlers::getSerializer()->map($item, fn() => new SavedItemData($identifier));
 
 		StringToItemParser::getInstance()->register($identifier, fn() => clone $item);
 

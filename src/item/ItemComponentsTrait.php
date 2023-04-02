@@ -41,12 +41,6 @@ trait ItemComponentsTrait {
 		$this->components[$component->getName()] = $component;
 	}
 
-	public function addComponents(ItemComponent ...$components): void {
-		foreach($components as $component){
-			$this->addComponent($component);
-		}
-	}
-
 	public function hasComponent(string $name): bool {
 		return isset($this->components[$name]);
 	}
@@ -75,12 +69,10 @@ trait ItemComponentsTrait {
 	 */
 	protected function initComponent(string $texture, ?CreativeInventoryInfo $creativeInfo = null): void {
 		$creativeInfo ??= CreativeInventoryInfo::DEFAULT();
-		$this->addComponents(
-			new CreativeCategoryComponent($creativeInfo),
-			new CreativeGroupComponent($creativeInfo),
-			new IconComponent($texture),
-			new MaxStackSizeComponent($this->getMaxStackSize())
-		);
+		$this->addComponent(new CreativeCategoryComponent($creativeInfo));
+		$this->addComponent(new CreativeGroupComponent($creativeInfo));
+		$this->addComponent(new IconComponent($texture));
+		$this->addComponent(new MaxStackSizeComponent($this->getMaxStackSize()));
 
 		if($this instanceof Armor) {
 			$slot = match ($this->getArmorSlot()) {
@@ -90,8 +82,8 @@ trait ItemComponentsTrait {
 				ArmorInventory::SLOT_FEET => WearableComponent::SLOT_ARMOR_FEET,
 				default => WearableComponent::SLOT_ARMOR
 			};
-
-			$this->addComponents(new ArmorComponent($this->getDefensePoints()), new WearableComponent($slot));
+			$this->addComponent(new ArmorComponent($this->getDefensePoints()));
+			$this->addComponent(new WearableComponent($slot));
 		}
 
 		if($this instanceof Consumable) {
@@ -107,7 +99,8 @@ trait ItemComponentsTrait {
 		}
 
 		if($this instanceof ProjectileItem) {
-			$this->addComponents(new ProjectileComponent("projectile"), new ThrowableComponent(true));
+			$this->addComponent(new ProjectileComponent("projectile"));
+			$this->addComponent(new ThrowableComponent(true));
 		}
 
 		if($this->getName() !== "Unknown") {
@@ -126,7 +119,8 @@ trait ItemComponentsTrait {
 	 * item is something like a tool or weapon.
 	 */
 	protected function setupRenderOffsets(int $width, int $height, bool $handEquipped = false): void {
-		$this->addComponents(new HandEquippedComponent($handEquipped), new RenderOffsetsComponent($width, $height, $handEquipped));
+		$this->addComponent(new HandEquippedComponent($handEquipped));
+		$this->addComponent(new RenderOffsetsComponent($width, $height, $handEquipped));
 	}
 
 	/**

@@ -10,10 +10,10 @@ use customiesdevs\customies\block\permutations\Permutations;
 use customiesdevs\customies\item\CreativeInventoryInfo;
 use customiesdevs\customies\item\CustomiesItemFactory;
 use customiesdevs\customies\task\AsyncRegisterBlocksTask;
-use customiesdevs\customies\util\Cache;
 use customiesdevs\customies\util\NBT;
 use InvalidArgumentException;
 use pocketmine\block\Block;
+use pocketmine\block\BlockTypeIds;
 use pocketmine\block\RuntimeBlockStateRegistry;
 use pocketmine\data\bedrock\block\convert\BlockStateReader;
 use pocketmine\data\bedrock\block\convert\BlockStateWriter;
@@ -47,11 +47,11 @@ final class CustomiesBlockFactory {
 	 * It is especially important for the workers that deal with chunk encoding, as using the wrong runtime ID mappings
 	 * can result in massive issues with almost every block showing as the wrong thing and causing lag to clients.
 	 */
-	public function addWorkerInitHook(string $cachePath): void {
+	public function addWorkerInitHook(): void {
 		$server = Server::getInstance();
 		$blocks = $this->blockFuncs;
-		$server->getAsyncPool()->addWorkerStartHook(static function (int $worker) use ($cachePath, $server, $blocks): void {
-			$server->getAsyncPool()->submitTaskToWorker(new AsyncRegisterBlocksTask($cachePath, $blocks), $worker);
+		$server->getAsyncPool()->addWorkerStartHook(static function (int $worker) use ($server, $blocks): void {
+			$server->getAsyncPool()->submitTaskToWorker(new AsyncRegisterBlocksTask($blocks), $worker);
 		});
 	}
 
@@ -78,7 +78,7 @@ final class CustomiesBlockFactory {
 	 * @phpstan-param (Closure(int): Block) $blockFunc
 	 */
 	public function registerBlock(Closure $blockFunc, string $identifier, ?Model $model = null, ?CreativeInventoryInfo $creativeInfo = null, ?Closure $objectToState = null, ?Closure $stateToObject = null): void {
-		$id = $this->getNextAvailableId($identifier);
+		$id = BlockTypeIds::newId();
 		$block = $blockFunc($id);
 		if(!$block instanceof Block) {
 			throw new InvalidArgumentException("Class returned from closure is not a Block");
@@ -172,12 +172,5 @@ final class CustomiesBlockFactory {
 
 		$this->blockPaletteEntries[] = new BlockPaletteEntry($identifier, new CacheableNbt($propertiesTag));
 		$this->blockFuncs[$identifier] = [$blockFunc, $objectToState, $stateToObject];
-	}
-
-	/**
-	 * Returns the next available custom block id, an exception will be thrown if the block factory is full.
-	 */
-	private function getNextAvailableId(string $identifier): int {
-		return Cache::getInstance()->getNextAvailableBlockID($identifier);
 	}
 }
