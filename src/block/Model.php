@@ -15,15 +15,17 @@ final class Model {
 	private string $geometry;
 	private Vector3 $origin;
 	private Vector3 $size;
+	private bool $collisionBox;
 
 	/**
 	 * @param Material[] $materials
 	 */
-	public function __construct(array $materials, string $geometry, Vector3 $origin, Vector3 $size) {
+	public function __construct(array $materials, string $geometry, Vector3 $origin, Vector3 $size, bool $collisionBox = true) {
 		$this->materials = $materials;
 		$this->geometry = $geometry;
 		$this->origin = $origin;
 		$this->size = $size;
+		$this->collisionBox = $collisionBox;
 	}
 
 	/**
@@ -43,7 +45,7 @@ final class Model {
 			"minecraft:geometry" => CompoundTag::create()
 				->setString("value", $this->geometry),
 			"minecraft:collision_box" => CompoundTag::create()
-				->setByte("enabled", 1)
+				->setByte("enabled", (int) $this->collisionBox)
 				->setTag("origin", new ListTag([
 					new FloatTag($this->origin->getX()),
 					new FloatTag($this->origin->getY()),
