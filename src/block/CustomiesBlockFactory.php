@@ -18,6 +18,7 @@ use pocketmine\block\RuntimeBlockStateRegistry;
 use pocketmine\data\bedrock\block\convert\BlockStateReader;
 use pocketmine\data\bedrock\block\convert\BlockStateWriter;
 use pocketmine\inventory\CreativeInventory;
+use pocketmine\item\StringToItemParser;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\ListTag;
 use pocketmine\network\mcpe\protocol\types\BlockPaletteEntry;
@@ -27,7 +28,6 @@ use pocketmine\utils\SingletonTrait;
 use pocketmine\world\format\io\GlobalBlockStateHandlers;
 use function array_map;
 use function array_reverse;
-use function get_class;
 
 final class CustomiesBlockFactory {
 	use SingletonTrait;
@@ -59,10 +59,8 @@ final class CustomiesBlockFactory {
 	 * Get a custom block from its identifier. An exception will be thrown if the block is not registered.
 	 */
 	public function get(string $identifier): Block {
-		return RuntimeBlockStateRegistry::getInstance()->fromTypeId(
-			$this->stringIdToTypedIds[$identifier] ??
-			throw new InvalidArgumentException("Custom block " . $identifier . " is not registered")
-		);
+		return StringToItemParser::getInstance()->parse($identifier)?->getBlock() ??
+			throw new InvalidArgumentException("Custom block $identifier is not registered");
 	}
 
 	/**
@@ -74,8 +72,11 @@ final class CustomiesBlockFactory {
 	}
 
 	/**
-	 * Register a block to the BlockFactory and all the required mappings.
+	 * Register a block to the BlockFactory and all the required mappings. A custom stateReader and stateWriter can be
+	 * provided to allow for custom block state serialization.
 	 * @phpstan-param (Closure(int): Block) $blockFunc
+	 * @phpstan-param null|(Closure(BlockStateReader): void) $stateReader
+	 * @phpstan-param null|(Closure(BlockStateWriter): void) $stateWriter
 	 */
 	public function registerBlock(Closure $blockFunc, string $identifier, ?Model $model = null, ?CreativeInventoryInfo $creativeInfo = null, ?Closure $objectToState = null, ?Closure $stateToObject = null): void {
 		$id = BlockTypeIds::newId();
@@ -84,9 +85,6 @@ final class CustomiesBlockFactory {
 			throw new InvalidArgumentException("Class returned from closure is not a Block");
 		}
 
-		if(RuntimeBlockStateRegistry::getInstance()->isRegistered($id)) {
-			throw new InvalidArgumentException("Block with ID " . $id . " is already registered");
-		}
 		RuntimeBlockStateRegistry::getInstance()->register($block);
 		CustomiesItemFactory::getInstance()->registerBlockItem($identifier, $block);
 		$this->stringIdToTypedIds[$identifier] = $id;
@@ -142,17 +140,28 @@ final class CustomiesBlockFactory {
 				BlockPalette::getInstance()->insertState($blockState, $meta);
 			}
 
-			GlobalBlockStateHandlers::getSerializer()->map($block, $objectToState ?? throw new InvalidArgumentException("Serializer for " . get_class($block) . " cannot be null"));
-			GlobalBlockStateHandlers::getDeserializer()->map($identifier, $stateToObject ?? throw new InvalidArgumentException("Deserializer for " . get_class($block) . " cannot be null"));
+			$objectToState ??= static function (Permutable $block) use ($identifier, $blockPropertyNames) : BlockStateWriter {
+				$b = BlockStateWriter::create($identifier);
+				$block->serializeState($b);
+				return $b;
+			};
+			$stateToObject ??= static function (BlockStateReader $in) use ($block, $identifier, $blockPropertyNames) : Permutable {
+				$b = CustomiesBlockFactory::getInstance()->get($identifier);
+				assert($b instanceof Permutable);
+				$b->deserializeState($in);
+				return $b;
+			};
 		} else {
 			// If a block does not contain any permutations we can just insert the one state.
 			$blockState = CompoundTag::create()
 				->setString("name", $identifier)
 				->setTag("states", CompoundTag::create());
 			BlockPalette::getInstance()->insertState($blockState);
-			GlobalBlockStateHandlers::getSerializer()->map($block, $objectToState ??= static fn() => new BlockStateWriter($identifier));
-			GlobalBlockStateHandlers::getDeserializer()->map($identifier, $stateToObject ??= static fn(BlockStateReader $in) => $block);
+			$objectToState ??= static fn() => new BlockStateWriter($identifier);
+			$stateToObject ??= static fn(BlockStateReader $in) => $block;
 		}
+		GlobalBlockStateHandlers::getSerializer()->map($block, $objectToState);
+		GlobalBlockStateHandlers::getDeserializer()->map($identifier, $stateToObject);
 
 		$creativeInfo ??= CreativeInventoryInfo::DEFAULT();
 		$components->setTag("minecraft:creative_category", CompoundTag::create()

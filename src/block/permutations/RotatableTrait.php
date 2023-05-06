@@ -5,6 +5,8 @@ namespace customiesdevs\customies\block\permutations;
 
 use pocketmine\block\Block;
 use pocketmine\block\utils\HorizontalFacingTrait;
+use pocketmine\data\bedrock\block\convert\BlockStateReader;
+use pocketmine\data\bedrock\block\convert\BlockStateWriter;
 use pocketmine\item\Item;
 use pocketmine\math\Facing;
 use pocketmine\math\Vector3;
@@ -74,5 +76,13 @@ trait RotatableTrait {
 			$this->facing = $player->getHorizontalFacing();
 		}
 		return parent::place($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
+	}
+
+	public function serializeState(BlockStateWriter $out): void {
+		$out->writeInt("customies:rotation", $this->facing);
+	}
+
+	public function deserializeState(BlockStateReader $in): void {
+		$this->facing = $in->readInt("customies:rotation");
 	}
 }

@@ -3,6 +3,9 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies\block\permutations;
 
+use pocketmine\data\bedrock\block\convert\BlockStateReader;
+use pocketmine\data\bedrock\block\convert\BlockStateWriter;
+
 interface Permutable {
 
 	/**
@@ -25,4 +28,14 @@ interface Permutable {
 	 * @return BlockProperty[]
 	 */
 	public function getCurrentBlockProperties(): array;
+
+	/**
+	 * Serializes the block state to the given BlockStateWriter.
+	 */
+	public function serializeState(BlockStateWriter $blockStateOut): void;
+
+	/**
+	 * Deserializes the block state from the given BlockStateReader.
+	 */
+	public function deserializeState(BlockStateReader $blockStateIn): void;
 }
