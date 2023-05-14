@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies\item\component;
 
-use customiesdevs\customies\world\LegacyBlockIdToStringIdMap;
 use pocketmine\block\Block;
+use pocketmine\world\format\io\GlobalBlockStateHandlers;
 use function array_map;
 use function implode;
 
@@ -30,7 +30,7 @@ final class DiggerComponent implements ItemComponent {
 		foreach($blocks as $block){
 			$this->destroySpeeds[] = [
 				"block" => [
-					"name" => LegacyBlockIdToStringIdMap::getInstance()->legacyToString($block->getId())
+					"name" => GlobalBlockStateHandlers::getSerializer()->serialize($block->getStateId())->getName()
 				],
 				"speed" => $speed
 			];
@@ -39,10 +39,9 @@ final class DiggerComponent implements ItemComponent {
 	}
 
 	public function withTags(int $speed, string ...$tags): DiggerComponent {
-		$query = implode(",", array_map(fn($tag) => "'" . $tag . "'", $tags));
 		$this->destroySpeeds[] = [
 			"block" => [
-				"tags" => "query.any_tag(" . $query . ")"
+				"tags" => "query.any_tag(" . implode(",", array_map(fn($tag) => "'" . $tag . "'", $tags)) . ")"
 			],
 			"speed" => $speed
 		];

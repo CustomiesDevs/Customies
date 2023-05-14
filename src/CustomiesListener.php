@@ -15,17 +15,14 @@ use pocketmine\network\mcpe\protocol\types\BlockPaletteEntry;
 use pocketmine\network\mcpe\protocol\types\Experiments;
 use pocketmine\network\mcpe\protocol\types\ItemTypeEntry;
 use function array_merge;
+use function count;
 
 final class CustomiesListener implements Listener {
 
 	private ?ItemComponentPacket $cachedItemComponentPacket = null;
-	/**
-	 * @var ItemTypeEntry[]
-	 */
+	/** @var ItemTypeEntry[] */
 	private array $cachedItemTable = [];
-	/**
-	 * @var BlockPaletteEntry[]
-	 */
+	/** @var BlockPaletteEntry[] */
 	private array $cachedBlockPalette = [];
 	private Experiments $experiments;
 
@@ -53,13 +50,13 @@ final class CustomiesListener implements Listener {
 				if(count($this->cachedItemTable) === 0) {
 					// Wait for the data to be needed before it is actually cached. Allows for all blocks and items to be
 					// registered before they are cached for the rest of the runtime.
-					$this->cachedItemTable = array_merge($packet->itemTable, CustomiesItemFactory::getInstance()->getItemTableEntries());
-					//$this->cachedBlockPalette = CustomiesBlockFactory::getInstance()->getBlockPaletteEntries();
+					$this->cachedItemTable = CustomiesItemFactory::getInstance()->getItemTableEntries();
+					$this->cachedBlockPalette = CustomiesBlockFactory::getInstance()->getBlockPaletteEntries();
 				}
 				$packet->levelSettings->experiments = $this->experiments;
-				$packet->itemTable = $this->cachedItemTable;
+				$packet->itemTable = array_merge($packet->itemTable, $this->cachedItemTable);
 				$packet->blockPalette = $this->cachedBlockPalette;
-			} else if($packet instanceof ResourcePackStackPacket) {
+			} elseif($packet instanceof ResourcePackStackPacket) {
 				$packet->experiments = $this->experiments;
 			}
 		}

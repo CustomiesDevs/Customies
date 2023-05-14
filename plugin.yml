@@ -13,3 +13,6 @@ contributors:
   - JackNoordhuis
   - Unickorn
   - abimek
+
+extensions:
+  Core: ">=8.1"
