@@ -59,9 +59,9 @@ trait ItemComponentsTrait {
 			}
 			$components->setTag($component->getName(), $tag);
 		}
-
+		$components->setTag("item_properties", $properties);
 		return CompoundTag::create()
-			->setTag("components", $components->setTag("item_properties", $properties));
+			->setTag("components", $components);
 	}
 
 	/**

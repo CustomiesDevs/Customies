@@ -39,9 +39,10 @@ final class DiggerComponent implements ItemComponent {
 	}
 
 	public function withTags(int $speed, string ...$tags): DiggerComponent {
+		$query = implode(",", array_map(fn($tag) => "'" . $tag . "'", $tags));
 		$this->destroySpeeds[] = [
 			"block" => [
-				"tags" => "query.any_tag(" . implode(",", array_map(fn($tag) => "'" . $tag . "'", $tags)) . ")"
+				"tags" => "query.any_tag(" . $query . ")"
 			],
 			"speed" => $speed
 		];
