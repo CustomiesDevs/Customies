@@ -24,9 +24,13 @@ use function array_values;
 final class CustomiesItemFactory {
 	use SingletonTrait;
 
-	/** @var ItemTypeEntry[] */
+	/**
+	 * @var ItemTypeEntry[]
+	 */
 	private array $itemTableEntries = [];
-	/** @var ItemComponentPacketEntry[] */
+	/**
+	 * @var ItemComponentPacketEntry[]
+	 */
 	private array $itemComponentEntries = [];
 
 	/**
@@ -34,7 +38,6 @@ final class CustomiesItemFactory {
 	 */
 	public function get(string $identifier, int $amount = 1): Item {
 		$item = StringToItemParser::getInstance()->parse($identifier);
-
 		if($item === null) {
 			throw new InvalidArgumentException("Custom item " . $identifier . " is not registered");
 		}
@@ -116,9 +119,7 @@ final class CustomiesItemFactory {
 	public function registerBlockItem(string $identifier, Block $block): void {
 		$itemId = $block->getIdInfo()->getBlockTypeId();
 		$this->registerCustomItemMapping($identifier, $itemId);
-
 		StringToItemParser::getInstance()->registerBlock($identifier, fn() => clone $block);
-
 		$this->itemTableEntries[] = new ItemTypeEntry($identifier, $itemId, false);
 	}
 }
