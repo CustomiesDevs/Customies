@@ -11,7 +11,6 @@ use pocketmine\item\Item;
 use pocketmine\item\ItemIdentifier;
 use pocketmine\item\ItemTypeIds;
 use pocketmine\item\StringToItemParser;
-use pocketmine\network\mcpe\convert\GlobalItemTypeDictionary;
 use pocketmine\network\mcpe\convert\TypeConverter;
 use pocketmine\network\mcpe\protocol\types\CacheableNbt;
 use pocketmine\network\mcpe\protocol\types\ItemComponentPacketEntry;
@@ -66,6 +65,7 @@ final class CustomiesItemFactory {
      * Registers the item to the item factory and assigns it an ID. It also updates the required mappings and stores the
      * item components if present.
      * @phpstan-param class-string $className
+     * @throws ReflectionException
      */
     public function registerItem(string $className, string $identifier, string $name): void {
         if($className !== Item::class) {
