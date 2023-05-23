@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies\block;
 
-use pocketmine\data\bedrock\block\BlockStateData;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\network\mcpe\convert\BlockStateDictionary;
 use pocketmine\network\mcpe\convert\BlockStateDictionaryEntry;
@@ -77,7 +76,6 @@ final class BlockPalette {
 		// using the name of the block, and keeping the order of the existing states.
 		$states = [];
 		foreach($this->getStates() as $state){
-
 			$states[$state->getStateName()][] = $state;
 		}
 		// Append the new state we are sorting with at the end to preserve existing order.
@@ -96,8 +94,8 @@ final class BlockPalette {
 		$this->states = $sortedStates;
 		$this->bedrockKnownStates->setValue($this->dictionary, $sortedStates);
 		$this->lookupCache->setValue(
-            $this->dictionary,
-            new BlockStateDictionary(array_map(fn(BlockStateDictionaryEntry $entry) => $entry->getRawStateProperties(), $this->states))
+                    $this->dictionary,
+                    new BlockStateDictionary(array_map(fn(BlockStateDictionaryEntry $entry) => $entry->getRawStateProperties(), $this->states))
         );
 	}
 }
