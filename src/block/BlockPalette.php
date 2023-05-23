@@ -7,8 +7,7 @@ use pocketmine\data\bedrock\block\BlockStateData;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\network\mcpe\convert\BlockStateDictionary;
 use pocketmine\network\mcpe\convert\BlockStateDictionaryEntry;
-use pocketmine\network\mcpe\convert\BlockStateLookupCache;
-use pocketmine\network\mcpe\convert\RuntimeBlockMapping;
+use pocketmine\network\mcpe\convert\TypeConverter;
 use pocketmine\utils\SingletonTrait;
 use ReflectionProperty;
 use RuntimeException;
@@ -31,13 +30,13 @@ final class BlockPalette {
 	private ReflectionProperty $lookupCache;
 
 	public function __construct() {
-		$instance = RuntimeBlockMapping::getInstance();
+		$instance = TypeConverter::getInstance()->getBlockTranslator();
 		$this->dictionary = $dictionary = $instance->getBlockStateDictionary();
 		$this->states = $dictionary->getStates();
 
 		$this->bedrockKnownStates = $bedrockKnownStates = new ReflectionProperty($dictionary, "states");
 		$bedrockKnownStates->setAccessible(true);
-		$this->lookupCache = $lookupCache = new ReflectionProperty($dictionary, "stateDataToStateIdLookupCache");
+		$this->lookupCache = $lookupCache = new ReflectionProperty($dictionary, "idMetaToStateIdLookupCache");
 		$lookupCache->setAccessible(true);
 	}
 
@@ -65,7 +64,8 @@ final class BlockPalette {
 		if($state->getCompoundTag("states") === null) {
 			throw new RuntimeException("Block state must contain a CompoundTag called 'states'");
 		}
-		$this->sortWith($entry = new BlockStateDictionaryEntry(BlockStateData::fromNbt($state), $meta));
+
+		$this->sortWith($entry = new BlockStateDictionaryEntry($state->getString("name"), $state->getTag("states")->getValue(), $meta));
 		$this->customStates[] = $entry;
 	}
 
@@ -77,10 +77,11 @@ final class BlockPalette {
 		// using the name of the block, and keeping the order of the existing states.
 		$states = [];
 		foreach($this->getStates() as $state){
-			$states[$state->getStateData()->getName()][] = $state;
+
+			$states[$state->getStateName()][] = $state;
 		}
 		// Append the new state we are sorting with at the end to preserve existing order.
-		$states[$newState->getStateData()->getName()][] = $newState;
+		$states[$newState->getStateName()][] = $newState;
 
 		$names = array_keys($states);
 		// As of 1.18.30, blocks are sorted using a fnv164 hash of their names.
@@ -95,8 +96,8 @@ final class BlockPalette {
 		$this->states = $sortedStates;
 		$this->bedrockKnownStates->setValue($this->dictionary, $sortedStates);
 		$this->lookupCache->setValue(
-			$this->dictionary,
-			new BlockStateLookupCache(array_map(fn(BlockStateDictionaryEntry $entry) => $entry->getStateData(), $this->states))
-		);
+            $this->dictionary,
+            new BlockStateDictionary(array_map(fn(BlockStateDictionaryEntry $entry) => $entry->getRawStateProperties(), $this->states))
+        );
 	}
 }
