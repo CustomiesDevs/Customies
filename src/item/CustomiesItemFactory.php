@@ -11,7 +11,7 @@ use pocketmine\item\Item;
 use pocketmine\item\ItemIdentifier;
 use pocketmine\item\ItemTypeIds;
 use pocketmine\item\StringToItemParser;
-use pocketmine\network\mcpe\convert\GlobalItemTypeDictionary;
+use pocketmine\network\mcpe\convert\TypeConverter;
 use pocketmine\network\mcpe\protocol\types\CacheableNbt;
 use pocketmine\network\mcpe\protocol\types\ItemComponentPacketEntry;
 use pocketmine\network\mcpe\protocol\types\ItemTypeEntry;
@@ -96,17 +96,15 @@ final class CustomiesItemFactory {
 	 * Registers a custom item ID to the required mappings in the global ItemTypeDictionary instance.
 	 */
 	private function registerCustomItemMapping(string $identifier, int $itemId): void {
-		$dictionary = GlobalItemTypeDictionary::getInstance()->getDictionary();
+		$dictionary = TypeConverter::getInstance()->getItemTypeDictionary();
 		$reflection = new ReflectionClass($dictionary);
 
 		$intToString = $reflection->getProperty("intToStringIdMap");
-		$intToString->setAccessible(true);
 		/** @var int[] $value */
 		$value = $intToString->getValue($dictionary);
 		$intToString->setValue($dictionary, $value + [$itemId => $identifier]);
 
 		$stringToInt = $reflection->getProperty("stringToIntMap");
-		$stringToInt->setAccessible(true);
 		/** @var int[] $value */
 		$value = $stringToInt->getValue($dictionary);
 		$stringToInt->setValue($dictionary, $value + [$identifier => $itemId]);
