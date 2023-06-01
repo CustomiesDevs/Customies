@@ -34,7 +34,7 @@ final class CustomiesBlockFactory {
 
 	/**
 	 * @var Closure[]
-	 * @phpstan-var array<string, array{(Closure(int): Block), (Closure(BlockStateReader): void), (Closure(BlockStateWriter): void)}>
+	 * @phpstan-var array<string, array{(Closure(int): Block), (Closure(BlockStateWriter): Block), (Closure(Block): BlockStateReader)}>
 	 */
 	private array $blockFuncs = [];
 	/** @var BlockPaletteEntry[] */
@@ -77,10 +77,10 @@ final class CustomiesBlockFactory {
 	 * Register a block to the BlockFactory and all the required mappings. A custom stateReader and stateWriter can be
 	 * provided to allow for custom block state serialization.
 	 * @phpstan-param (Closure(int): Block) $blockFunc
-	 * @phpstan-param null|(Closure(BlockStateReader): void) $stateReader
-	 * @phpstan-param null|(Closure(BlockStateWriter): void) $stateWriter
+	 * @phpstan-param null|(Closure(BlockStateWriter): Block) $serializer
+	 * @phpstan-param null|(Closure(Block): BlockStateReader) $deserializer
 	 */
-	public function registerBlock(Closure $blockFunc, string $identifier, ?Model $model = null, ?CreativeInventoryInfo $creativeInfo = null, ?Closure $stateReader = null, ?Closure $stateWriter = null): void {
+	public function registerBlock(Closure $blockFunc, string $identifier, ?Model $model = null, ?CreativeInventoryInfo $creativeInfo = null, ?Closure $serializer = null, ?Closure $deserializer = null): void {
 		$id = $this->getNextAvailableId($identifier);
 		$block = $blockFunc($id);
 		if(!$block instanceof Block) {
@@ -142,12 +142,12 @@ final class CustomiesBlockFactory {
 				BlockPalette::getInstance()->insertState($blockState, $meta);
 			}
 
-			$stateReader ??= static function (Permutable $block) use ($identifier, $blockPropertyNames) : BlockStateWriter {
+			$serializer ??= static function (Permutable $block) use ($identifier, $blockPropertyNames) : BlockStateWriter {
 				$b = BlockStateWriter::create($identifier);
 				$block->serializeState($b);
 				return $b;
 			};
-			$stateWriter ??= static function (BlockStateReader $in) use ($block, $identifier, $blockPropertyNames) : Permutable {
+			$deserializer ??= static function (BlockStateReader $in) use ($block, $identifier, $blockPropertyNames) : Permutable {
 				$b = CustomiesBlockFactory::getInstance()->get($identifier);
 				assert($b instanceof Permutable);
 				$b->deserializeState($in);
@@ -159,11 +159,11 @@ final class CustomiesBlockFactory {
 				->setString(BlockStateData::TAG_NAME, $identifier)
 				->setTag(BlockStateData::TAG_STATES, CompoundTag::create());
 			BlockPalette::getInstance()->insertState($blockState);
-			$stateReader ??= static fn() => new BlockStateWriter($identifier);
-			$stateWriter ??= static fn(BlockStateReader $in) => $block;
+			$serializer ??= static fn() => new BlockStateWriter($identifier);
+			$deserializer ??= static fn(BlockStateReader $in) => $block;
 		}
-		GlobalBlockStateHandlers::getSerializer()->map($block, $stateReader);
-		GlobalBlockStateHandlers::getDeserializer()->map($identifier, $stateWriter);
+		GlobalBlockStateHandlers::getSerializer()->map($block, $serializer);
+		GlobalBlockStateHandlers::getDeserializer()->map($identifier, $deserializer);
 
 		$creativeInfo ??= CreativeInventoryInfo::DEFAULT();
 		$components->setTag("minecraft:creative_category", CompoundTag::create()
@@ -184,7 +184,7 @@ final class CustomiesBlockFactory {
 		}
 
 		$this->blockPaletteEntries[] = new BlockPaletteEntry($identifier, new CacheableNbt($propertiesTag));
-		$this->blockFuncs[$identifier] = [$blockFunc, $stateReader, $stateWriter];
+		$this->blockFuncs[$identifier] = [$blockFunc, $serializer, $deserializer];
 	}
 
 	/**
