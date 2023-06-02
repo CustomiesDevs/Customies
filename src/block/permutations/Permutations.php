@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies\block\permutations;
 
-use pocketmine\block\utils\InvalidBlockStateException;
+use Exception;
 use function array_map;
 use function count;
 use function current;
@@ -18,10 +18,11 @@ class Permutations {
 	 * properties.
 	 */
 	public static function fromMeta(Permutable $block, int $meta): array {
-		$possibleValues = array_map(static fn(BlockProperty $blockProperty) => $blockProperty->getValues(), $block->getBlockProperties());
-		$properties = self::getCartesianProduct($possibleValues)[$meta] ?? null;
+		$properties = self::getCartesianProduct(
+			array_map(static fn(BlockProperty $blockProperty) => $blockProperty->getValues(), $block->getBlockProperties())
+		)[$meta] ?? null;
 		if($properties === null) {
-			throw new InvalidBlockStateException("Unable to calculate permutations from block meta: " . $meta);
+			throw new Exception("Unable to calculate permutations from block meta: " . $meta);
 		}
 		return $properties;
 	}
@@ -31,13 +32,15 @@ class Permutations {
 	 * thrown if the state of the block is not a possible combination of all the block properties.
 	 */
 	public static function toMeta(Permutable $block): int {
-		$possibleValues = array_map(static fn(BlockProperty $blockProperty) => $blockProperty->getValues(), $block->getBlockProperties());
-		foreach(self::getCartesianProduct($possibleValues) as $meta => $permutations){
+		$properties = self::getCartesianProduct(
+			array_map(static fn(BlockProperty $blockProperty) => $blockProperty->getValues(), $block->getBlockProperties())
+		);
+		foreach($properties as $meta => $permutations){
 			if($permutations === $block->getCurrentBlockProperties()) {
 				return $meta;
 			}
 		}
-		throw new InvalidBlockStateException("Unable to calculate block meta from current permutations");
+		throw new Exception("Unable to calculate block meta from current permutations");
 	}
 
 	/**

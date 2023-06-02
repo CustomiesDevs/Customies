@@ -8,11 +8,9 @@ use pocketmine\nbt\tag\CompoundTag;
 
 final class Permutation {
 
-	private string $condition;
 	private CompoundTag $components;
 
-	public function __construct(string $condition) {
-		$this->condition = $condition;
+	public function __construct(private readonly string $condition) {
 		$this->components = CompoundTag::create();
 	}
 

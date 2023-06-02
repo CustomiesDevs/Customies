@@ -34,15 +34,12 @@ class CustomiesEntityFactory {
 
 	private function updateStaticPacketCache(string $identifier, string $behaviourId): void {
 		$instance = StaticPacketCache::getInstance();
-		$staticPacketCache = new ReflectionClass($instance);
-		$property = $staticPacketCache->getProperty("availableActorIdentifiers");
-		$property->setAccessible(true);
+		$property = (new ReflectionClass($instance))->getProperty("availableActorIdentifiers");
 		/** @var AvailableActorIdentifiersPacket $packet */
 		$packet = $property->getValue($instance);
 		/** @var CompoundTag $root */
 		$root = $packet->identifiers->getRoot();
-		$idList = $root->getListTag("idlist") ?? new ListTag();
-		$idList->push(CompoundTag::create()
+		($root->getListTag("idlist") ?? new ListTag())->push(CompoundTag::create()
 			->setString("id", $identifier)
 			->setString("bid", $behaviourId));
 		$packet->identifiers = new CacheableNbt($root);

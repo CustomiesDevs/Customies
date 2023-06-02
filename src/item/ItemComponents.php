@@ -9,7 +9,8 @@ use pocketmine\nbt\tag\CompoundTag;
 interface ItemComponents {
 
 	/**
-	 * Add component adds a component to the item that can be returned in the getComponents() method to be sent over the networkj.
+	 * Add component adds a component to the item that can be returned in the getComponents() method to be sent over
+	 * the network.
 	 */
 	public function addComponent(ItemComponent $component): void;
 
