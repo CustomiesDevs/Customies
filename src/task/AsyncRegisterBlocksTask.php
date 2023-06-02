@@ -4,37 +4,41 @@ declare(strict_types=1);
 namespace customiesdevs\customies\task;
 
 use customiesdevs\customies\block\CustomiesBlockFactory;
+use customiesdevs\customies\util\Cache;
+use pmmp\thread\ThreadSafeArray;
 use pocketmine\block\Block;
+use pocketmine\data\bedrock\block\convert\BlockStateReader;
+use pocketmine\data\bedrock\block\convert\BlockStateWriter;
 use pocketmine\scheduler\AsyncTask;
-use ThreadedArray;
 
 final class AsyncRegisterBlocksTask extends AsyncTask {
 
-	private ThreadedArray $blockFuncs;
-	private ThreadedArray $objectToState;
-	private ThreadedArray $stateToObject;
+	private ThreadSafeArray $blockFuncs;
+	private ThreadSafeArray $serializer;
+	private ThreadSafeArray $deserializer;
 
 	/**
 	 * @param Closure[] $blockFuncs
-	 * @phpstan-param array<string, Closure(int): Block> $blockFuncs
+	 * @phpstan-param array<string, array{(Closure(int): Block), (Closure(BlockStateWriter): Block), (Closure(Block): BlockStateReader)}> $blockFuncs
 	 */
-	public function __construct(array $blockFuncs) {
-		$this->blockFuncs = new ThreadedArray();
-		$this->objectToState = new ThreadedArray();
-		$this->stateToObject = new ThreadedArray();
+	public function __construct(private string $cachePath, array $blockFuncs) {
+		$this->blockFuncs = new ThreadSafeArray();
+		$this->serializer = new ThreadSafeArray();
+		$this->deserializer = new ThreadSafeArray();
 
-		foreach($blockFuncs as $identifier => [$blockFunc, $objectToState, $stateToObject]){
+		foreach($blockFuncs as $identifier => [$blockFunc, $serializer, $deserializer]){
 			$this->blockFuncs[$identifier] = $blockFunc;
-			$this->objectToState[$identifier] = $objectToState;
-			$this->stateToObject[$identifier] = $stateToObject;
+			$this->serializer[$identifier] = $serializer;
+			$this->deserializer[$identifier] = $deserializer;
 		}
 	}
 
 	public function onRun(): void {
+		Cache::setInstance(new Cache($this->cachePath));
 		foreach($this->blockFuncs as $identifier => $blockFunc){
 			// We do not care about the model or creative inventory data in other threads since it is unused outside of
 			// the main thread.
-			CustomiesBlockFactory::getInstance()->registerBlock($blockFunc, $identifier, objectToState: $this->objectToState[$identifier], stateToObject: $this->stateToObject[$identifier]);
+			CustomiesBlockFactory::getInstance()->registerBlock($blockFunc, $identifier, serializer: $this->serializer[$identifier], deserializer: $this->deserializer[$identifier]);
 		}
 	}
 }
