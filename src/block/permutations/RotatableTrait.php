@@ -32,25 +32,25 @@ trait RotatableTrait {
 	public function getPermutations(): array {
 		return [
 			(new Permutation("q.block_property('customies:rotation') == 2"))
-				->withComponent("minecraft:rotation", CompoundTag::create()
-					->setFloat("x", 0)
-					->setFloat("y", 0)
-					->setFloat("z", 0)),
+				->withComponent("minecraft:transformation", CompoundTag::create()
+					->setFloat("RX", 0)
+					->setFloat("RY", 0)
+					->setFloat("RZ", 0)),
 			(new Permutation("q.block_property('customies:rotation') == 3"))
-				->withComponent("minecraft:rotation", CompoundTag::create()
-					->setFloat("x", 0)
-					->setFloat("y", 180)
-					->setFloat("z", 0)),
+				->withComponent("minecraft:transformation", CompoundTag::create()
+					->setFloat("RX", 0)
+					->setFloat("RY", 180)
+					->setFloat("RZ", 0)),
 			(new Permutation("q.block_property('customies:rotation') == 4"))
-				->withComponent("minecraft:rotation", CompoundTag::create()
-					->setFloat("x", 0)
-					->setFloat("y", 90)
-					->setFloat("z", 0)),
+				->withComponent("minecraft:transformation", CompoundTag::create()
+					->setFloat("RX", 0)
+					->setFloat("RY", 90)
+					->setFloat("RZ", 0)),
 			(new Permutation("q.block_property('customies:rotation') == 5"))
-				->withComponent("minecraft:rotation", CompoundTag::create()
-					->setFloat("x", 0)
-					->setFloat("y", 270)
-					->setFloat("z", 0)),
+				->withComponent("minecraft:transformation", CompoundTag::create()
+					->setFloat("RX", 0)
+					->setFloat("RY", 270)
+					->setFloat("RZ", 0)),
 		];
 	}
 
