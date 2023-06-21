@@ -13,7 +13,7 @@ class GiveItem extends VanillaCommand{
     {
         parent::__construct("cgiveitem", "give item from customies plugin", "/give <pseudo> <item> <count>", ["cgi"]);
 
-        $this->setPermission(DefaultPermissions::ROOT_USER);
+        $this->setPermission(DefaultPermissions::ROOT_OPERATOR);
     }
     public function execute(CommandSender $sender, string $commandLabel, array $args): void
     {

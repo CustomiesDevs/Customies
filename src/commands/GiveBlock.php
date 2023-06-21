@@ -13,7 +13,7 @@ class GiveBlock extends VanillaCommand{
     public function __construct()
     {
         parent::__construct("cgiveblock", "give item from customies plugin", "/give <pseudo> <blockName> <count>", ["cgb"]);
-        $this->setPermission(DefaultPermissions::ROOT_USER);
+        $this->setPermission(DefaultPermissions::ROOT_OPERATOR);
     }
     public function execute(CommandSender $sender, string $commandLabel, array $args): void
     {
