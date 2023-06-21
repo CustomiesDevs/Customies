@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace customiesdevs\customies;
 
 use customiesdevs\customies\block\CustomiesBlockFactory;
+use customiesdevs\customies\commands\GiveBlock;
 use customiesdevs\customies\commands\GiveItem;
 use customiesdevs\customies\util\Cache;
 use pocketmine\plugin\PluginBase;
@@ -27,5 +28,6 @@ final class Customies extends PluginBase {
 			CustomiesBlockFactory::getInstance()->addWorkerInitHook($cachePath);
 		}), 0);
         Server::getInstance()->getCommandMap()->register("customies", new GiveItem());
+        Server::getInstance()->getCommandMap()->register("customies", new GiveBlock());
 	}
 }
