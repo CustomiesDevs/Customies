@@ -43,7 +43,7 @@ trait RotatableTrait {
 					->setFloat("TY", 0.0)
 					->setFloat("TZ", 0.0)),
 			(new Permutation("q.block_property('customies:rotation') == 3"))
-				->withComponent("minecraft:rotation", CompoundTag::create()
+				->withComponent("minecraft:transformation", CompoundTag::create()
 					->setInt("RX", 0)
 					->setInt("RY", 2)
 					->setInt("RZ", 0)
@@ -54,7 +54,7 @@ trait RotatableTrait {
 					->setFloat("TY", 0.0)
 					->setFloat("TZ", 0.0)),
 			(new Permutation("q.block_property('customies:rotation') == 4"))
-				->withComponent("minecraft:rotation", CompoundTag::create()
+				->withComponent("minecraft:transformation", CompoundTag::create()
 					->setInt("RX", 0)
 					->setInt("RY", 1)
 					->setInt("RZ", 0)
@@ -65,7 +65,7 @@ trait RotatableTrait {
 					->setFloat("TY", 0.0)
 					->setFloat("TZ", 0.0)),
 			(new Permutation("q.block_property('customies:rotation') == 5"))
-				->withComponent("minecraft:rotation", CompoundTag::create()
+				->withComponent("minecraft:transformation", CompoundTag::create()
 					->setInt("RX", 0)
 					->setInt("RY", 3)
 					->setInt("RZ", 0)
