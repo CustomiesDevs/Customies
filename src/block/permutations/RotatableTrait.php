@@ -30,25 +30,49 @@ trait RotatableTrait {
 	public function getPermutations(): array {
 		return [
 			(new Permutation("q.block_property('customies:rotation') == 2"))
-				->withComponent("minecraft:rotation", CompoundTag::create()
-					->setFloat("x", 0)
-					->setFloat("y", 0)
-					->setFloat("z", 0)),
+				->withComponent("minecraft:transformation", CompoundTag::create()
+					->setInt("RX", 0)
+					->setInt("RY", 0)
+					->setInt("RZ", 0)
+					->setFloat("SX", 1.0)
+					->setFloat("SY", 1.0)
+					->setFloat("SZ", 1.0)
+					->setFloat("TX", 0.0)
+					->setFloat("TY", 0.0)
+					->setFloat("TZ", 0.0)),
 			(new Permutation("q.block_property('customies:rotation') == 3"))
-				->withComponent("minecraft:rotation", CompoundTag::create()
-					->setFloat("x", 0)
-					->setFloat("y", 180)
-					->setFloat("z", 0)),
+				->withComponent("minecraft:transformation", CompoundTag::create()
+					->setInt("RX", 0)
+					->setInt("RY", 2)
+					->setInt("RZ", 0)
+					->setFloat("SX", 1.0)
+					->setFloat("SY", 1.0)
+					->setFloat("SZ", 1.0)
+					->setFloat("TX", 0.0)
+					->setFloat("TY", 0.0)
+					->setFloat("TZ", 0.0)),
 			(new Permutation("q.block_property('customies:rotation') == 4"))
-				->withComponent("minecraft:rotation", CompoundTag::create()
-					->setFloat("x", 0)
-					->setFloat("y", 90)
-					->setFloat("z", 0)),
+				->withComponent("minecraft:transformation", CompoundTag::create()
+					->setInt("RX", 0)
+					->setInt("RY", 1)
+					->setInt("RZ", 0)
+					->setFloat("SX", 1.0)
+					->setFloat("SY", 1.0)
+					->setFloat("SZ", 1.0)
+					->setFloat("TX", 0.0)
+					->setFloat("TY", 0.0)
+					->setFloat("TZ", 0.0)),
 			(new Permutation("q.block_property('customies:rotation') == 5"))
-				->withComponent("minecraft:rotation", CompoundTag::create()
-					->setFloat("x", 0)
-					->setFloat("y", 270)
-					->setFloat("z", 0)),
+				->withComponent("minecraft:transformation", CompoundTag::create()
+					->setInt("RX", 0)
+					->setInt("RY", 3)
+					->setInt("RZ", 0)
+					->setFloat("SX", 1.0)
+					->setFloat("SY", 1.0)
+					->setFloat("SZ", 1.0)
+					->setFloat("TX", 0.0)
+					->setFloat("TY", 0.0)
+					->setFloat("TZ", 0.0)),
 		];
 	}
 
