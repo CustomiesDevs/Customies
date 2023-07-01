@@ -10,7 +10,6 @@ use customiesdevs\customies\block\permutations\Permutations;
 use customiesdevs\customies\item\CreativeInventoryInfo;
 use customiesdevs\customies\item\CustomiesItemFactory;
 use customiesdevs\customies\task\AsyncRegisterBlocksTask;
-use customiesdevs\customies\util\Cache;
 use customiesdevs\customies\util\NBT;
 use InvalidArgumentException;
 use pocketmine\block\Block;
@@ -76,13 +75,12 @@ final class CustomiesBlockFactory {
 	/**
 	 * Register a block to the BlockFactory and all the required mappings. A custom stateReader and stateWriter can be
 	 * provided to allow for custom block state serialization.
-	 * @phpstan-param (Closure(int): Block) $blockFunc
+	 * @phpstan-param (Closure(): Block) $blockFunc
 	 * @phpstan-param null|(Closure(BlockStateWriter): Block) $serializer
 	 * @phpstan-param null|(Closure(Block): BlockStateReader) $deserializer
 	 */
 	public function registerBlock(Closure $blockFunc, string $identifier, ?Model $model = null, ?CreativeInventoryInfo $creativeInfo = null, ?Closure $serializer = null, ?Closure $deserializer = null): void {
-		$id = $this->getNextAvailableId($identifier);
-		$block = $blockFunc($id);
+		$block = $blockFunc();
 		if(!$block instanceof Block) {
 			throw new InvalidArgumentException("Class returned from closure is not a Block");
 		}
@@ -179,18 +177,9 @@ final class CustomiesBlockFactory {
 				->setString("group", $creativeInfo->getGroup() ?? ""))
 			->setInt("molangVersion", 1);
 
-		if(Cache::getInstance()->isMainThread()){
-			CreativeInventory::getInstance()->add($block->asItem());
-		}
+		CreativeInventory::getInstance()->add($block->asItem());
 
 		$this->blockPaletteEntries[] = new BlockPaletteEntry($identifier, new CacheableNbt($propertiesTag));
 		$this->blockFuncs[$identifier] = [$blockFunc, $serializer, $deserializer];
-	}
-
-	/**
-	 * Returns the next available custom block id
-	 */
-	private function getNextAvailableId(string $identifier): int {
-		return Cache::getInstance()->getNextAvailableBlockID($identifier);
 	}
 }

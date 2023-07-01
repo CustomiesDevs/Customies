@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace customiesdevs\customies\task;
 
 use customiesdevs\customies\block\CustomiesBlockFactory;
-use customiesdevs\customies\util\Cache;
 use pmmp\thread\ThreadSafeArray;
 use pocketmine\block\Block;
 use pocketmine\data\bedrock\block\convert\BlockStateReader;
@@ -34,7 +33,6 @@ final class AsyncRegisterBlocksTask extends AsyncTask {
 	}
 
 	public function onRun(): void {
-		Cache::setInstance(new Cache($this->cachePath));
 		foreach($this->blockFuncs as $identifier => $blockFunc){
 			// We do not care about the model or creative inventory data in other threads since it is unused outside of
 			// the main thread.
