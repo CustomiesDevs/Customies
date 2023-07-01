@@ -5,6 +5,7 @@ namespace customiesdevs\customies\item;
 
 use InvalidArgumentException;
 use pocketmine\block\Block;
+use pocketmine\data\bedrock\item\BlockItemIdMap;
 use pocketmine\data\bedrock\item\SavedItemData;
 use pocketmine\inventory\CreativeInventory;
 use pocketmine\item\Item;
@@ -119,5 +120,13 @@ final class CustomiesItemFactory {
 		$this->registerCustomItemMapping($identifier, $itemId);
 		StringToItemParser::getInstance()->registerBlock($identifier, fn() => clone $block);
 		$this->itemTableEntries[] = new ItemTypeEntry($identifier, $itemId, false);
+
+		$blockItemIdMap = BlockItemIdMap::getInstance();
+		$reflection = new ReflectionClass($blockItemIdMap);
+
+		$itemToBlockId = $reflection->getProperty("itemToBlockId");
+		/** @var string[] $value */
+		$value = $itemToBlockId->getValue($blockItemIdMap);
+		$itemToBlockId->setValue($blockItemIdMap, $value + [$identifier => $identifier]);
 	}
 }
