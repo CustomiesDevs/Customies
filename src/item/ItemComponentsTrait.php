@@ -5,6 +5,7 @@ namespace customiesdevs\customies\item;
 
 use customiesdevs\customies\item\component\AllowOffHandComponent;
 use customiesdevs\customies\item\component\ArmorComponent;
+use customiesdevs\customies\item\component\CanDestroyInCreativeComponent;
 use customiesdevs\customies\item\component\CooldownComponent;
 use customiesdevs\customies\item\component\CreativeCategoryComponent;
 use customiesdevs\customies\item\component\CreativeGroupComponent;
@@ -71,6 +72,7 @@ trait ItemComponentsTrait {
 		$creativeInfo ??= CreativeInventoryInfo::DEFAULT();
 		$this->addComponent(new CreativeCategoryComponent($creativeInfo));
 		$this->addComponent(new CreativeGroupComponent($creativeInfo));
+		$this->addComponent(new CanDestroyInCreativeComponent());
 		$this->addComponent(new IconComponent($texture));
 		$this->addComponent(new MaxStackSizeComponent($this->getMaxStackSize()));
 

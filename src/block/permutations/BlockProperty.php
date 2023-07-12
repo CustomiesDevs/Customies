@@ -10,13 +10,7 @@ use function array_map;
 
 final class BlockProperty {
 
-	private string $name;
-	private array $values;
-
-	public function __construct(string $name, array $values) {
-		$this->name = $name;
-		$this->values = $values;
-	}
+	public function __construct(private readonly string $name, private readonly array $values) { }
 
 	/**
 	 * Returns the name of the block property provided in the constructor.
