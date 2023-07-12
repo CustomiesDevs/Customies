@@ -22,7 +22,7 @@ final class BlockPlacerComponent implements ItemComponent {
     public function getValue(): array {
         return [
             "block" => $this->blockIdentifier,
-		    "use_block_description" => $this->useBlockDescription
+            "use_block_description" => $this->useBlockDescription
         ];
     }
 
