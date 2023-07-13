@@ -45,7 +45,7 @@ final class Model {
 			$material["minecraft:unit_cube"] = CompoundTag::create();
 		} else {
 			$material["minecraft:geometry"] = CompoundTag::create()
-				->setString("value", $this->geometry);
+				->setString("identifier", $this->geometry);
 			$material["minecraft:collision_box"] = CompoundTag::create()
 				->setByte("enabled", 1)
 				->setTag("origin", new ListTag([
