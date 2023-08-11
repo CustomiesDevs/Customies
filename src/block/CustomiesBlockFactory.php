@@ -93,7 +93,7 @@ final class CustomiesBlockFactory {
 		$components = CompoundTag::create()
 			->setTag("minecraft:light_emission", CompoundTag::create()
 				->setByte("emission", $block->getLightLevel()))
-			->setTag("minecraft:block_light_filter", CompoundTag::create()
+			->setTag("minecraft:light_dampening", CompoundTag::create()
 				->setByte("lightLevel", $block->getLightFilter()))
 			->setTag("minecraft:destructible_by_mining", CompoundTag::create()
 				->setFloat("value", $block->getBreakInfo()->getHardness()))
