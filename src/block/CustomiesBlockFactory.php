@@ -98,7 +98,7 @@ final class CustomiesBlockFactory {
 			->setTag("minecraft:destructible_by_mining", CompoundTag::create()
 				->setFloat("value", $block->getBreakInfo()->getHardness()))
 			->setTag("minecraft:friction", CompoundTag::create()
-				->setFloat("value", $block->getFrictionFactor()));
+				->setFloat("value", 1 - $block->getFrictionFactor()));
 
 		if($model !== null) {
 			foreach($model->toNBT() as $tagName => $tag){
