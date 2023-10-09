@@ -21,9 +21,11 @@ final class WearableComponent implements ItemComponent {
 	public const SLOT_WEAPON_OFF_HAND = "slot.weapon.offhand";
 
 	private string $slot;
+	private int $protection;
 
-	public function __construct(string $slot) {
+	public function __construct(string $slot,int $protection) {
 		$this->slot = $slot;
+        $this->protection = $protection;
 	}
 
 	public function getName(): string {
@@ -32,7 +34,8 @@ final class WearableComponent implements ItemComponent {
 
 	public function getValue(): array {
 		return [
-			"slot" => $this->slot
+			"slot" => $this->slot,
+            "protection" => $this->protection
 		];
 	}
 
