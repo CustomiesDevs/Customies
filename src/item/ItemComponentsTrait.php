@@ -85,7 +85,7 @@ trait ItemComponentsTrait {
 				default => WearableComponent::SLOT_ARMOR
 			};
 			$this->addComponent(new ArmorComponent($this->getDefensePoints()));
-			$this->addComponent(new WearableComponent($slot));
+			$this->addComponent(new WearableComponent($slot,$this->getDefensePoints()));
 		}
 
 		if($this instanceof Consumable) {
