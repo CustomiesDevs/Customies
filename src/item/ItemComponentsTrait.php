@@ -27,13 +27,23 @@ use customiesdevs\customies\util\NBT;
 use pocketmine\entity\Consumable;
 use pocketmine\inventory\ArmorInventory;
 use pocketmine\item\Armor;
+use pocketmine\item\Axe;
 use pocketmine\item\Durable;
 use pocketmine\item\Food;
+use pocketmine\item\Hoe;
+use pocketmine\item\Pickaxe;
 use pocketmine\item\ProjectileItem;
+use pocketmine\item\Shovel;
+use pocketmine\item\Sword;
 use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\nbt\tag\IntTag;
+use pocketmine\nbt\tag\StringTag;
 use RuntimeException;
 
 trait ItemComponentsTrait {
+
+
+
 
 	/** @var ItemComponent[] */
 	private array $components;
@@ -47,6 +57,14 @@ trait ItemComponentsTrait {
 	}
 
 	public function getComponents(): CompoundTag {
+
+	    $armorSlotEnchantable =  [
+            0 => 'armor_helmet',
+            1 => 'armor_torso',
+            2 => 'armor_legs',
+            3 => 'armor_feet'
+        ];
+
 		$components = CompoundTag::create();
 		$properties = CompoundTag::create();
 		foreach($this->components as $component){
@@ -60,7 +78,48 @@ trait ItemComponentsTrait {
 			}
 			$components->setTag($component->getName(), $tag);
 		}
+
+
+
+		if ($this instanceof Sword) {
+            $properties->setString('enchantable_slot', 'sword');
+            $properties->setInt('enchantable_value', $this->getEnchantability());
+        }
+
+        if ($this instanceof Pickaxe) {
+            $properties->setString('enchantable_slot', 'pickaxe');
+            $properties->setInt('enchantable_value', $this->getEnchantability());
+        }
+
+        if ($this instanceof Axe) {
+            $properties->setString('enchantable_slot', 'axe');
+            $properties->setInt('enchantable_value', $this->getEnchantability());
+        }
+
+
+        if ($this instanceof Hoe) {
+            $properties->setString('enchantable_slot', 'hoe');
+            $properties->setInt('enchantable_value', $this->getEnchantability());
+        }
+
+
+        if ($this instanceof Shovel) {
+            $properties->setString('enchantable_slot', 'shovel');
+            $properties->setInt('enchantable_value', $this->getEnchantability());
+        }
+
+
+        if ($this instanceof Armor) {
+            $properties->setString('enchantable_slot', $armorSlotEnchantable[$this->getArmorSlot()]);
+            $properties->setInt('enchantable_value', $this->getEnchantability());
+        }
+
+
 		$components->setTag("item_properties", $properties);
+
+		if ($this instanceof Sword) {
+
+        }
 		return CompoundTag::create()
 			->setTag("components", $components);
 	}
