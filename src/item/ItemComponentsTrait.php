@@ -27,184 +27,152 @@ use customiesdevs\customies\util\NBT;
 use pocketmine\entity\Consumable;
 use pocketmine\inventory\ArmorInventory;
 use pocketmine\item\Armor;
-use pocketmine\item\Axe;
 use pocketmine\item\Durable;
 use pocketmine\item\Food;
-use pocketmine\item\Hoe;
-use pocketmine\item\Pickaxe;
 use pocketmine\item\ProjectileItem;
-use pocketmine\item\Shovel;
-use pocketmine\item\Sword;
 use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\nbt\tag\IntTag;
-use pocketmine\nbt\tag\StringTag;
 use RuntimeException;
 
 trait ItemComponentsTrait {
 
+    /** @var ItemComponent[] */
+    private array $components;
 
+    public function hasComponent(string $name): bool
+    {
+        return isset($this->components[$name]);
+    }
 
-
-	/** @var ItemComponent[] */
-	private array $components;
-
-	public function addComponent(ItemComponent $component): void {
-		$this->components[$component->getName()] = $component;
-	}
-
-	public function hasComponent(string $name): bool {
-		return isset($this->components[$name]);
-	}
-
-	public function getComponents(): CompoundTag {
-
-	    $armorSlotEnchantable =  [
-            0 => 'armor_helmet',
-            1 => 'armor_torso',
-            2 => 'armor_legs',
-            3 => 'armor_feet'
-        ];
-
-		$components = CompoundTag::create();
-		$properties = CompoundTag::create();
-		foreach($this->components as $component){
-			$tag = NBT::getTagType($component->getValue());
-			if($tag === null) {
-				throw new RuntimeException("Failed to get tag type for component " . $component->getName());
-			}
-			if($component->isProperty()) {
-				$properties->setTag($component->getName(), $tag);
-				continue;
-			}
-			$components->setTag($component->getName(), $tag);
-		}
-
-
-
-		if ($this instanceof Sword) {
-            $properties->setString('enchantable_slot', 'sword');
-            $properties->setInt('enchantable_value', $this->getEnchantability());
+    public function getComponents(): CompoundTag
+    {
+        $components = CompoundTag::create();
+        $properties = CompoundTag::create();
+        foreach ($this->components as $component) {
+            $tag = NBT::getTagType($component->getValue());
+            if ($tag === null) {
+                throw new RuntimeException("Failed to get tag type for component " . $component->getName());
+            }
+            if ($component->isProperty()) {
+                $properties->setTag($component->getName(), $tag);
+                continue;
+            }
+            $components->setTag($component->getName(), $tag);
         }
 
-        if ($this instanceof Pickaxe) {
-            $properties->setString('enchantable_slot', 'pickaxe');
-            $properties->setInt('enchantable_value', $this->getEnchantability());
-        }
+        $enchanted_slot = match(get_parent_class($this)) {
+            "Sword" => "sword",
+            "Pickaxe" => "pickaxe",
+            "Axe" => "axe",
+            "Hoe" => "hoe",
+            "Shovel" => "shovel",
+            "Armor" => match ($this->getArmorSlot()){
+                0 => "armor_helmet",
+                1 => "armor_torso",
+                2 => "armor_legs",
+                3 => "armor_feet"
+            },
+            default => "none"
+        };
 
-        if ($this instanceof Axe) {
-            $properties->setString('enchantable_slot', 'axe');
-            $properties->setInt('enchantable_value', $this->getEnchantability());
-        }
+        $properties->setString("enchantable_slot", $enchanted_slot);
+        $properties->setInt("enchantable_value", $this->getEnchantability());
+        $components->setTag("item_properties", $properties);
 
+        return CompoundTag::create()
+            ->setTag("components", $components);
+    }
 
-        if ($this instanceof Hoe) {
-            $properties->setString('enchantable_slot', 'hoe');
-            $properties->setInt('enchantable_value', $this->getEnchantability());
-        }
-
-
-        if ($this instanceof Shovel) {
-            $properties->setString('enchantable_slot', 'shovel');
-            $properties->setInt('enchantable_value', $this->getEnchantability());
-        }
-
+    /**
+     * Initializes the item with default components that are required for the item to function correctly.
+     */
+    protected function initComponent(string $texture, ?CreativeInventoryInfo $creativeInfo = null): void
+    {
+        $creativeInfo ??= CreativeInventoryInfo::DEFAULT();
+        $this->addComponent(new CreativeCategoryComponent($creativeInfo));
+        $this->addComponent(new CreativeGroupComponent($creativeInfo));
+        $this->addComponent(new CanDestroyInCreativeComponent());
+        $this->addComponent(new IconComponent($texture));
+        $this->addComponent(new MaxStackSizeComponent($this->getMaxStackSize()));
 
         if ($this instanceof Armor) {
-            $properties->setString('enchantable_slot', $armorSlotEnchantable[$this->getArmorSlot()]);
-            $properties->setInt('enchantable_value', $this->getEnchantability());
+            $slot = match ($this->getArmorSlot()) {
+                ArmorInventory::SLOT_HEAD => WearableComponent::SLOT_ARMOR_HEAD,
+                ArmorInventory::SLOT_CHEST => WearableComponent::SLOT_ARMOR_CHEST,
+                ArmorInventory::SLOT_LEGS => WearableComponent::SLOT_ARMOR_LEGS,
+                ArmorInventory::SLOT_FEET => WearableComponent::SLOT_ARMOR_FEET,
+                default => WearableComponent::SLOT_ARMOR
+            };
+            $this->addComponent(new ArmorComponent($this->getDefensePoints()));
+            $this->addComponent(new WearableComponent($slot, $this->getDefensePoints()));
         }
 
-
-		$components->setTag("item_properties", $properties);
-
-		if ($this instanceof Sword) {
-
+        if ($this instanceof Consumable) {
+            if (($food = $this instanceof Food)) {
+                $this->addComponent(new FoodComponent(!$this->requiresHunger()));
+            }
+            $this->addComponent(new UseAnimationComponent($food ? UseAnimationComponent::ANIMATION_EAT : UseAnimationComponent::ANIMATION_DRINK));
+            $this->setUseDuration(20);
         }
-		return CompoundTag::create()
-			->setTag("components", $components);
-	}
 
-	/**
-	 * Initializes the item with default components that are required for the item to function correctly.
-	 */
-	protected function initComponent(string $texture, ?CreativeInventoryInfo $creativeInfo = null): void {
-		$creativeInfo ??= CreativeInventoryInfo::DEFAULT();
-		$this->addComponent(new CreativeCategoryComponent($creativeInfo));
-		$this->addComponent(new CreativeGroupComponent($creativeInfo));
-		$this->addComponent(new CanDestroyInCreativeComponent());
-		$this->addComponent(new IconComponent($texture));
-		$this->addComponent(new MaxStackSizeComponent($this->getMaxStackSize()));
+        if ($this instanceof Durable) {
+            $this->addComponent(new DurabilityComponent($this->getMaxDurability()));
+        }
 
-		if($this instanceof Armor) {
-			$slot = match ($this->getArmorSlot()) {
-				ArmorInventory::SLOT_HEAD => WearableComponent::SLOT_ARMOR_HEAD,
-				ArmorInventory::SLOT_CHEST => WearableComponent::SLOT_ARMOR_CHEST,
-				ArmorInventory::SLOT_LEGS => WearableComponent::SLOT_ARMOR_LEGS,
-				ArmorInventory::SLOT_FEET => WearableComponent::SLOT_ARMOR_FEET,
-				default => WearableComponent::SLOT_ARMOR
-			};
-			$this->addComponent(new ArmorComponent($this->getDefensePoints()));
-			$this->addComponent(new WearableComponent($slot,$this->getDefensePoints()));
-		}
+        if ($this instanceof ProjectileItem) {
+            $this->addComponent(new ProjectileComponent("projectile"));
+            $this->addComponent(new ThrowableComponent(true));
+        }
 
-		if($this instanceof Consumable) {
-			if(($food = $this instanceof Food)) {
-				$this->addComponent(new FoodComponent(!$this->requiresHunger()));
-			}
-			$this->addComponent(new UseAnimationComponent($food ? UseAnimationComponent::ANIMATION_EAT : UseAnimationComponent::ANIMATION_DRINK));
-			$this->setUseDuration(20);
-		}
+        if ($this->getName() !== "Unknown") {
+            $this->addComponent(new DisplayNameComponent($this->getName()));
+        }
 
-		if($this instanceof Durable) {
-			$this->addComponent(new DurabilityComponent($this->getMaxDurability()));
-		}
+        if ($this->getFuelTime() > 0) {
+            $this->addComponent(new FuelComponent($this->getFuelTime()));
+        }
+    }
 
-		if($this instanceof ProjectileItem) {
-			$this->addComponent(new ProjectileComponent("projectile"));
-			$this->addComponent(new ThrowableComponent(true));
-		}
+    public function addComponent(ItemComponent $component): void
+    {
+        $this->components[$component->getName()] = $component;
+    }
 
-		if($this->getName() !== "Unknown") {
-			$this->addComponent(new DisplayNameComponent($this->getName()));
-		}
+    /**
+     * Set the number of ticks the use animation should play for before consuming the item. There are 20 ticks in a
+     * second, so providing the number 20 will create a duration of 1 second.
+     */
+    protected function setUseDuration(int $ticks): void
+    {
+        $this->addComponent(new UseDurationComponent($ticks));
+    }
 
-		if($this->getFuelTime() > 0) {
-			$this->addComponent(new FuelComponent($this->getFuelTime()));
-		}
-	}
+    /**
+     * When a custom item has a texture that is not 16x16, the item will scale when held in a hand based on the size of
+     * the texture. This method adds the minecraft:render_offsets component with the correct data for the provided width
+     * and height of a texture to make the item scale correctly. An optional bool for hand equipped can be used if the
+     * item is something like a tool or weapon.
+     */
+    protected function setupRenderOffsets(int $width, int $height, bool $handEquipped = false): void
+    {
+        $this->addComponent(new HandEquippedComponent($handEquipped));
+        $this->addComponent(new RenderOffsetsComponent($width, $height, $handEquipped));
+    }
 
-	/**
-	 * When a custom item has a texture that is not 16x16, the item will scale when held in a hand based on the size of
-	 * the texture. This method adds the minecraft:render_offsets component with the correct data for the provided width
-	 * and height of a texture to make the item scale correctly. An optional bool for hand equipped can be used if the
-	 * item is something like a tool or weapon.
-	 */
-	protected function setupRenderOffsets(int $width, int $height, bool $handEquipped = false): void {
-		$this->addComponent(new HandEquippedComponent($handEquipped));
-		$this->addComponent(new RenderOffsetsComponent($width, $height, $handEquipped));
-	}
+    /**
+     * Change if you want to allow the item to be placed in a player's off-hand or not. This is set to false by default,
+     * so it only needs to be set if you want to allow it.
+     */
+    protected function allowOffHand(bool $offHand = true): void
+    {
+        $this->addComponent(new AllowOffHandComponent($offHand));
+    }
 
-	/**
-	 * Change if you want to allow the item to be placed in a player's off-hand or not. This is set to false by default,
-	 * so it only needs to be set if you want to allow it.
-	 */
-	protected function allowOffHand(bool $offHand = true): void {
-		$this->addComponent(new AllowOffHandComponent($offHand));
-	}
-
-	/**
-	 * Set the number of seconds the item should be on cooldown for after being used. By default, the cooldown category
-	 * will be the name of the item, but to share the cooldown across multiple items you can provide a shared category.
-	 */
-	protected function setUseCooldown(float $duration, string $category = ""): void {
-		$this->addComponent(new CooldownComponent($category !== "" ? $category : $this->getName(), $duration));
-	}
-
-	/**
-	 * Set the number of ticks the use animation should play for before consuming the item. There are 20 ticks in a
-	 * second, so providing the number 20 will create a duration of 1 second.
-	 */
-	protected function setUseDuration(int $ticks): void {
-		$this->addComponent(new UseDurationComponent($ticks));
-	}
+    /**
+     * Set the number of seconds the item should be on cooldown for after being used. By default, the cooldown category
+     * will be the name of the item, but to share the cooldown across multiple items you can provide a shared category.
+     */
+    protected function setUseCooldown(float $duration, string $category = ""): void
+    {
+        $this->addComponent(new CooldownComponent($category !== "" ? $category : $this->getName(), $duration));
+    }
 }

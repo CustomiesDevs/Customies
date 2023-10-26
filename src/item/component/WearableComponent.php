@@ -23,7 +23,7 @@ final class WearableComponent implements ItemComponent {
 	private string $slot;
 	private int $protection;
 
-	public function __construct(string $slot,int $protection) {
+	public function __construct(string $slot, int $protection) {
 		$this->slot = $slot;
         $this->protection = $protection;
 	}
