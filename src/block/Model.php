@@ -49,7 +49,7 @@ final class Model {
 			$material["minecraft:geometry"] = CompoundTag::create()
 				->setString("identifier", $this->geometry);
 			$material["minecraft:collision_box"] = CompoundTag::create()
-				->setByte("enabled", $this->collision_enable)
+				->setByte("enabled", ($this->collision_enable === true ? 1 : 0))
 				->setTag("origin", new ListTag([
 					new FloatTag($this->origin->getX()),
 					new FloatTag($this->origin->getY()),
