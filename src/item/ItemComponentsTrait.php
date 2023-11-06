@@ -35,6 +35,9 @@ use RuntimeException;
 
 trait ItemComponentsTrait {
 
+    # for custom gen craft image
+    public string $texture = "";
+
     /** @var ItemComponent[] */
     private array $components;
 
@@ -87,6 +90,7 @@ trait ItemComponentsTrait {
      */
     protected function initComponent(string $texture, ?CreativeInventoryInfo $creativeInfo = null): void
     {
+        $this->texture = $texture;
         $creativeInfo ??= CreativeInventoryInfo::DEFAULT();
         $this->addComponent(new CreativeCategoryComponent($creativeInfo));
         $this->addComponent(new CreativeGroupComponent($creativeInfo));
@@ -130,6 +134,10 @@ trait ItemComponentsTrait {
         if ($this->getFuelTime() > 0) {
             $this->addComponent(new FuelComponent($this->getFuelTime()));
         }
+    }
+
+    public function getTextureString(): string {
+        return $this->texture;
     }
 
     public function addComponent(ItemComponent $component): void
