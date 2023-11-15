@@ -39,7 +39,9 @@ trait ItemComponentsTrait {
     public string $texture = "";
 
     /** @var ItemComponent[] */
-    private array $components;
+    public array $components;
+
+    public string $identifierString = "";
 
     public function hasComponent(string $name): bool
     {
