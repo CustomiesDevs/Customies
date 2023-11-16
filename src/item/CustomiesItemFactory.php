@@ -91,9 +91,9 @@ final class CustomiesItemFactory {
         $baseIdentifier = $identifier;
 
         if ($item instanceof Axe || $item instanceof Shovel || $item instanceof Pickaxe) {
-            $i = 1;
+            $i = 0;
             while ( $i !== 6) {
-                    if ($i === 1) {
+                    if ($i === 0) {
                         if(($componentBased = $item instanceof ItemComponents)) {
                             $this->itemComponentEntries[$identifier] = new ItemComponentPacketEntry($identifier,
                                 new CacheableNbt($item->getComponents()
@@ -202,7 +202,7 @@ final class CustomiesItemFactory {
         $itemId = $block->getIdInfo()->getBlockTypeId();
         $this->registerCustomItemMapping($identifier, $itemId);
         StringToItemParser::getInstance()->registerBlock($identifier, fn() => clone $block);
-        $this->itemTableEntries[] = new ItemTypeEntry($identifier, $itemId, false);
+        $this->itemTableEntries[] = new ItemTypeEntry($identifier, $itemId, true);
 
         $blockItemIdMap = BlockItemIdMap::getInstance();
         $reflection = new ReflectionClass($blockItemIdMap);
