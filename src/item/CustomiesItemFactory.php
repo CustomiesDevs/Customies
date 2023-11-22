@@ -152,6 +152,86 @@ final class CustomiesItemFactory {
         }
     }
 
+
+    public function registerCosmetic(string $className, string $identifier, string $name, string $texture): void {
+        if($className !== Item::class) {
+            Utils::testValidInstance($className, Item::class);
+        }
+
+        $itemId = ItemTypeIds::newId();
+        $item = new $className(new ItemIdentifier($itemId), $name, $texture);
+        $item->identifierString = $identifier;
+        $this->registerCustomItemMapping($identifier, $itemId);
+
+        GlobalItemDataHandlers::getDeserializer()->map($identifier, fn() => clone $item);
+        GlobalItemDataHandlers::getSerializer()->map($item, fn() => new SavedItemData($identifier));
+
+        StringToItemParser::getInstance()->register($identifier, fn() => clone $item);
+
+        $baseIdentifier = $identifier;
+
+        if ($item instanceof Axe || $item instanceof Shovel || $item instanceof Pickaxe) {
+            $i = 0;
+            while ( $i !== 6) {
+                if ($i === 0) {
+                    if(($componentBased = $item instanceof ItemComponents)) {
+                        $this->itemComponentEntries[$identifier] = new ItemComponentPacketEntry($identifier,
+                            new CacheableNbt($item->getComponents()
+                                ->setInt("id", $itemId)
+                                ->setString("name", $identifier)
+                            )
+                        );
+                    }
+
+                    $this->itemTableEntries[$identifier] = new ItemTypeEntry($identifier, $itemId, $componentBased);
+                    CreativeInventory::getInstance()->add($item);
+                } else {
+
+
+                    $itemId = ItemTypeIds::newId();
+                    $item = new $className(new ItemIdentifier($itemId), $name);
+
+
+                    $component = $this->getDiggerComponent($item, intval($item->getMiningEfficiency(true) * $i));
+                    if (!is_null($component)) $item->addComponent($component);
+
+                    $identifier = $baseIdentifier . "_efficiency-" . $i;
+                    $item->identifierString = $identifier;
+                    $this->registerCustomItemMapping($identifier, $itemId);
+
+                    GlobalItemDataHandlers::getDeserializer()->map($identifier, fn() => clone $item);
+                    GlobalItemDataHandlers::getSerializer()->map($item, fn() => new SavedItemData($identifier));
+
+                    StringToItemParser::getInstance()->register($identifier, fn() => clone $item);
+
+                    if(($componentBased = $item instanceof ItemComponents)) {
+                        $this->itemComponentEntries[$identifier] = new ItemComponentPacketEntry($identifier,
+                            new CacheableNbt($item->getComponents()
+                                ->setInt("id", $itemId)
+                                ->setString("name", $identifier)
+                            )
+                        );
+                    }
+
+                    $this->itemTableEntries[$identifier] = new ItemTypeEntry($identifier, $itemId, $componentBased);
+                }
+                $i++;
+            }
+        } else {
+            if(($componentBased = $item instanceof ItemComponents)) {
+                $this->itemComponentEntries[$identifier] = new ItemComponentPacketEntry($identifier,
+                    new CacheableNbt($item->getComponents()
+                        ->setInt("id", $itemId)
+                        ->setString("name", $identifier)
+                    )
+                );
+            }
+
+            $this->itemTableEntries[$identifier] = new ItemTypeEntry($identifier, $itemId, $componentBased);
+            CreativeInventory::getInstance()->add($item);
+        }
+    }
+
     public function getDiggerComponent(Durable $item, int $speed): ?DiggerComponent {
         $blocks = VanillaBlocks::getAll();
         $blocksCustom = CustomiesBlockFactory::getInstance()->getAll();
