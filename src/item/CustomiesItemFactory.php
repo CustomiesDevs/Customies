@@ -112,7 +112,7 @@ final class CustomiesItemFactory {
                         $item = new $className(new ItemIdentifier($itemId), $name);
 
 
-                        $component = $this->getDiggerComponent($item, intval($item->getMiningEfficiency(true) * $i));
+                        $component = $this->getDiggerComponent($item, intval($item->getMiningEfficiency(true) + $i + 2));
                         if (!is_null($component)) $item->addComponent($component);
 
                         $identifier = $baseIdentifier . "_efficiency-" . $i;
