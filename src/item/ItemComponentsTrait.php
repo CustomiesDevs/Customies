@@ -25,10 +25,10 @@ use customiesdevs\customies\item\component\UseDurationComponent;
 use customiesdevs\customies\item\component\WearableComponent;
 use customiesdevs\customies\util\NBT;
 use pocketmine\entity\Consumable;
+use pocketmine\entity\FoodSource;
 use pocketmine\inventory\ArmorInventory;
 use pocketmine\item\Armor;
 use pocketmine\item\Durable;
-use pocketmine\item\Food;
 use pocketmine\item\ProjectileItem;
 use pocketmine\nbt\tag\CompoundTag;
 use RuntimeException;
@@ -89,7 +89,7 @@ trait ItemComponentsTrait {
 		}
 
 		if($this instanceof Consumable) {
-			if(($food = $this instanceof Food)) {
+			if(($food = $this instanceof FoodSource)) {
 				$this->addComponent(new FoodComponent(!$this->requiresHunger()));
 			}
 			$this->addComponent(new UseAnimationComponent($food ? UseAnimationComponent::ANIMATION_EAT : UseAnimationComponent::ANIMATION_DRINK));
