@@ -27,6 +27,9 @@ use pocketmine\utils\SingletonTrait;
 use pocketmine\world\format\io\GlobalBlockStateHandlers;
 use function array_map;
 use function array_reverse;
+use function hash;
+use function strcmp;
+use function usort;
 
 final class CustomiesBlockFactory {
 	use SingletonTrait;
@@ -176,5 +179,17 @@ final class CustomiesBlockFactory {
 
 		$this->blockPaletteEntries[] = new BlockPaletteEntry($identifier, new CacheableNbt($propertiesTag));
 		$this->blockFuncs[$identifier] = [$blockFunc, $serializer, $deserializer];
+
+		// 1.20.60 added a new "block_id" field which depends on the order of the block palette entries. Every time we
+		// insert a new block, we need to re-sort the block palette entries to keep in sync with the client.
+		usort($this->blockPaletteEntries, static function(BlockPaletteEntry $a, BlockPaletteEntry $b): int {
+			return strcmp(hash("fnv164", $a->getName()), hash("fnv164", $b->getName()));
+		});
+		foreach($this->blockPaletteEntries as $i => $entry) {
+			$root = $entry->getStates()->getRoot()
+				->setTag("vanilla_block_data", CompoundTag::create()
+					->setInt("block_id", 10000 + $i));
+			$this->blockPaletteEntries[$i] = new BlockPaletteEntry($entry->getName(), new CacheableNbt($root));
+		}
 	}
 }
