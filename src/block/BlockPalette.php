@@ -16,6 +16,7 @@ use RuntimeException;
 use function array_keys;
 use function count;
 use function hash;
+use function is_array;
 use function strcmp;
 use function usort;
 
@@ -111,5 +112,17 @@ final class BlockPalette {
 		$this->fallbackStateId->setValue($this->translator, $stateDataToStateIdLookup[BlockTypeNames::INFO_UPDATE] ??
 			throw new AssumptionFailedError(BlockTypeNames::INFO_UPDATE . " should always exist")
 		);
+	}
+
+	public function getStateIdByName(string $name, CompoundTag $state): int {
+		$stateDataToStateIdLookup = $this->stateDataToStateIdLookup->getValue($this->translator->getBlockStateDictionary());
+		if(isset($stateDataToStateIdLookup[$name])) {
+			$stateId = $stateDataToStateIdLookup[$name];
+			if(is_array($stateId) && count($stateDataToStateIdLookup[$name]) > 1) {
+				$stateId = $stateDataToStateIdLookup[$name][BlockStateDictionaryEntry::encodeStateProperties($state->getValue())];
+			}
+			return $stateId;
+		}
+		return $this->fallbackStateId->getValue($this->translator);
 	}
 }

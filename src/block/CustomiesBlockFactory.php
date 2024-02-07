@@ -106,6 +106,8 @@ final class CustomiesBlockFactory {
 			}
 		}
 
+		$stateId = -1;
+
 		if($block instanceof Permutable) {
 			$blockPropertyNames = $blockPropertyValues = $blockProperties = [];
 			foreach($block->getBlockProperties() as $blockProperty){
@@ -133,6 +135,7 @@ final class CustomiesBlockFactory {
 					->setString(BlockStateData::TAG_NAME, $identifier)
 					->setTag(BlockStateData::TAG_STATES, $states);
 				BlockPalette::getInstance()->insertState($blockState, $meta);
+				$stateId = BlockPalette::getInstance()->getStateIdByName($identifier, $states);
 			}
 
 			$serializer ??= static function (Permutable $block) use ($identifier, $blockPropertyNames) : BlockStateWriter {
@@ -152,8 +155,12 @@ final class CustomiesBlockFactory {
 				->setString(BlockStateData::TAG_NAME, $identifier)
 				->setTag(BlockStateData::TAG_STATES, CompoundTag::create());
 			BlockPalette::getInstance()->insertState($blockState);
+			$stateId = BlockPalette::getInstance()->getStateIdByName($identifier, $blockState->getCompoundTag(BlockStateData::TAG_STATES));
 			$serializer ??= static fn() => new BlockStateWriter($identifier);
 			$deserializer ??= static fn(BlockStateReader $in) => $block;
+		}
+		if($stateId === -1) {
+			throw new InvalidArgumentException("stateId was not found for block $identifier");
 		}
 		GlobalBlockStateHandlers::getSerializer()->map($block, $serializer);
 		GlobalBlockStateHandlers::getDeserializer()->map($identifier, $deserializer);
@@ -170,7 +177,10 @@ final class CustomiesBlockFactory {
 			->setTag("menu_category", CompoundTag::create()
 				->setString("category", $creativeInfo->getCategory() ?? "")
 				->setString("group", $creativeInfo->getGroup() ?? ""))
-			->setInt("molangVersion", 1);
+			->setInt("molangVersion", 1)
+			->setTag("vanilla_block_data", CompoundTag::create()
+				->setInt("block_id", $stateId)
+			);
 
 		CreativeInventory::getInstance()->add($block->asItem());
 

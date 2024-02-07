@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies\item\component;
 
+use pocketmine\nbt\tag\CompoundTag;
+
 final class IconComponent implements ItemComponent {
 
 	private string $texture;
@@ -16,12 +18,14 @@ final class IconComponent implements ItemComponent {
 	}
 
 	public function getValue(): array {
-		return [
-			"texture" => $this->texture
-		];
+		return CompoundTag::create()
+			->setTag("textures",
+				CompoundTag::create()
+					->setString("default", $this->texture)
+			);
 	}
 
 	public function isProperty(): bool {
-		return true;
+		return false;
 	}
 }
