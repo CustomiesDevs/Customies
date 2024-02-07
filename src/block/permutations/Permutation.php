@@ -10,7 +10,7 @@ final class Permutation {
 
 	private CompoundTag $components;
 
-	public function __construct(private readonly string $condition) {
+	public function __construct(private string $condition) {
 		$this->components = CompoundTag::create();
 	}
 

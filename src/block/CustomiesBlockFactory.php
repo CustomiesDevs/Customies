@@ -34,6 +34,10 @@ use function usort;
 final class CustomiesBlockFactory {
 	use SingletonTrait;
 
+	/** @var Block[]  */
+	private array $allBlocks = [];
+
+
 	/**
 	 * @var Closure[]
 	 * @phpstan-var array<string, array{(Closure(int): Block), (Closure(BlockStateWriter): Block), (Closure(Block): BlockStateReader)}>
@@ -75,6 +79,11 @@ final class CustomiesBlockFactory {
 		return $this->blockPaletteEntries;
 	}
 
+
+	public function getAll(): array {
+	    return $this->allBlocks;
+    }
+
 	/**
 	 * Register a block to the BlockFactory and all the required mappings. A custom stateReader and stateWriter can be
 	 * provided to allow for custom block state serialization.
@@ -88,6 +97,7 @@ final class CustomiesBlockFactory {
 			throw new InvalidArgumentException("Class returned from closure is not a Block");
 		}
 
+		$this->allBlocks[] = $block;
 		RuntimeBlockStateRegistry::getInstance()->register($block);
 		CustomiesItemFactory::getInstance()->registerBlockItem($identifier, $block);
 		$this->customBlocks[$identifier] = $block;
@@ -169,7 +179,9 @@ final class CustomiesBlockFactory {
 			->setTag("components",
 				$components->setTag("minecraft:creative_category", CompoundTag::create()
 					->setString("category", $creativeInfo->getCategory())
-					->setString("group", $creativeInfo->getGroup())))
+					->setString("group", $creativeInfo->getGroup())
+                )
+            )
 			->setTag("menu_category", CompoundTag::create()
 				->setString("category", $creativeInfo->getCategory() ?? "")
 				->setString("group", $creativeInfo->getGroup() ?? ""))

@@ -18,14 +18,14 @@ final class Material {
 
 	public const RENDER_METHOD_ALPHA_TEST = "alpha_test";
 	public const RENDER_METHOD_BLEND = "blend";
-	public const RENDER_METHOD_OPAQUE = "opaque";
+	public const RENDER_METHOD_OPAQUE = "opaque ";
 
 	public function __construct(
-		private readonly string $target,
-		private readonly string $texture,
-		private readonly string $renderMethod,
-		private readonly bool   $faceDimming = true,
-		private readonly bool   $ambientOcclusion = true
+		private  string $target,
+		private  string $texture,
+		private  ?string $renderMethod = null,
+		private  bool   $faceDimming = true,
+		private  bool   $ambientOcclusion = true
 	) { }
 
 	/**
@@ -41,7 +41,7 @@ final class Material {
 	public function toNBT(): CompoundTag {
 		return CompoundTag::create()
 			->setString("texture", $this->texture)
-			->setString("render_method", $this->renderMethod)
+			->setString("render_method", $this->renderMethod ?? "")
 			->setByte("face_dimming", $this->faceDimming ? 1 : 0)
 			->setByte("ambient_occlusion", $this->ambientOcclusion ? 1 : 0);
 	}

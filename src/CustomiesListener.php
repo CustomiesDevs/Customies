@@ -6,6 +6,7 @@ namespace customiesdevs\customies;
 use customiesdevs\customies\block\CustomiesBlockFactory;
 use customiesdevs\customies\item\CustomiesItemFactory;
 use pocketmine\event\Listener;
+use pocketmine\event\player\PlayerItemEnchantEvent;
 use pocketmine\event\server\DataPacketSendEvent;
 use pocketmine\network\mcpe\protocol\BiomeDefinitionListPacket;
 use pocketmine\network\mcpe\protocol\ItemComponentPacket;
@@ -33,6 +34,7 @@ final class CustomiesListener implements Listener {
 			"data_driven_items" => true,
 		], true);
 	}
+
 
 	public function onDataPacketSend(DataPacketSendEvent $event): void {
 		foreach($event->getPackets() as $packet){
