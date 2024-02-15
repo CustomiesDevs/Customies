@@ -3,8 +3,7 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies\item\component;
 
-
-final class RenderOffsetsComponent implements ItemComponent { //thanks to https://github.com/MedicalJewel105/bedrock-render-offsets-generator/blob/main/main.py
+final class RenderOffsetsComponent implements ItemComponent {
 
 	private int $textureSize;
 
@@ -16,6 +15,10 @@ final class RenderOffsetsComponent implements ItemComponent { //thanks to https:
 		return "minecraft:render_offsets";
 	}
 
+	/**
+	* This is "MedicalJewel105"'s work.
+	* @see https://github.com/MedicalJewel105/bedrock-render-offsets-generator/blob/main/main.py
+	*/
 	public function getValue(): array {
 	        $textureSize = $this->textureSize;
 	        $mainHandFirst = round(0.039 * 16 / $textureSize, 8);
