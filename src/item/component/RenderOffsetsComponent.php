@@ -18,25 +18,25 @@ final class RenderOffsetsComponent implements ItemComponent { //thanks to https:
 
 	public function getValue(): array {
 	        $textureSize = $this->textureSize;
-	        $mainHand_fp = round(0.039 * 16 / $textureSize, 8);
-	        $offhand_fp = round(0.065 * 16 / $textureSize, 8);
-	        $mainHand_tp = $offhand_tp = round(0.0965 * 16 / $textureSize, 8);
+	        $mainHandFirst = round(0.039 * 16 / $textureSize, 8);
+	        $offHandFirst = round(0.065 * 16 / $textureSize, 8);
+	        $mainHandThird = $offHandThird = round(0.0965 * 16 / $textureSize, 8);
 
 		return [
 			"main_hand" => [
 				"first_person" => [
-					"scale" => [$mainHand_fp, $mainHand_fp, $mainHand_fp],
+					"scale" => [$mainHandFirst, $mainHandFirst, $mainHandFirst],
 				],
 				"third_person" => [
-					"scale" => [$mainHand_tp, $mainHand_tp, $mainHand_tp]
+					"scale" => [$mainHandThird, $mainHandThird, $mainHandThird]
 				]
 			],
 			"off_hand" => [
 				"first_person" => [
-					"scale" => [$offhand_fp, $offhand_fp, $offhand_fp],
+					"scale" => [$offHandFirst, $offHandFirst, $offHandFirst],
 				],
 				"third_person" => [
-					"scale" => [$offhand_tp, $offhand_tp, $offhand_tp]
+					"scale" => [$offHandThird, $offHandThird, $offHandThird]
 				]
 			]
 		];
