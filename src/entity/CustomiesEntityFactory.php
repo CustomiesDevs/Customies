@@ -7,6 +7,7 @@ use Closure;
 use pocketmine\entity\Entity;
 use pocketmine\entity\EntityDataHelper;
 use pocketmine\entity\EntityFactory;
+use pocketmine\entity\Human;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\ListTag;
 use pocketmine\network\mcpe\cache\StaticPacketCache;
@@ -26,9 +27,15 @@ class CustomiesEntityFactory {
 	 * @phpstan-param Closure(World $world, CompoundTag $nbt) : Entity $creationFunc
 	 */
 	public function registerEntity(string $className, string $identifier, ?Closure $creationFunc = null, string $behaviourId = ""): void {
-		EntityFactory::getInstance()->register($className, $creationFunc ?? static function (World $world, CompoundTag $nbt) use ($className): Entity {
-			return new $className(EntityDataHelper::parseLocation($nbt, $world), $nbt);
-		}, [$identifier]);
+		if (is_subclass_of($className, Human::class)) {
+	            EntityFactory::getInstance()->register($className, $creationFunc ?? static function (World $world, CompoundTag $nbt) use ($className): Entity {
+	                return new $className(EntityDataHelper::parseLocation($nbt, $world), Human::parseSkinNBT($nbt), $nbt);
+	            }, [$identifier]);
+	        } else {
+	            EntityFactory::getInstance()->register($className, $creationFunc ?? static function (World $world, CompoundTag $nbt) use ($className): Entity {
+	                return new $className(EntityDataHelper::parseLocation($nbt, $world), $nbt);
+	            }, [$identifier]);
+	        }
 		$this->updateStaticPacketCache($identifier, $behaviourId);
 	}
 
