@@ -62,28 +62,35 @@ final class BlockPalette {
 	 * Inserts the provided state in to the correct position of the palette.
 	 */
 	public function insertState(CompoundTag $state, int $meta = 0): void {
+		$this->insertStateWithoutSort($state, $meta);
+		$this->sort();
+	}
+
+	/**
+	 * Inserts the provided state in to the correct position of the palette.
+	 */
+	public function insertStateWithoutSort(CompoundTag $state, int $meta = 0): void {
 		if(($name = $state->getString(BlockStateData::TAG_NAME, "")) === "") {
 			throw new RuntimeException("Block state must contain a StringTag called 'name'");
 		}
 		if(($properties = $state->getCompoundTag(BlockStateData::TAG_STATES)) === null) {
 			throw new RuntimeException("Block state must contain a CompoundTag called 'states'");
 		}
-		$this->sortWith($entry = new BlockStateDictionaryEntry($name, $properties->getValue(), $meta));
+		$entry = new BlockStateDictionaryEntry($name, $properties->getValue(), $meta);
+		$this->states[] = $entry;
 		$this->customStates[] = $entry;
 	}
 
 	/**
-	 * Sorts the palette's block states in the correct order, also adding the provided state to the array.
+	 * Sorts the palette's block states in the correct order
 	 */
-	private function sortWith(BlockStateDictionaryEntry $newState): void {
+	public function sort(): void {
 		// To sort the block palette we first have to split the palette up in to groups of states. We only want to sort
 		// using the name of the block, and keeping the order of the existing states.
 		$states = [];
 		foreach($this->getStates() as $state){
 			$states[$state->getStateName()][] = $state;
 		}
-		// Append the new state we are sorting with at the end to preserve existing order.
-		$states[$newState->getStateName()][] = $newState;
 
 		$names = array_keys($states);
 		// As of 1.18.30, blocks are sorted using a fnv164 hash of their names.

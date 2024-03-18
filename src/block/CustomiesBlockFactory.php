@@ -82,7 +82,7 @@ final class CustomiesBlockFactory {
 	 * @phpstan-param null|(Closure(BlockStateWriter): Block) $serializer
 	 * @phpstan-param null|(Closure(Block): BlockStateReader) $deserializer
 	 */
-	public function registerBlock(Closure $blockFunc, string $identifier, ?Model $model = null, ?CreativeInventoryInfo $creativeInfo = null, ?Closure $serializer = null, ?Closure $deserializer = null): void {
+	public function registerBlock(Closure $blockFunc, string $identifier, ?Model $model = null, ?CreativeInventoryInfo $creativeInfo = null, ?Closure $serializer = null, ?Closure $deserializer = null, bool $sort = true): void {
 		$block = $blockFunc();
 		if(!$block instanceof Block) {
 			throw new InvalidArgumentException("Class returned from closure is not a Block");
@@ -109,6 +109,11 @@ final class CustomiesBlockFactory {
 			}
 		}
 
+		if($sort){
+			$insertStateToPalette = BlockPalette::getInstance()->insertState(...);
+		}else{
+			$insertStateToPalette = BlockPalette::getInstance()->insertStateWithoutSort(...);
+		}
 		if($block instanceof Permutable) {
 			$blockPropertyNames = $blockPropertyValues = $blockProperties = [];
 			foreach($block->getBlockProperties() as $blockProperty){
@@ -135,7 +140,7 @@ final class CustomiesBlockFactory {
 				$blockState = CompoundTag::create()
 					->setString(BlockStateData::TAG_NAME, $identifier)
 					->setTag(BlockStateData::TAG_STATES, $states);
-				BlockPalette::getInstance()->insertState($blockState, $meta);
+				$insertStateToPalette($blockState, $meta);
 			}
 
 			$serializer ??= static function (Permutable $block) use ($identifier, $blockPropertyNames) : BlockStateWriter {
@@ -154,7 +159,7 @@ final class CustomiesBlockFactory {
 			$blockState = CompoundTag::create()
 				->setString(BlockStateData::TAG_NAME, $identifier)
 				->setTag(BlockStateData::TAG_STATES, CompoundTag::create());
-			BlockPalette::getInstance()->insertState($blockState);
+			$insertStateToPalette($blockState);
 			$serializer ??= static fn() => new BlockStateWriter($identifier);
 			$deserializer ??= static fn(BlockStateReader $in) => $block;
 		}
@@ -180,6 +185,18 @@ final class CustomiesBlockFactory {
 		$this->blockPaletteEntries[] = new BlockPaletteEntry($identifier, new CacheableNbt($propertiesTag));
 		$this->blockFuncs[$identifier] = [$blockFunc, $serializer, $deserializer];
 
+
+		if($sort){
+			$this->sort();
+		}
+	}
+
+	public function sortAll() : void{
+		BlockPalette::getInstance()->sort();
+		$this->sort();
+	}
+
+	private function sort() : void{
 		// 1.20.60 added a new "block_id" field which depends on the order of the block palette entries. Every time we
 		// insert a new block, we need to re-sort the block palette entries to keep in sync with the client.
 		usort($this->blockPaletteEntries, static function(BlockPaletteEntry $a, BlockPaletteEntry $b): int {

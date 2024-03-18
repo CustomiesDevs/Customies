@@ -33,10 +33,20 @@ final class AsyncRegisterBlocksTask extends AsyncTask {
 	}
 
 	public function onRun(): void {
+		$blockFactory = CustomiesBlockFactory::getInstance();
 		foreach($this->blockFuncs as $identifier => $blockFunc){
 			// We do not care about the model or creative inventory data in other threads since it is unused outside of
 			// the main thread.
-			CustomiesBlockFactory::getInstance()->registerBlock($blockFunc, $identifier, serializer: $this->serializer[$identifier], deserializer: $this->deserializer[$identifier]);
+			$blockFactory->registerBlock(
+				$blockFunc,
+				$identifier,
+				null,
+				null,
+				$this->serializer[$identifier],
+				$this->deserializer[$identifier],
+				false
+			);
 		}
+		$blockFactory->sortAll();
 	}
 }
