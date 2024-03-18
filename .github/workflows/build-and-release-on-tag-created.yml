@@ -1,0 +1,52 @@
+name: Build and release on tag created
+on:
+  create:
+    tags:
+      - '*'
+
+jobs:
+  release-latest:
+    runs-on: ubuntu-latest
+    permissions: write-all
+    concurrency:
+      group: release-latest
+      cancel-in-progress: true
+    env:
+      RELEASE_DIR: "."
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: Create project directory hash
+        run: |
+          DIR_HASH=$(find ${{ env.RELEASE_DIR }} -type f -not -path './.*' -exec sha256sum "{}" \; | sha256sum | cut -c 1-32)
+          echo "DIR_HASH=${DIR_HASH}" >> $GITHUB_ENV
+
+      - name: Cache releases
+        uses: actions/cache@v3
+        id: cache-releases
+        with:
+          path: .releases/
+          key: ${{ runner.os }}-releases-${{ env.DIR_HASH }}
+          restore-keys: ${{ runner.os }}-releases-
+
+      - name: Set up PHP 8.3
+        if: steps.cache-releases.outputs.cache-hit != 'true'
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.3
+
+      - name: Download PresentKim/pmmp-plugin-build.php
+        run: wget -O .github/workflows/pmmp-plugin-build.php https://raw.githubusercontent.com/PresentKim/scripts-for-action/main/pmmp-plugin-build.php
+
+      - name: Build plugin with virion infecting
+        if: steps.cache-releases.outputs.cache-hit != 'true'
+        run: php -dphar.readonly=0 .github/workflows/pmmp-plugin-build.php ${{ env.RELEASE_DIR }}
+
+      - name: Force update tag release
+        if: steps.cache-releases.outputs.cache-hit != 'true'
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ github.ref_name }}
+          artifacts: ".releases/*.phar"
+          allowUpdates: true
