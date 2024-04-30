@@ -83,7 +83,7 @@ final class CustomiesItemFactory {
 		if(($componentBased = $item instanceof ItemComponents)) {
 			$this->itemComponentEntries[$identifier] = new ItemComponentPacketEntry($identifier,
 				new CacheableNbt($item->getComponents()
-					->setInt("id", $itemId)
+					->setInt("id", self::getUniqueIdFromString($identifier))
 					->setString("name", $identifier)
 				)
 			);
@@ -128,5 +128,15 @@ final class CustomiesItemFactory {
 		/** @var string[] $value */
 		$value = $itemToBlockId->getValue($blockItemIdMap);
 		$itemToBlockId->setValue($blockItemIdMap, $value + [$identifier => $identifier]);
+	}
+
+	public static function getUniqueIdFromString(string $string) : int{
+		$id = crc32($string);
+		if($id >= 0x7fff){
+			while($id >= 0x7fff){
+				$id -= 1000;
+			}
+		}
+		return $id;
 	}
 }
