@@ -11,7 +11,7 @@ final class CreativeInventoryInfo {
 	const string CATEGORY_ITEMS = "items";
 	const string CATEGORY_NATURE = "nature";
 
-	const string NONE = "none";
+	public const string NONE = "none";
 	const string GROUP_ANVIL = "itemGroup.name.anvil";
 	const string GROUP_ARROW = "itemGroup.name.arrow";
 	const string GROUP_AXE = "itemGroup.name.axe";
@@ -20,7 +20,7 @@ final class CreativeInventoryInfo {
 	const string GROUP_BED = "itemGroup.name.bed";
 	const string GROUP_BOAT = "itemGroup.name.boat";
 	const string GROUP_BOOTS = "itemGroup.name.boots";
-	const GROUP_BUTTONS = "itemGroup.name.buttons";
+	const string GROUP_BUTTONS = "itemGroup.name.buttons";
 	const string GROUP_CHALKBOARD = "itemGroup.name.chalkboard";
 	const string GROUP_CHEST = "itemGroup.name.chest";
 	const string GROUP_CHESTPLATE = "itemGroup.name.chestplate";
