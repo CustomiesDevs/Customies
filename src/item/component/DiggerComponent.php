@@ -18,7 +18,8 @@ final class DiggerComponent implements ItemComponent {
 
 	public function getValue(): array {
 		return [
-			"destroy_speeds" => $this->destroySpeeds
+			"destroy_speeds" => $this->destroySpeeds,
+            "use_efficiency" => true
 		];
 	}
 
