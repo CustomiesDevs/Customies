@@ -66,12 +66,12 @@ final class CustomiesItemFactory {
 	 * item components if present.
 	 * @phpstan-param class-string $className
 	 */
-	public function registerItem(string $className, string $identifier, string $name): void {
+	public function registerItem(string $className, string $identifier, string $name, ?int $id = null): void {
 		if($className !== Item::class) {
 			Utils::testValidInstance($className, Item::class);
 		}
 
-		$itemId = ItemTypeIds::newId();
+		$itemId = $id ?? ItemTypeIds::newId();
 		$item = new $className(new ItemIdentifier($itemId), $name);
 		$this->registerCustomItemMapping($identifier, $itemId);
 
