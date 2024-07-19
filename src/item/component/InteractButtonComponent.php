@@ -21,7 +21,7 @@ final class InteractButtonComponent implements ItemComponent{
     }
 
     public function isProperty() : bool{
-        return true;
+        return false;
     }
 
 }
