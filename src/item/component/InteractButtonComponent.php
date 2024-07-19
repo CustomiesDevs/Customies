@@ -16,8 +16,8 @@ final class InteractButtonComponent implements ItemComponent{
         return "minecraft:interact_button";
     }
 
-    public function getValue() : bool{
-        return $this->value;
+    public function getValue() : string{
+        return $this->value ? "true" : "false";
     }
 
     public function isProperty() : bool{
