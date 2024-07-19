@@ -6,9 +6,9 @@ namespace customiesdevs\customies\item\component;
 
 final class InteractButtonComponent implements ItemComponent{
 
-    private bool $value;
+    private string $value;
 
-    public function __construct(bool $value = true){
+    public function __construct(string $value = "true"){
         $this->value = $value;
     }
 
@@ -17,7 +17,7 @@ final class InteractButtonComponent implements ItemComponent{
     }
 
     public function getValue() : string{
-        return $this->value ? "true" : "false";
+        return $this->value;
     }
 
     public function isProperty() : bool{
