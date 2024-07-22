@@ -12,14 +12,14 @@ final class AllowOffHandComponent implements ItemComponent {
 	}
 
 	public function getName(): string {
-		return "allow_off_hand";
+		return "minecraft:allow_off_hand";
 	}
 
-	public function getValue(): bool {
-		return $this->offHand;
+	public function getValue(): array {
+		return ["value" => $this->offHand];
 	}
 
 	public function isProperty(): bool {
-		return true;
+		return false;
 	}
 }

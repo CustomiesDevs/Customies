@@ -11,6 +11,7 @@ use function implode;
 final class DiggerComponent implements ItemComponent {
 
 	private array $destroySpeeds;
+	private bool $useEfficiency;
 
 	public function getName(): string {
 		return "minecraft:digger";
@@ -18,6 +19,7 @@ final class DiggerComponent implements ItemComponent {
 
 	public function getValue(): array {
 		return [
+			"use_efficiency" => $this->useEfficiency,
 			"destroy_speeds" => $this->destroySpeeds
 		];
 	}

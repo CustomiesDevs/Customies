@@ -16,9 +16,7 @@ final class DisplayNameComponent implements ItemComponent {
 	}
 
 	public function getValue(): array {
-		return [
-			"value" => $this->name
-		];
+		return ["value" => $this->name];
 	}
 
 	public function isProperty(): bool {

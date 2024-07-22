@@ -12,14 +12,14 @@ final class HandEquippedComponent implements ItemComponent {
 	}
 
 	public function getName(): string {
-		return "hand_equipped";
+		return "minecraft:hand_equipped";
 	}
 
-	public function getValue(): bool {
-		return $this->handEquipped;
+	public function getValue(): array {
+		return ["value" => $this->handEquipped];
 	}
 
 	public function isProperty(): bool {
-		return true;
+		return false;
 	}
 }

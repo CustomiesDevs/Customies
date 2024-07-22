@@ -8,21 +8,21 @@ final class UseAnimationComponent implements ItemComponent {
 	public const ANIMATION_EAT = 1;
 	public const ANIMATION_DRINK = 2;
 
-	private int $animation;
+	private string $animation;
 
-	public function __construct(int $animation) {
+	public function __construct(string $animation) {
 		$this->animation = $animation;
 	}
 
 	public function getName(): string {
-		return "use_animation";
+		return "minecraft:use_animation";
 	}
 
-	public function getValue(): int {
+	public function getValue(): string {
 		return $this->animation;
 	}
 
 	public function isProperty(): bool {
-		return true;
+		return false;
 	}
 }

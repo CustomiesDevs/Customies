@@ -3,23 +3,23 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies\item\component;
 
-final class FoilComponent implements ItemComponent {
+final class GlintComponent implements ItemComponent {
 
-	private bool $foil;
+	private bool $glint;
 
-	public function __construct(bool $foil = true) {
-		$this->foil = $foil;
+	public function __construct(bool $glint) {
+		$this->glint = $glint;
 	}
 
 	public function getName(): string {
-		return "foil";
+		return "minecraft:glint";
 	}
 
 	public function getValue(): bool {
-		return $this->foil;
+		return $this->glint;
 	}
 
 	public function isProperty(): bool {
-		return true;
+		return false;
 	}
 }

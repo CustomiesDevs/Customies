@@ -84,24 +84,24 @@ trait ItemComponentsTrait {
 				ArmorInventory::SLOT_FEET => WearableComponent::SLOT_ARMOR_FEET,
 				default => WearableComponent::SLOT_ARMOR
 			};
-			$this->addComponent(new ArmorComponent($this->getDefensePoints()));
-			$this->addComponent(new WearableComponent($slot));
+			//$this->addComponent(new ArmorComponent($this->getDefensePoints()));
+			$this->addComponent(new WearableComponent(true, $slot));
 		}
 
 		if($this instanceof Consumable) {
 			if(($food = $this instanceof Food)) {
 				$this->addComponent(new FoodComponent(!$this->requiresHunger()));
 			}
-			$this->addComponent(new UseAnimationComponent($food ? UseAnimationComponent::ANIMATION_EAT : UseAnimationComponent::ANIMATION_DRINK));
+			$this->addComponent(new UseAnimationComponent("eat"));
 			$this->setUseDuration(20);
 		}
 
 		if($this instanceof Durable) {
-			$this->addComponent(new DurabilityComponent($this->getMaxDurability()));
+			$this->addComponent(new DurabilityComponent(["min"=> 10, "max" =>40],$this->getMaxDurability()));
 		}
 
 		if($this instanceof ProjectileItem) {
-			$this->addComponent(new ProjectileComponent("projectile"));
+			$this->addComponent(new ProjectileComponent(1.25, "projectile"));
 			$this->addComponent(new ThrowableComponent(true));
 		}
 
@@ -122,7 +122,7 @@ trait ItemComponentsTrait {
 	 */
 	protected function setupRenderOffsets(int $width, int $height, bool $handEquipped = false): void {
 		$this->addComponent(new HandEquippedComponent($handEquipped));
-		$this->addComponent(new RenderOffsetsComponent($width, $height, $handEquipped));
+		//$this->addComponent(new RenderOffsetsComponent($width, $height, $handEquipped));
 	}
 
 	/**
@@ -146,6 +146,6 @@ trait ItemComponentsTrait {
 	 * second, so providing the number 20 will create a duration of 1 second.
 	 */
 	protected function setUseDuration(int $ticks): void {
-		$this->addComponent(new UseDurationComponent($ticks));
+		//$this->addComponent(new UseDurationComponent($ticks));
 	}
 }

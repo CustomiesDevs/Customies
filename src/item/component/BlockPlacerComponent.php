@@ -3,16 +3,14 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies\item\component;
 
-use pocketmine\block\Block;
-
 final class BlockPlacerComponent implements ItemComponent {
 
     private string $blockIdentifier;
-    private bool $useBlockDescription;
+    private array $useOn;
 
-    public function __construct(string $blockIdentifier, bool $useBlockDescription = false) {
+    public function __construct(string $blockIdentifier, array $useOn) {
         $this->blockIdentifier = $blockIdentifier;
-        $this->useBlockDescription = $useBlockDescription;
+        $this->useOn = $useOn;
     }
 
     public function getName(): string {
@@ -22,7 +20,7 @@ final class BlockPlacerComponent implements ItemComponent {
     public function getValue(): array {
         return [
             "block" => $this->blockIdentifier,
-            "use_block_description" => $this->useBlockDescription
+            "use_on" => $this->useOn
         ];
     }
 

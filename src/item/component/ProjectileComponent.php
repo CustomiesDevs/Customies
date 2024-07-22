@@ -5,9 +5,11 @@ namespace customiesdevs\customies\item\component;
 
 final class ProjectileComponent implements ItemComponent {
 
+	private float $minimumCriticalPower;
 	private string $projectileEntity;
 
-	public function __construct(string $projectileEntity) {
+	public function __construct(float $minimumCriticalPower, string $projectileEntity) {
+		$this->minimumCriticalPower = $minimumCriticalPower;
 		$this->projectileEntity = $projectileEntity;
 	}
 
@@ -17,6 +19,7 @@ final class ProjectileComponent implements ItemComponent {
 
 	public function getValue(): array {
 		return [
+			"minimum_critical_power" => $this->minimumCriticalPower,
 			"projectile_entity" => $this->projectileEntity
 		];
 	}
