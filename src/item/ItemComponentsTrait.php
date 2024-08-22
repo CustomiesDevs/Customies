@@ -24,6 +24,7 @@ use customiesdevs\customies\item\component\UseAnimationComponent;
 use customiesdevs\customies\item\component\UseDurationComponent;
 use customiesdevs\customies\item\component\WearableComponent;
 use customiesdevs\customies\util\NBT;
+use naeng\ItemTexture\ItemTexture;
 use pocketmine\entity\Consumable;
 use pocketmine\inventory\ArmorInventory;
 use pocketmine\item\Armor;
@@ -69,6 +70,9 @@ trait ItemComponentsTrait {
 	 * Initializes the item with default components that are required for the item to function correctly.
 	 */
 	protected function initComponent(string $texture, ?CreativeInventoryInfo $creativeInfo = null): void {
+        if(class_exists(ItemTexture::class)){
+            ItemTexture::registerItemTexture($this->getTypeId(), $texture);
+        }
 		$creativeInfo ??= CreativeInventoryInfo::DEFAULT();
 		$this->addComponent(new CreativeCategoryComponent($creativeInfo));
 		$this->addComponent(new CreativeGroupComponent($creativeInfo));
