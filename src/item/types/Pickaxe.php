@@ -19,12 +19,11 @@ class Pickaxe extends PM_Pickaxe {
 	*  }
 	*/
 
-	public function getTypePickaxe(): string {
+	public function getTypePickaxe(): string{
 		return "wood";
 	}
 	
 	public function updateEfficiency(): void{
-		$this->removeMiningSpeedComponent();
 		$this->addComponent(new MiningSpeedComponent($this->getTypePickaxe(), (int)$this->getMiningEfficiency(true)));
 	}
 
