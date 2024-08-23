@@ -6,6 +6,7 @@ namespace customiesdevs\customies\item\types;
 
 use customiesdevs\customies\item\component\MiningSpeedComponent;
 use pocketmine\item\enchantment\EnchantmentInstance;
+use pocketmine\item\enchantment\Enchantment;
 use pocketmine\item\enchantment\VanillaEnchantments;
 use pocketmine\item\Pickaxe as PM_Pickaxe;
 
