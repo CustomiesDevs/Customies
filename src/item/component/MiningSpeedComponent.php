@@ -11,15 +11,11 @@ use function implode;
 final class MiningSpeedComponent implements ItemComponent {
 
 	private array $destroySpeeds;
-	private array TOOL_TYPES = ["wood", "stone", "iron", "gold", "diamond"];
+	private const TOOL_TYPES = ["wood", "stone", "iron", "gold", "diamond"];
 
         public function __construct(private string $toolType = "wood", private int $mspeed) {
 		if (!in_array($this->toolType, self::TOOL_TYPES)) {
-			try {
-				throw new Exception('Tool type not listed, default is wood!');
-			} catch (Exception $e) {
-                                echo 'Tool Mining Speed Error: ',  $e->getMessage();
-                        }
+			throw new Exception('Tool type not listed, default is wood!');
 		}
 
 		$this->withBlocks($this->mspeed,
