@@ -69,7 +69,7 @@ final class MiningSpeedComponent implements ItemComponent {
 		return false;
 	}
 
-	public function withBlocks(int $speed, string ...$blocks): DiggerComponent {
+	public function withBlocks(int $speed, string ...$blocks): MiningSpeedComponent {
 		foreach($blocks as $block){
 			$this->destroySpeeds[] = [
 				"block" => [
@@ -81,7 +81,7 @@ final class MiningSpeedComponent implements ItemComponent {
 		return $this;
 	}
 
-	public function withTags(int $speed, string ...$tags): DiggerComponent {
+	public function withTags(int $speed, string ...$tags): MiningSpeedComponent {
 		$query = implode(",", array_map(fn($tag) => "'" . $tag . "'", $tags));
 		$this->destroySpeeds[] = [
 			"block" => [
