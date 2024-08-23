@@ -52,7 +52,7 @@ final class MiningSpeedComponent implements ItemComponent {
 			"Stone Bricks Slab"
 			);
 		
-                $this->withTags($this->mspeed, 'metal', $this->toolType.'_pick_diggable'));
+                $this->withTags($this->mspeed, 'metal', $this->toolType.'_pick_diggable');
         }
   
 	public function getName(): string {
