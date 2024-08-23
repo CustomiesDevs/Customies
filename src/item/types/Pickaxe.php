@@ -25,7 +25,7 @@ class Pickaxe extends PM_Pickaxe {
 	
 	public function updateEfficiency(): void{
 		$this->removeMiningSpeedComponent();
-		$this->addComponent(new MiningSpeedComponent($this->getTypePickaxe(), $this->getMiningEfficiency(true)));
+		$this->addComponent(new MiningSpeedComponent($this->getTypePickaxe(), (int)$this->getMiningEfficiency(true)));
 	}
 
 	#[Override]
