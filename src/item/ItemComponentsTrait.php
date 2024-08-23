@@ -42,6 +42,10 @@ trait ItemComponentsTrait {
 		$this->components[$component->getName()] = $component;
 	}
 
+	public function removeMiningSpeedComponent(): void {
+		unset($this->components["minecraft:digger"]);
+	}
+
 	public function hasComponent(string $name): bool {
 		return isset($this->components[$name]);
 	}
