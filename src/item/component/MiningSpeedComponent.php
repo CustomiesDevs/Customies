@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace customiesdevs\customies\item\component;
 
 use pocketmine\block\Block;
-use pocketmine\world\format\io\GlobalBlockStateHandlers;
 use function array_map;
 use function implode;
 
