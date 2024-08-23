@@ -22,27 +22,9 @@ class Pickaxe extends PM_Pickaxe {
 	public function getTypePickaxe(): string{
 		return "wood";
 	}
-	
-	public function updateEfficiency(): void{
-		$this->addComponent(new MiningSpeedComponent($this->getTypePickaxe(), (int)$this->getMiningEfficiency(true)));
-	}
 
-	#[Override]
-	public function addEnchantment(EnchantmentInstance $enchantment) : self{
-		$this->enchantments[spl_object_id($enchantment->getType())] = $enchantment;
-		$this->updateEfficiency();
-		return $this;
-	}
-
-	#[Override]
-	public function removeEnchantment(Enchantment $enchantment, int $level = -1) : self{
-		$instance = $this->getEnchantment($enchantment);
-		if($instance !== null && ($level === -1 || $instance->getLevel() === $level)){
-			unset($this->enchantments[spl_object_id($enchantment)]);
-		}
-		$this->updateEfficiency();
-
-		return $this;
+	public function getEfficiencyEnchantLevel(): int{
+		return 0;
 	}
 	
         #[Override]
@@ -50,9 +32,9 @@ class Pickaxe extends PM_Pickaxe {
 		$efficiency = 1;
 		if($isCorrectTool){
 			$efficiency = $this->getBaseMiningEfficiency();
-			if(($enchantmentLevel = $this->getEnchantmentLevel(VanillaEnchantments::EFFICIENCY())) > 0){
-				$efficiency += ($enchantmentLevel ** 2 + 1);
-			}
+			$enchantmentLevel = $this->getEfficiencyEnchantLevel();
+			
+			if($enchantmentLevel > 0) $efficiency += ($enchantmentLevel ** 2 + 1);
 		}
 
 		return $efficiency;
