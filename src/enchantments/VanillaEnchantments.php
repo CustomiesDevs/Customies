@@ -25,7 +25,6 @@ namespace customiesdevs\customies\enchantments;
 
 use pocketmine\item\enchantment\{Rarity, ProtectionEnchantment, Enchantment, SharpnessEnchantment, KnockbackEnchantment, FireAspectEnchantment};
 use pocketmine\event\entity\EntityDamageEvent;
-use pocketmine\lang\KnownTranslationFactory;
 use pocketmine\utils\RegistryTrait;
 
 /**
@@ -61,7 +60,7 @@ final class VanillaEnchantments{
 
 	protected static function setup() : void{
 		self::register("PROTECTION", new ProtectionEnchantment(
-			KnownTranslationFactory::enchantment_protect_all(),
+			"Protection",
 			Rarity::COMMON,
 			0,
 			0,
@@ -72,7 +71,7 @@ final class VanillaEnchantments{
 			20
 		));
 		self::register("FIRE_PROTECTION", new ProtectionEnchantment(
-			KnownTranslationFactory::enchantment_protect_fire(),
+			"§6Fire Protection",
 			Rarity::UNCOMMON,
 			0,
 			0,
@@ -88,7 +87,7 @@ final class VanillaEnchantments{
 			12
 		));
 		self::register("FEATHER_FALLING", new ProtectionEnchantment(
-			KnownTranslationFactory::enchantment_protect_fall(),
+			"§7Feather Falling",
 			Rarity::UNCOMMON,
 			0,
 			0,
@@ -101,7 +100,7 @@ final class VanillaEnchantments{
 			10
 		));
 		self::register("BLAST_PROTECTION", new ProtectionEnchantment(
-			KnownTranslationFactory::enchantment_protect_explosion(),
+			"§cBlast Protection",
 			Rarity::RARE,
 			0,
 			0,
@@ -115,7 +114,7 @@ final class VanillaEnchantments{
 			12
 		));
 		self::register("PROJECTILE_PROTECTION", new ProtectionEnchantment(
-			KnownTranslationFactory::enchantment_protect_projectile(),
+			"§7Projectile Protection",
 			Rarity::UNCOMMON,
 			0,
 			0,
@@ -128,7 +127,7 @@ final class VanillaEnchantments{
 			15
 		));
 		self::register("THORNS", new Enchantment(
-			KnownTranslationFactory::enchantment_thorns(),
+			"§bThorns",
 			Rarity::MYTHIC,
 			0,
 			0,
@@ -137,7 +136,7 @@ final class VanillaEnchantments{
 			50
 		));
 		self::register("RESPIRATION", new Enchantment(
-			KnownTranslationFactory::enchantment_oxygen(),
+			"Oxygen",
 			Rarity::RARE,
 			0,
 			0,
@@ -147,7 +146,7 @@ final class VanillaEnchantments{
 		));
 
 		self::register("SHARPNESS", new SharpnessEnchantment(
-			KnownTranslationFactory::enchantment_damage_all(),
+			"§7Sharpness",
 			Rarity::COMMON,
 			0,
 			0,
@@ -156,7 +155,7 @@ final class VanillaEnchantments{
 			20
 		));
 		self::register("KNOCKBACK", new KnockbackEnchantment(
-			KnownTranslationFactory::enchantment_knockback(),
+			"Knockback",
 			Rarity::UNCOMMON,
 			0,
 			0,
@@ -165,7 +164,7 @@ final class VanillaEnchantments{
 			50
 		));
 		self::register("FIRE_ASPECT", new FireAspectEnchantment(
-			KnownTranslationFactory::enchantment_fire(),
+			"§6Fire Aspect",
 			Rarity::RARE,
 			0,
 			0,
@@ -176,7 +175,7 @@ final class VanillaEnchantments{
 		//TODO: smite, bane of arthropods, looting (these don't make sense now because their applicable mobs don't exist yet)
 
 		self::register("EFFICIENCY", new Enchantment(
-			KnownTranslationFactory::enchantment_digging(),
+			"§2Efficiency",
 			Rarity::COMMON,
 			0,
 			0,
@@ -185,7 +184,7 @@ final class VanillaEnchantments{
 			50
 		));
 		self::register("FORTUNE", new Enchantment(
-			KnownTranslationFactory::enchantment_lootBonusDigger(),
+			"§eFortune",
 			Rarity::RARE,
 			0,
 			0,
@@ -194,7 +193,7 @@ final class VanillaEnchantments{
 			50
 		));
 		self::register("SILK_TOUCH", new Enchantment(
-			KnownTranslationFactory::enchantment_untouching(),
+			"§7Silk touch",
 			Rarity::MYTHIC,
 			0,
 			0,
@@ -203,7 +202,7 @@ final class VanillaEnchantments{
 			50
 		));
 		self::register("UNBREAKING", new Enchantment(
-			KnownTranslationFactory::enchantment_durability(),
+			"Unbreaking",
 			Rarity::UNCOMMON,
 			0,
 			0,
@@ -213,7 +212,7 @@ final class VanillaEnchantments{
 		));
 
 		self::register("POWER", new Enchantment(
-			KnownTranslationFactory::enchantment_arrowDamage(),
+			"§bPower",
 			Rarity::COMMON,
 			0,
 			0,
@@ -222,7 +221,7 @@ final class VanillaEnchantments{
 			15
 		));
 		self::register("PUNCH", new Enchantment(
-			KnownTranslationFactory::enchantment_arrowKnockback(),
+			"§cPunch",
 			Rarity::RARE,
 			0,
 			0,
@@ -231,7 +230,7 @@ final class VanillaEnchantments{
 			25
 		));
 		self::register("FLAME", new Enchantment(
-			KnownTranslationFactory::enchantment_arrowFire(),
+			"§6Flame",
 			Rarity::RARE,
 			0,
 			0,
@@ -240,7 +239,7 @@ final class VanillaEnchantments{
 			30
 		));
 		self::register("INFINITY", new Enchantment(
-			KnownTranslationFactory::enchantment_arrowInfinite(),
+			"§dInfinity",
 			Rarity::MYTHIC,
 			0,
 			0,
@@ -250,7 +249,7 @@ final class VanillaEnchantments{
 		));
 
 		self::register("MENDING", new Enchantment(
-			KnownTranslationFactory::enchantment_mending(),
+			"§7Mending",
 			Rarity::RARE,
 			0,
 			0,
@@ -260,7 +259,7 @@ final class VanillaEnchantments{
 		));
 
 		self::register("VANISHING", new Enchantment(
-			KnownTranslationFactory::enchantment_curse_vanishing(),
+			"§uVanishing",
 			Rarity::MYTHIC,
 			0,
 			0,
@@ -270,7 +269,7 @@ final class VanillaEnchantments{
 		));
 
 		self::register("SWIFT_SNEAK", new Enchantment(
-			KnownTranslationFactory::enchantment_swift_sneak(),
+			"§7Swift sneak",
 			Rarity::MYTHIC,
 			0,
 			0,
