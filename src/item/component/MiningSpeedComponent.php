@@ -28,6 +28,7 @@ final class MiningSpeedComponent implements ItemComponent {
 			"Cobblestone Slab", 
 			"Cobblestone Stairs", 
 			"Cobblestone Wall", 
+	                "Cobbled Deepslate",
 			"Diorite", 
 			"Diorite Wall", 
 			"Dripstone Block", 
