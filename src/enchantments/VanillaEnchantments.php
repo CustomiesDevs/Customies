@@ -23,7 +23,7 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies\enchantments;
 
-use pocketmine\item\enchantment\{ProtectionEnchantment, Enchantment, SharpnessEnchantment, KnockbackEnchantment, FireAspectEnchantment};
+use pocketmine\item\enchantment\{Rarity, ProtectionEnchantment, Enchantment, SharpnessEnchantment, KnockbackEnchantment, FireAspectEnchantment};
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\lang\KnownTranslationFactory;
 use pocketmine\utils\RegistryTrait;
