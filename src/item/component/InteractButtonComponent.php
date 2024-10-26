@@ -6,18 +6,21 @@ namespace customiesdevs\customies\item\component;
 
 final class InteractButtonComponent implements ItemComponent{
 
-    private string $value;
 
-    public function __construct(string $value = "true"){
-        $this->value = $value;
+    public function __construct(
+        private string $text
+    ){
     }
 
     public function getName() : string{
         return "minecraft:interact_button";
     }
 
-    public function getValue() : string{
-        return $this->value;
+    public function getValue() : array{
+        return [
+            'interact_text' => $this->text,
+            'requires_interact' => true
+        ];
     }
 
     public function isProperty() : bool{
