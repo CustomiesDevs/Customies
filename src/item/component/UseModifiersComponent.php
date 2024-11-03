@@ -5,7 +5,7 @@ namespace customiesdevs\customies\item\component;
 
 final class UseModifiersComponent implements ItemComponent {
 
-    public function __construct(private float $movementModifier,private float $useDuration) {}
+    public function __construct(private float $movementModifier, private float $useDuration) {}
 
     public function getName(): string {
         return "minecraft:use_modifiers";
