@@ -4,29 +4,46 @@ declare(strict_types=1);
 namespace customiesdevs\customies\item\component;
 
 use pocketmine\block\Block;
+use pocketmine\world\format\io\GlobalBlockStateHandlers;
 
 final class BlockPlacerComponent implements ItemComponent {
 
-    private string $blockIdentifier;
-    private bool $useBlockDescription;
+	private Block $block;
+	private array $useOn = [];
 
-    public function __construct(string $blockIdentifier, bool $useBlockDescription = false) {
-        $this->blockIdentifier = $blockIdentifier;
-        $this->useBlockDescription = $useBlockDescription;
-    }
+	/**
+	 * Sets the item as a Planter item component for blocks. Items with this component will place a block when used.
+	 * @param Block $block
+	 */
+	public function __construct(Block $block) {
+		$this->block = $block;
+	}
 
-    public function getName(): string {
-        return "minecraft:block_placer";
-    }
+	public function getName(): string {
+		return "minecraft:block_placer";
+	}
 
-    public function getValue(): array {
-        return [
-            "block" => $this->blockIdentifier,
-            "use_block_description" => $this->useBlockDescription
-        ];
-    }
+	public function getValue(): array {
+		return [
+			"block" => GlobalBlockStateHandlers::getSerializer()->serialize($this->block->getStateId())->getName(),
+			"use_on" => $this->useOn
+		];
+	}
 
-    public function isProperty(): bool {
-        return false;
-    }
+	public function isProperty(): bool {
+		return false;
+	}
+
+	/**
+	 * Add blocks to the `use_on` array in the required format.
+	 * @param Block ...$blocks
+	 */
+	public function useOn(Block ...$blocks): self{
+		foreach($blocks as $block){
+			$this->useOn[] = [
+				"name" => GlobalBlockStateHandlers::getSerializer()->serialize($block->getStateId())->getName()
+			];
+		}
+		return $this;
+	}
 }

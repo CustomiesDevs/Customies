@@ -7,6 +7,10 @@ final class AllowOffHandComponent implements ItemComponent {
 
 	private bool $offHand;
 
+	/**
+	 * Determine whether an item can be placed in the off-hand slot of the inventory.
+	 * @param bool $offHand Default is set to `true`
+	 */
 	public function __construct(bool $offHand = true) {
 		$this->offHand = $offHand;
 	}

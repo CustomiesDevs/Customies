@@ -12,7 +12,12 @@ final class RarityComponent implements ItemComponent {
 
 	private string $rarity;
 
-	public function __construct(string $rarity) {
+	/**
+	 * Rarity Component enables the specifying of the base rarity of an item. 
+	 * The rarity of the item will determine which color it uses for its name, unless the item has a HoverTextColor component specified, in which case that hover text color will take priority and be used instead of the rarity color.
+	 * @param string $type Sets the base rarity of the item. The rarity of an item automatically increases when enchanted, either to Rare when the base rarity is Common or Uncommon, or Epic when the base rarity is Rare
+	 */
+	public function __construct(string $rarity = self::COMMON) {
 		$this->rarity = $rarity;
 	}
 
