@@ -28,6 +28,7 @@ final class WearableComponent implements ItemComponent {
 	 * Sets the wearable item component.
 	 * @param string $slot Specifies where the item can be worn
 	 * @param int $protection How much protection the wearable item provides
+	 * @param bool $dispensable Whether the wearable item can be dispensed
 	 */
 	public function __construct(string $slot, int $protection = 0, bool $dispensable = true) {
 		$this->slot = $slot;
