@@ -11,7 +11,7 @@ final class DamageComponent implements ItemComponent {
 	 * Determines how much extra damage an item does on attack. Note that this must be a positive value.
 	 * @param int $damage Should be a Intger above `0`
 	 */
-	public function __construct(int $damage = 0) {
+	public function __construct(int $damage) {
 		$this->damage = $damage;
 	}
 

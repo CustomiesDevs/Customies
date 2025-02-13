@@ -9,7 +9,7 @@ final class UseDurationComponent implements ItemComponent {
 
 	/**
 	 * How long the item takes to use in seconds.
-	 * @param int $duration Default is set to `20` (`1` means `20` seconds) so (`1.6` means `32` seconds)
+	 * @param int $duration Default is set to `20` (`20` means `1` seconds) so (`32` means `1.6` seconds)
 	 */
 	public function __construct(int $duration = 20) {
 		$this->duration = $duration;

@@ -12,7 +12,7 @@ final class HoverTextColorComponent implements ItemComponent {
 	 * @param string $hoverTextColor Specifies the color of the item's hover text
 	 * @link [List of Color Code](https://minecraft.wiki/w/Formatting_codes#Color_codes)
 	 */
-	public function __construct(string $hoverTextColor = "§s") {
+	public function __construct(string $hoverTextColor) {
 		$this->hoverTextColor = $hoverTextColor;
 	}
 
