@@ -4,12 +4,11 @@ declare(strict_types=1);
 namespace customiesdevs\customies\item;
 
 use customiesdevs\customies\item\component\AllowOffHandComponent;
-use customiesdevs\customies\item\component\ArmorComponent;
-use customiesdevs\customies\item\component\AttackDamageComponent;
 use customiesdevs\customies\item\component\CanDestroyInCreativeComponent;
 use customiesdevs\customies\item\component\CooldownComponent;
 use customiesdevs\customies\item\component\CreativeCategoryComponent;
 use customiesdevs\customies\item\component\CreativeGroupComponent;
+use customiesdevs\customies\item\component\DamageComponent;
 use customiesdevs\customies\item\component\DisplayNameComponent;
 use customiesdevs\customies\item\component\DurabilityComponent;
 use customiesdevs\customies\item\component\FoodComponent;
@@ -19,7 +18,6 @@ use customiesdevs\customies\item\component\IconComponent;
 use customiesdevs\customies\item\component\ItemComponent;
 use customiesdevs\customies\item\component\MaxStackSizeComponent;
 use customiesdevs\customies\item\component\ProjectileComponent;
-use customiesdevs\customies\item\component\RenderOffsetsComponent;
 use customiesdevs\customies\item\component\ThrowableComponent;
 use customiesdevs\customies\item\component\UseAnimationComponent;
 use customiesdevs\customies\item\component\UseDurationComponent;
@@ -87,8 +85,7 @@ trait ItemComponentsTrait {
 				ArmorInventory::SLOT_FEET => WearableComponent::SLOT_ARMOR_FEET,
 				default => WearableComponent::SLOT_ARMOR
 			};
-			$this->addComponent(new ArmorComponent($this->getDefensePoints()));
-			$this->addComponent(new WearableComponent($slot));
+			$this->addComponent(new WearableComponent($slot, $this->getDefensePoints()));
 		}
 
 		if($this instanceof Consumable) {
@@ -104,7 +101,7 @@ trait ItemComponentsTrait {
 		}
 
 		if($this instanceof ProjectileItem) {
-			$this->addComponent(new ProjectileComponent("projectile"));
+			$this->addComponent(new ProjectileComponent(1.25, "projectile"));
 			$this->addComponent(new ThrowableComponent(true));
 		}
 
@@ -117,7 +114,7 @@ trait ItemComponentsTrait {
 		}
 
 		if($this->getAttackPoints() > 0) {
-			$this->addComponent(new AttackDamageComponent($this->getAttackPoints() - 1));
+			$this->addComponent(new DamageComponent($this->getAttackPoints() - 1));
 		}
 
 		if($this instanceof Tool) {
@@ -126,17 +123,6 @@ trait ItemComponentsTrait {
 				$this->addComponent(new CanDestroyInCreativeComponent(false));
 			}
 		}
-	}
-
-	/**
-	 * When a custom item has a texture that is not 16x16, the item will scale when held in a hand based on the size of
-	 * the texture. This method adds the minecraft:render_offsets component with the correct data for the provided width
-	 * and height of a texture to make the item scale correctly. An optional bool for hand equipped can be used if the
-	 * item is something like a tool or weapon.
-	 */
-	protected function setupRenderOffsets(int $width, int $height, bool $handEquipped = false): void {
-		$this->addComponent(new HandEquippedComponent($handEquipped));
-		$this->addComponent(new RenderOffsetsComponent($width, $height, $handEquipped));
 	}
 
 	/**

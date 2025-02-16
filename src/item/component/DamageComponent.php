@@ -3,10 +3,14 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies\item\component;
 
-final class AttackDamageComponent implements ItemComponent {
+final class DamageComponent implements ItemComponent {
 
 	private int $damage;
 
+	/**
+	 * Determines how much extra damage an item does on attack. Note that this must be a positive value.
+	 * @param int $damage Should be a Intger above `0`
+	 */
 	public function __construct(int $damage) {
 		$this->damage = $damage;
 	}
