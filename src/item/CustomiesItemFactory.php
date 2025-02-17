@@ -7,12 +7,15 @@ use InvalidArgumentException;
 use pocketmine\block\Block;
 use pocketmine\data\bedrock\item\BlockItemIdMap;
 use pocketmine\data\bedrock\item\SavedItemData;
+use pocketmine\inventory\CreativeCategory;
 use pocketmine\inventory\CreativeInventory;
 use pocketmine\item\Item;
 use pocketmine\item\ItemIdentifier;
 use pocketmine\item\ItemTypeIds;
 use pocketmine\item\StringToItemParser;
+use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\network\mcpe\convert\TypeConverter;
+use pocketmine\network\mcpe\protocol\CreativeContentPacket;
 use pocketmine\network\mcpe\protocol\types\CacheableNbt;
 use pocketmine\network\mcpe\protocol\types\ItemComponentPacketEntry;
 use pocketmine\network\mcpe\protocol\types\ItemTypeEntry;
@@ -29,10 +32,6 @@ final class CustomiesItemFactory {
 	 * @var ItemTypeEntry[]
 	 */
 	private array $itemTableEntries = [];
-	/**
-	 * @var ItemComponentPacketEntry[]
-	 */
-	private array $itemComponentEntries = [];
 
 	/**
 	 * Get a custom item from its identifier. An exception will be thrown if the item is not registered.
@@ -46,15 +45,7 @@ final class CustomiesItemFactory {
 	}
 
 	/**
-	 * Returns the item properties CompoundTag which maps out all custom item properties.
-	 * @return ItemComponentPacketEntry[]
-	 */
-	public function getItemComponentEntries(): array {
-		return $this->itemComponentEntries;
-	}
-
-	/**
-	 * Returns custom item entries for the StartGamePacket itemTable property.
+	 * Returns custom item entries
 	 * @return ItemTypeEntry[]
 	 */
 	public function getItemTableEntries(): array {
@@ -66,7 +57,7 @@ final class CustomiesItemFactory {
 	 * item components if present.
 	 * @phpstan-param class-string $className
 	 */
-	public function registerItem(string $className, string $identifier, string $name): void {
+	public function registerItem(string $className, string $identifier, string $name, CreativeCategory $category = CreativeCategory::ITEMS): void {
 		if($className !== Item::class) {
 			Utils::testValidInstance($className, Item::class);
 		}
@@ -80,17 +71,15 @@ final class CustomiesItemFactory {
 
 		StringToItemParser::getInstance()->register($identifier, fn() => clone $item);
 
-		if(($componentBased = $item instanceof ItemComponents)) {
-			$this->itemComponentEntries[$identifier] = new ItemComponentPacketEntry($identifier,
-				new CacheableNbt($item->getComponents()
-					->setInt("id", $itemId)
-					->setString("name", $identifier)
-				)
-			);
-		}
+		$nbt = ($componentBased = $item instanceof ItemComponents) ? $item->getComponents()
+			->setInt("id", $itemId)
+			->setString("name", $identifier) : CompoundTag::create();
 
-		$this->itemTableEntries[$identifier] = new ItemTypeEntry($identifier, $itemId, $componentBased);
-		CreativeInventory::getInstance()->add($item);
+		$this->itemTableEntries[$identifier] = new ItemTypeEntry($identifier, $itemId, $componentBased, 1, new CacheableNbt($nbt));
+		CreativeInventory::getInstance()->add(
+			$item,
+			$category
+		);
 	}
 
 	/**
@@ -119,7 +108,7 @@ final class CustomiesItemFactory {
 		$itemId = $block->getIdInfo()->getBlockTypeId();
 		$this->registerCustomItemMapping($identifier, $itemId);
 		StringToItemParser::getInstance()->registerBlock($identifier, fn() => clone $block);
-		$this->itemTableEntries[] = new ItemTypeEntry($identifier, $itemId, false);
+		$this->itemTableEntries[] = new ItemTypeEntry($identifier, $itemId, false, 2, new CacheableNbt(CompoundTag::create()));
 
 		$blockItemIdMap = BlockItemIdMap::getInstance();
 		$reflection = new ReflectionClass($blockItemIdMap);

@@ -9,6 +9,7 @@ use pocketmine\event\Listener;
 use pocketmine\event\server\DataPacketSendEvent;
 use pocketmine\network\mcpe\protocol\BiomeDefinitionListPacket;
 use pocketmine\network\mcpe\protocol\ItemComponentPacket;
+use pocketmine\network\mcpe\protocol\ItemRegistryPacket;
 use pocketmine\network\mcpe\protocol\ResourcePackStackPacket;
 use pocketmine\network\mcpe\protocol\StartGamePacket;
 use pocketmine\network\mcpe\protocol\types\BlockPaletteEntry;
@@ -19,7 +20,6 @@ use function count;
 
 final class CustomiesListener implements Listener {
 
-	private ?ItemComponentPacket $cachedItemComponentPacket = null;
 	/** @var ItemTypeEntry[] */
 	private array $cachedItemTable = [];
 	/** @var BlockPaletteEntry[] */
@@ -36,16 +36,10 @@ final class CustomiesListener implements Listener {
 
 	public function onDataPacketSend(DataPacketSendEvent $event): void {
 		foreach($event->getPackets() as $packet){
-			if($packet instanceof BiomeDefinitionListPacket) {
-				// ItemComponentPacket needs to be sent after the BiomeDefinitionListPacket.
-				if($this->cachedItemComponentPacket === null) {
-					// Wait for the data to be needed before it is actually cached. Allows for all blocks and items to be
-					// registered before they are cached for the rest of the runtime.
-					$this->cachedItemComponentPacket = ItemComponentPacket::create(CustomiesItemFactory::getInstance()->getItemComponentEntries());
-				}
-				foreach($event->getTargets() as $session){
-					$session->sendDataPacket($this->cachedItemComponentPacket);
-				}
+			if($packet instanceof ItemRegistryPacket) {
+				(function() : void{
+					$this->entries = array_merge($this->entries, CustomiesItemFactory::getInstance()->getItemTableEntries());
+				})->call($packet);
 			} elseif($packet instanceof StartGamePacket) {
 				if(count($this->cachedItemTable) === 0) {
 					// Wait for the data to be needed before it is actually cached. Allows for all blocks and items to be
@@ -54,7 +48,6 @@ final class CustomiesListener implements Listener {
 					$this->cachedBlockPalette = CustomiesBlockFactory::getInstance()->getBlockPaletteEntries();
 				}
 				$packet->levelSettings->experiments = $this->experiments;
-				$packet->itemTable = array_merge($packet->itemTable, $this->cachedItemTable);
 				$packet->blockPalette = $this->cachedBlockPalette;
 			} elseif($packet instanceof ResourcePackStackPacket) {
 				$packet->experiments = $this->experiments;
