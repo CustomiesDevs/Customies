@@ -7,7 +7,6 @@ use customiesdevs\customies\block\CustomiesBlockFactory;
 use customiesdevs\customies\item\CustomiesItemFactory;
 use pocketmine\event\Listener;
 use pocketmine\event\server\DataPacketSendEvent;
-use pocketmine\network\mcpe\protocol\ItemRegistryPacket;
 use pocketmine\network\mcpe\protocol\ResourcePackStackPacket;
 use pocketmine\network\mcpe\protocol\StartGamePacket;
 use pocketmine\network\mcpe\protocol\types\BlockPaletteEntry;
@@ -34,11 +33,7 @@ final class CustomiesListener implements Listener {
 
 	public function onDataPacketSend(DataPacketSendEvent $event): void {
 		foreach($event->getPackets() as $packet){
-			if($packet instanceof ItemRegistryPacket) {
-				(function() : void{
-					$this->entries = array_merge($this->entries, CustomiesItemFactory::getInstance()->getItemTableEntries());
-				})->call($packet);
-			} elseif($packet instanceof StartGamePacket) {
+			if($packet instanceof StartGamePacket) {
 				if(count($this->cachedItemTable) === 0) {
 					// Wait for the data to be needed before it is actually cached. Allows for all blocks and items to be
 					// registered before they are cached for the rest of the runtime.
