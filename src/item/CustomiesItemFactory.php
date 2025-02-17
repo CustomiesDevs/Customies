@@ -62,7 +62,6 @@ final class CustomiesItemFactory {
 
 		$itemId = ItemTypeIds::newId();
 		$item = new $className(new ItemIdentifier($itemId), $name);
-		$this->registerCustomItemMapping($identifier, $itemId);
 
 		GlobalItemDataHandlers::getDeserializer()->map($identifier, fn() => clone $item);
 		GlobalItemDataHandlers::getSerializer()->map($item, fn() => new SavedItemData($identifier));
@@ -73,7 +72,8 @@ final class CustomiesItemFactory {
 			->setInt("id", $itemId)
 			->setString("name", $identifier) : CompoundTag::create();
 
-		$this->itemTableEntries[$identifier] = new ItemTypeEntry($identifier, $itemId, $componentBased, 1, new CacheableNbt($nbt));
+		$this->itemTableEntries[$identifier] = $entry = new ItemTypeEntry($identifier, $itemId, $componentBased, $componentBased ? 1 : 0, new CacheableNbt($nbt));
+		$this->registerCustomItemMapping($identifier, $itemId, $entry);
 		CreativeInventory::getInstance()->add(
 			$item,
 			$category
@@ -83,7 +83,7 @@ final class CustomiesItemFactory {
 	/**
 	 * Registers a custom item ID to the required mappings in the global ItemTypeDictionary instance.
 	 */
-	private function registerCustomItemMapping(string $identifier, int $itemId): void {
+	private function registerCustomItemMapping(string $identifier, int $itemId, ItemTypeEntry $entry): void {
 		$dictionary = TypeConverter::getInstance()->getItemTypeDictionary();
 		$reflection = new ReflectionClass($dictionary);
 
@@ -96,6 +96,11 @@ final class CustomiesItemFactory {
 		/** @var int[] $value */
 		$value = $stringToInt->getValue($dictionary);
 		$stringToInt->setValue($dictionary, $value + [$identifier => $itemId]);
+
+		$itemTypes = $reflection->getProperty("itemTypes");
+		$value = $itemTypes->getValue($dictionary);
+		$value[] = $entry;
+		$itemTypes->setValue($dictionary, $value);
 	}
 
 	/**
@@ -104,9 +109,9 @@ final class CustomiesItemFactory {
 	 */
 	public function registerBlockItem(string $identifier, Block $block): void {
 		$itemId = $block->getIdInfo()->getBlockTypeId();
-		$this->registerCustomItemMapping($identifier, $itemId);
 		StringToItemParser::getInstance()->registerBlock($identifier, fn() => clone $block);
-		$this->itemTableEntries[] = new ItemTypeEntry($identifier, $itemId, false, 2, new CacheableNbt(CompoundTag::create()));
+		$this->itemTableEntries[] = $entry = new ItemTypeEntry($identifier, $itemId, false, 2, new CacheableNbt(CompoundTag::create()));
+		$this->registerCustomItemMapping($identifier, $itemId, $entry);
 
 		$blockItemIdMap = BlockItemIdMap::getInstance();
 		$reflection = new ReflectionClass($blockItemIdMap);
