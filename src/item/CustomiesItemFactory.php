@@ -55,7 +55,7 @@ final class CustomiesItemFactory {
 	 * item components if present.
 	 * @phpstan-param class-string $className
 	 */
-	public function registerItem(string $className, string $identifier, string $name, CreativeCategory $category = CreativeCategory::ITEMS): void {
+	public function registerItem(string $className, string $identifier, string $name, ?CreativeCategory $category = null): void {
 		if($className !== Item::class) {
 			Utils::testValidInstance($className, Item::class);
 		}
@@ -74,10 +74,12 @@ final class CustomiesItemFactory {
 
 		$this->itemTableEntries[$identifier] = $entry = new ItemTypeEntry($identifier, $itemId, $componentBased, $componentBased ? 1 : 0, new CacheableNbt($nbt));
 		$this->registerCustomItemMapping($identifier, $itemId, $entry);
-		CreativeInventory::getInstance()->add(
-			$item,
-			$category
-		);
+		if($category !== null){
+			CreativeInventory::getInstance()->add(
+				$item,
+				$category
+			);
+		}
 	}
 
 	/**
