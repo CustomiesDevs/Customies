@@ -20,7 +20,7 @@ final class AsyncRegisterBlocksTask extends AsyncTask {
 	 * @param Closure[] $blockFuncs
 	 * @phpstan-param array<string, array{(Closure(int): Block), (Closure(BlockStateWriter): Block), (Closure(Block): BlockStateReader)}> $blockFuncs
 	 */
-	public function __construct(private string $cachePath, array $blockFuncs) {
+	public function __construct(array $blockFuncs) {
 		$this->blockFuncs = new ThreadSafeArray();
 		$this->serializer = new ThreadSafeArray();
 		$this->deserializer = new ThreadSafeArray();

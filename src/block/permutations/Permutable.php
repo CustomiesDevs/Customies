@@ -23,13 +23,6 @@ interface Permutable {
 	public function getPermutations(): array;
 
 	/**
-	 * Returns an array of the current block property values in the same order as those in getBlockProperties(). It is
-	 * used to convert the current properties in to a meta value that can be stored on disk in the world.
-	 * @return mixed[]
-	 */
-	public function getCurrentBlockProperties(): array;
-
-	/**
 	 * Serializes the block state to the given BlockStateWriter.
 	 */
 	public function serializeState(BlockStateWriter $blockStateOut): void;
