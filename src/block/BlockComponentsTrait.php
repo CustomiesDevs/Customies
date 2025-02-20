@@ -6,6 +6,7 @@ use customiesdevs\customies\block\component\BlockComponent;
 use customiesdevs\customies\block\component\CollisionBoxComponent;
 use customiesdevs\customies\block\component\DestructibleByMiningComponent;
 use customiesdevs\customies\block\component\DisplayNameComponent;
+use customiesdevs\customies\block\component\FlammableComponent;
 use customiesdevs\customies\block\component\FrictionComponent;
 use customiesdevs\customies\block\component\GeometryComponent;
 use customiesdevs\customies\block\component\LightDampeningComponent;
@@ -47,6 +48,9 @@ trait BlockComponentsTrait {
 		if($this->hasEntityCollision()){
 			$this->addComponent(new SelectionBoxComponent());
 			$this->addComponent(new CollisionBoxComponent());
+		}
+		if($this->getFlammability() > 0){
+			$this->addComponent(new FlammableComponent($this->getFlameEncouragement()));
 		}
 		if($this->getName() !== "Unknown") {
 			$this->addComponent(new DisplayNameComponent($this->getName()));
