@@ -29,6 +29,7 @@ use pocketmine\utils\SingletonTrait;
 use pocketmine\world\format\io\GlobalBlockStateHandlers;
 use function array_map;
 use function array_reverse;
+use function assert;
 use function hash;
 use function strcmp;
 use function usort;
@@ -51,11 +52,11 @@ final class CustomiesBlockFactory {
 	 * It is especially important for the workers that deal with chunk encoding, as using the wrong runtime ID mappings
 	 * can result in massive issues with almost every block showing as the wrong thing and causing lag to clients.
 	 */
-	public function addWorkerInitHook(string $cachePath): void {
+	public function addWorkerInitHook(): void {
 		$server = Server::getInstance();
 		$blocks = $this->blockFuncs;
-		$server->getAsyncPool()->addWorkerStartHook(static function (int $worker) use ($cachePath, $server, $blocks): void {
-			$server->getAsyncPool()->submitTaskToWorker(new AsyncRegisterBlocksTask($cachePath, $blocks), $worker);
+		$server->getAsyncPool()->addWorkerStartHook(static function (int $worker) use ($server, $blocks): void {
+			$server->getAsyncPool()->submitTaskToWorker(new AsyncRegisterBlocksTask($blocks), $worker);
 		});
 	}
 

@@ -90,7 +90,7 @@ final class CustomiesItemFactory {
 		$reflection = new ReflectionClass($dictionary);
 
 		$intToString = $reflection->getProperty("intToStringIdMap");
-		/** @var int[] $value */
+		/** @var string[] $value */
 		$value = $intToString->getValue($dictionary);
 		$intToString->setValue($dictionary, $value + [$itemId => $identifier]);
 

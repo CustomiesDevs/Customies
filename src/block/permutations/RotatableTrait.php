@@ -8,7 +8,6 @@ use pocketmine\block\utils\HorizontalFacingTrait;
 use pocketmine\data\bedrock\block\convert\BlockStateReader;
 use pocketmine\data\bedrock\block\convert\BlockStateWriter;
 use pocketmine\item\Item;
-use pocketmine\math\Facing;
 use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\player\Player;
@@ -76,23 +75,6 @@ trait RotatableTrait {
 					->setFloat("TY", 0.0)
 					->setFloat("TZ", 0.0)),
 		];
-	}
-
-	public function getCurrentBlockProperties(): array {
-		return [$this->facing];
-	}
-
-	protected function writeStateToMeta(): int {
-		return Permutations::toMeta($this);
-	}
-
-	public function readStateFromData(int $id, int $stateMeta): void {
-		$blockProperties = Permutations::fromMeta($this, $stateMeta);
-		$this->facing = $blockProperties[0] ?? Facing::NORTH;
-	}
-
-	public function getStateBitmask(): int {
-		return Permutations::getStateBitmask($this);
 	}
 
 	public function place(BlockTransaction $tx, Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, ?Player $player = null): bool {
