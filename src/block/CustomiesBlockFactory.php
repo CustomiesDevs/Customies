@@ -84,7 +84,7 @@ final class CustomiesBlockFactory {
 	 * @phpstan-param null|(Closure(BlockStateWriter): Block) $serializer
 	 * @phpstan-param null|(Closure(Block): BlockStateReader) $deserializer
 	 */
-	public function registerBlock(Closure $blockFunc, string $identifier, ?Model $model = null, ?CreativeInventoryInfo $creativeInfo = null, ?Closure $serializer = null, ?Closure $deserializer = null): void {
+	public function registerBlock(Closure $blockFunc, string $identifier, ?CreativeInventoryInfo $creativeInfo = null, ?Closure $serializer = null, ?Closure $deserializer = null): void {
 		$block = $blockFunc();
 		if(!$block instanceof Block) {
 			throw new InvalidArgumentException("Class returned from closure is not a Block");
@@ -95,19 +95,11 @@ final class CustomiesBlockFactory {
 		$this->customBlocks[$identifier] = $block;
 
 		$propertiesTag = CompoundTag::create();
-		$components = CompoundTag::create()
-			->setTag("minecraft:light_emission", CompoundTag::create()
-				->setByte("emission", $block->getLightLevel()))
-			->setTag("minecraft:light_dampening", CompoundTag::create()
-				->setByte("lightLevel", $block->getLightFilter()))
-			->setTag("minecraft:destructible_by_mining", CompoundTag::create()
-				->setFloat("value", $block->getBreakInfo()->getHardness()))
-			->setTag("minecraft:friction", CompoundTag::create()
-				->setFloat("value", 1 - $block->getFrictionFactor()));
+		$components = CompoundTag::create();
 
-		if($model !== null) {
-			foreach($model->toNBT() as $tagName => $tag){
-				$components->setTag($tagName, $tag);
+		if($block instanceof BlockComponents) {
+			foreach ($block->getComponents() as $component) {
+				$components->setTag($component->getName(), $component->getValue());
 			}
 		}
 
