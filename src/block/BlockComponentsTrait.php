@@ -36,17 +36,19 @@ trait BlockComponentsTrait {
 
 	/** 
 	 * This Creates a Normal Block Functions
+	 * Initializes the block with default components that are required for the block to function correctly
 	 * @todo Work on more default values depending on different pm classes similar to items
-	 * Initializes the block with default components that are required for the block to function correctly.
 	 */
-	protected function initComponent(string $texture): void {
+	protected function initComponent(string $texture, bool $useGeometry = true): void {
 		$this->addComponent(new LightEmissionComponent($this->getLightLevel()));
 		$this->addComponent(new LightDampeningComponent($this->getLightFilter()));
 		$this->addComponent(new DestructibleByMiningComponent($this->getBreakInfo()->getHardness()));
 		$this->addComponent(new FrictionComponent($this->getFrictionFactor()));
-		$this->addComponent(new GeometryComponent()); // if there's no geometry then set it as a full block
-		if($this->hasEntityCollision()){
-			$this->addComponent(new SelectionBoxComponent());
+		if ($useGeometry){
+			$this->addComponent(new GeometryComponent()); // if there's no geometry then set it as a full block
+		}
+		$this->addComponent(new SelectionBoxComponent());
+		if($this->hasEntityCollision()){	
 			$this->addComponent(new CollisionBoxComponent());
 		}
 		if($this->getFlammability() > 0){

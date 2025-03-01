@@ -96,7 +96,6 @@ final class CustomiesBlockFactory {
 
 		$propertiesTag = CompoundTag::create();
 		$components = CompoundTag::create();
-
 		if($block instanceof BlockComponents) {
 			foreach ($block->getComponents() as $component) {
 				$components->setTag($component->getName(), $component->getValue());

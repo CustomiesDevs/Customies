@@ -33,13 +33,9 @@ class GeometryComponent implements BlockComponent {
 		if(is_string($visibility) && !is_bool($visibility)){
 			$this->boneVisibility->setTag($boneName, CompoundTag::create()
 				->setString("expression", $visibility)
-				->setInt("version", 12));
+				->setShort("version", 12));
 		} elseif(is_bool($visibility)){
-			if($visibility){
-				$this->boneVisibility->setFloat($boneName, 1);
-			} else {
-				$this->boneVisibility->setFloat($boneName, 0);
-			}
+			$this->boneVisibility->setFloat($boneName, $visibility ? 1 : 0);
 		}
 		return $this;
 	}
