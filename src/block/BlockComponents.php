@@ -22,7 +22,7 @@ interface BlockComponents {
 	public function hasComponent(string $name): bool;
 
 	/**
-	 * @return array
+	 * @return BlockComponent[]
 	 */
 	public function getComponents(): array;
 }
