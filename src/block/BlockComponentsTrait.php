@@ -37,7 +37,7 @@ trait BlockComponentsTrait {
 	}
 
 	/** 
-	 * Initializes the block with default components that are required for the block to function correctly
+	 * Initialises a block's components with default values inferred from existing properties.
 	 * @todo Work on more default values depending on different pm classes similar to items
 	 * @param string $texture Texture name for the material.
 	 * @param bool $useGeometry Check if geometry component should be used, default is set to `true`
