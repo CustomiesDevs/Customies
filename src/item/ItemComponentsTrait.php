@@ -19,6 +19,7 @@ use customiesdevs\customies\item\component\ItemComponent;
 use customiesdevs\customies\item\component\MaxStackSizeComponent;
 use customiesdevs\customies\item\component\ProjectileComponent;
 use customiesdevs\customies\item\component\ThrowableComponent;
+use customiesdevs\customies\item\component\UnbreakableComponent;
 use customiesdevs\customies\item\component\UseAnimationComponent;
 use customiesdevs\customies\item\component\UseDurationComponent;
 use customiesdevs\customies\item\component\WearableComponent;
@@ -123,6 +124,10 @@ trait ItemComponentsTrait {
 				$this->addComponent(new CanDestroyInCreativeComponent(false));
 			}
 		}
+
+        if($this instanceof Durable && $this->isUnbreakable()){
+            $this->addComponent(new UnbreakableComponent(true));
+        }
 	}
 
 	/**
