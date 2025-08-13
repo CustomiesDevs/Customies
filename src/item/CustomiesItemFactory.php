@@ -63,14 +63,14 @@ final class CustomiesItemFactory {
 		$itemId = ItemTypeIds::newId();
 		$item = new $className(new ItemIdentifier($itemId), $name);
 
-		GlobalItemDataHandlers::getDeserializer()->map($identifier, fn() => clone $item);
-		GlobalItemDataHandlers::getSerializer()->map($item, fn() => new SavedItemData($identifier));
+		GlobalItemDataHandlers::getDeserializer()->map(strtolower($identifier), fn() => clone $item);
+		GlobalItemDataHandlers::getSerializer()->map($item, fn() => new SavedItemData(strtolower($identifier)));
 
-		StringToItemParser::getInstance()->register($identifier, fn() => clone $item);
+		StringToItemParser::getInstance()->register(strtolower($identifier), fn() => clone $item);
 
 		$nbt = ($componentBased = $item instanceof ItemComponents) ? $item->getComponents()
 			->setInt("id", $itemId)
-			->setString("name", $identifier) : CompoundTag::create();
+			->setString("name", strtolower($identifier)) : CompoundTag::create();
 
 		$this->itemTableEntries[$identifier] = $entry = new ItemTypeEntry($identifier, $itemId, $componentBased, $componentBased ? 1 : 0, new CacheableNbt($nbt));
 		$this->registerCustomItemMapping($identifier, $itemId, $entry);
