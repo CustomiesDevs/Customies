@@ -70,7 +70,7 @@ trait ItemComponentsTrait {
 				$this->addComponent(new FoodComponent(!$this->requiresHunger()));
 			}
 			$this->addComponent(new UseAnimationComponent($food ? UseAnimationComponent::ANIMATION_EAT : UseAnimationComponent::ANIMATION_DRINK));
-			$this->setUseDuration(20);
+			$this->addComponent(new UseDurationComponent());
 		}
 
 		if($this instanceof Durable) {
