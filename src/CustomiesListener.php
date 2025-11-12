@@ -5,6 +5,7 @@ namespace customiesdevs\customies;
 
 use customiesdevs\customies\block\CustomiesBlockFactory;
 use pocketmine\event\Listener;
+use pocketmine\event\player\PlayerCreationEvent;
 use pocketmine\event\server\DataPacketSendEvent;
 use pocketmine\network\mcpe\protocol\ResourcePackStackPacket;
 use pocketmine\network\mcpe\protocol\StartGamePacket;
@@ -19,8 +20,6 @@ final class CustomiesListener implements Listener {
 
 	public function __construct() {
 		$this->experiments = new Experiments([
-			// "data_driven_items" is required for custom blocks to render in-game. With this disabled, they will be
-			// shown as the UPDATE texture block.
 			"data_driven_items" => true,
 		], true);
 	}
@@ -29,8 +28,6 @@ final class CustomiesListener implements Listener {
 		foreach($event->getPackets() as $packet){
 			if($packet instanceof StartGamePacket) {
 				if(count($this->cachedBlockPalette) === 0) {
-					// Wait for the data to be needed before it is actually cached. Allows for all blocks and items to be
-					// registered before they are cached for the rest of the runtime.
 					$this->cachedBlockPalette = CustomiesBlockFactory::getInstance()->getBlockPaletteEntries();
 				}
 				$packet->levelSettings->experiments = $this->experiments;
@@ -40,4 +37,9 @@ final class CustomiesListener implements Listener {
 			}
 		}
 	}
+
+    public function onPlayerCreation(PlayerCreationEvent $event): void
+    {
+        $event->setPlayerClass(CustomiesPlayer::class);
+    }
 }
