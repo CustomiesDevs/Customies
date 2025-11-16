@@ -14,6 +14,7 @@ use pocketmine\inventory\CreativeGroup;
 use pocketmine\inventory\CreativeInventory;
 use pocketmine\item\Item;
 use pocketmine\item\StringToItemParser;
+use pocketmine\item\ItemTypeIds;
 use pocketmine\lang\Translatable;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\network\mcpe\convert\TypeConverter;
@@ -73,7 +74,7 @@ final class CustomiesItemFactory {
 	 * @phpstan-param class-string $className
 	 */
 	public function registerItem(Closure $itemFunc, string $identifier, ?CreativeInventoryInfo $creativeInfo = null): void {
-		$item = $itemFunc();
+		$item = $itemFunc(ItemTypeIds::newId());
 		if(!$item instanceof Item) {
 			throw new InvalidArgumentException("Class returned from closure is not a Item");
 		}
