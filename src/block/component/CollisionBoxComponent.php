@@ -14,9 +14,12 @@ class CollisionBoxComponent implements BlockComponent {
 	private Vector3 $size;
 
 	/**
-	 * Defines the area of the block that collides with entities. If set to true, default values are used. If set to false, the block's collision with entities is disabled. If this component is omitted, default values are used.
-	 * @param Vector3 $origin Minimal position of the bounds of the collision box. "origin" is specified as [x, y, z] and must be in the range (-8, 0, -8) to (8, 16, 8), inclusive.
-	 * @param Vector3 $size Size of each side of the collision box. Size is specified as [x, y, z]. "origin" + "size" must be in the range (-8, 0, -8) to (8, 16, 8), inclusive.
+	 * Defines the area of the block that collides with entities. If set to true, default values are used. If set to
+	 * false, the block's collision with entities is disabled. If this component is omitted, default values are used.
+	 * @param Vector3 $origin Minimal position of the bounds of the collision box. "origin" is specified as [x, y, z]
+	 *     and must be in the range (-8, 0, -8) to (8, 16, 8), inclusive.
+	 * @param Vector3 $size Size of each side of the collision box. Size is specified as [x, y, z]. "origin" + "size"
+	 *     must be in the range (-8, 0, -8) to (8, 16, 8), inclusive.
 	 * @param bool $useCollisionBox If collision should be enabled, default is set to `true`.
 	 */
 	public function __construct(bool $useCollisionBox = true, Vector3 $origin = new Vector3(-8.0, 0.0, -8.0), Vector3 $size = new Vector3(16.0, 16.0, 16.0)) {
@@ -30,6 +33,23 @@ class CollisionBoxComponent implements BlockComponent {
 	}
 
 	public function getValue(): CompoundTag {
+
+		$minX = max(0, $this->origin->getX() + 8);
+		$minY = max(0, $this->origin->getY());
+		$minZ = max(0, $this->origin->getZ() + 8);
+
+		$maxX = min(16, $minX + $this->size->getX());
+		$maxY = min(16, $minY + $this->size->getY());
+		$maxZ = min(16, $minZ + $this->size->getZ());
+
+		$box = CompoundTag::create()
+			->setFloat("minX", $minX)
+			->setFloat("minY", $minY)
+			->setFloat("minZ", $minZ)
+			->setFloat("maxX", $maxX)
+			->setFloat("maxY", $maxY)
+			->setFloat("maxZ", $maxZ);
+		$boxes = new ListTag([$box]);
 		return CompoundTag::create()
 			->setByte("enabled", $this->useCollisionBox ? 1 : 0)
 			->setTag("origin", new ListTag([
@@ -41,6 +61,7 @@ class CollisionBoxComponent implements BlockComponent {
 				new FloatTag($this->size->getX()),
 				new FloatTag($this->size->getY()),
 				new FloatTag($this->size->getZ())
-			]));
+			]))
+			->setTag("boxes", $boxes);
 	}
 }
