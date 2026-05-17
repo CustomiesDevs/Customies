@@ -14,14 +14,21 @@ final class ThrowableComponent implements ItemComponent {
 
 	/**
 	 * Sets the throwable item component.
-	 * @param bool $doSwingAnimation Determines whether the item should use the swing animation when thrown
-	 * @param float $launchPowerScale The scale at which the power of the throw increases
-	 * @param float $maxDrawDuration The maximum duration to draw a throwable item
-	 * @param float $maxLaunchPower The maximum power to launch the throwable item
-	 * @param float $minDrawDuration The minimum duration to draw a throwable item
-	 * @param bool $scalePowerByDrawDuration Whether or not the power of the throw increases with duration charged
+	 * @param bool $doSwingAnimation Determines whether the item should use the swing animation when thrown. Default is set to false.
+	 * @param float $launchPowerScale The scale at which the power of the throw increases. Default is set to 1.0.
+	 * @param float $maxDrawDuration The maximum duration to draw a throwable item. Default is set to 0.0.
+	 * @param float $maxLaunchPower The maximum power to launch the throwable item. Default is set to 1.0.
+	 * @param float $minDrawDuration The minimum duration to draw a throwable item. Default is set to 0.0.
+	 * @param bool $scalePowerByDrawDuration Whether or not the power of the throw increases with duration charged. Default is set to false.
 	 */
-	public function __construct(bool $doSwingAnimation = false, float $launchPowerScale = 1.0, float $maxDrawDuration = 0.0, float $maxLaunchPower = 1.0, float $minDrawDuration = 0.0, bool $scalePowerByDrawDuration = false) {
+	public function __construct(
+		bool $doSwingAnimation = false, 
+		float $launchPowerScale = 1.0, 
+		float $maxDrawDuration = 0.0, 
+		float $maxLaunchPower = 1.0, 
+		float $minDrawDuration = 0.0, 
+		bool $scalePowerByDrawDuration = false
+	) {
 		$this->doSwingAnimation = $doSwingAnimation;
 		$this->launchPowerScale = $launchPowerScale;
 		$this->maxDrawDuration = $maxDrawDuration;
@@ -31,7 +38,7 @@ final class ThrowableComponent implements ItemComponent {
 	}
 
 	public function getName(): string {
-		return "minecraft:throwable";
+		return 'minecraft:throwable';
 	}
 
 	public function getValue(): array {
@@ -45,7 +52,7 @@ final class ThrowableComponent implements ItemComponent {
 		];
 	}
 
-	public function isProperty(): bool {
-		return false;
+	public function getPropertyMapping(): ?array {
+		return null;
 	}
 }

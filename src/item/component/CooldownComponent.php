@@ -5,38 +5,52 @@ namespace customiesdevs\customies\item\component;
 
 final class CooldownComponent implements ItemComponent {
 
-	public const CATEGORY_SHIELD = "minecraft:shield";
-	public const CATEGORY_PEARL = "minecraft:ender_pearl";
-	public const CATEGORY_HORN = "minecraft:goat_horn";
-	public const CATEGORY_WINDCHARGE = "minecraft:wind_charge";
-	public const CATEGORY_CHORUS = "minecraft:chorusfruit";
+	public const CATEGORY_SHIELD = "shield";
+	public const CATEGORY_PEARL = "ender_pearl";
+	public const CATEGORY_HORN = "goat_horn";
+	public const CATEGORY_WINDCHARGE = "wind_charge";
+	public const CATEGORY_CHORUS = "chorusfruit";
+
+	/** 
+	 * Causes the cooldown to start when the player attacks while holding the item and
+	 * prevents the item from being used to attack while the cooldown is active. 
+	 */
+	public const TYPE_ATTACK = "attack";
+	/** 
+	 * Causes the cooldown to start when the item is used and
+	 * prevents the item from being used while the cooldown is active.
+	 */
+	public const TYPE_USE = "use";
 
 	private string $category;
 	private float $duration;
+	private string $type;
 
 	/**
-	 * Sets an item's "Cooldown" time. 
-	 * After using an item, it becomes unusable for the duration specified by the `duration` setting of this component.
-	 * @param string $category The type of cool down for this item. All items with a cool down component with the same category are put on cool down when one is used
-	 * @param float $duration The duration of time (in seconds) items with a matching category will spend cooling down before becoming usable again
+	 * The duration of time (in seconds) items with a matching category will spend cooling down before becoming usable again.
+	 * @param string $category All items with the same "category" are put on cooldown when one is used.
+	 * @param float $duration How long the item is on cooldown before being able to be used again.
+	 * @param string $type The type of cooldown (e.g., "use", "attack"). Default is "use".
 	 */
-	public function __construct(string $category, float $duration) {
+	public function __construct(string $category, float $duration, string $type = self::TYPE_USE) {
 		$this->category = $category;
 		$this->duration = $duration;
+		$this->type = $type;
 	}
 
 	public function getName(): string {
-		return "minecraft:cooldown";
+		return 'minecraft:cooldown';
 	}
 
 	public function getValue(): array {
 		return [
 			"category" => $this->category,
-			"duration" => $this->duration
+			"duration" => $this->duration,
+			"type" => $this->type,
 		];
 	}
 
-	public function isProperty(): bool {
-		return false;
+	public function getPropertyMapping(): ?array {
+		return null;
 	}
 }

@@ -45,6 +45,7 @@ final class BlockPalette {
 	}
 
 	/**
+	 * Returns all block states in the palette.
 	 * @return BlockStateDictionaryEntry[]
 	 */
 	public function getStates(): array {
@@ -52,6 +53,7 @@ final class BlockPalette {
 	}
 
 	/**
+	 * Returns all custom block states.
 	 * @return BlockStateDictionaryEntry[]
 	 */
 	public function getCustomStates(): array {
@@ -60,6 +62,9 @@ final class BlockPalette {
 
 	/**
 	 * Inserts the provided state in to the correct position of the palette.
+	 * @param CompoundTag $state
+	 * @param int $meta
+	 * @return void
 	 */
 	public function insertState(CompoundTag $state, int $meta = 0): void {
 		if(($name = $state->getString(BlockStateData::TAG_NAME, "")) === "") {
@@ -74,6 +79,8 @@ final class BlockPalette {
 
 	/**
 	 * Sorts the palette's block states in the correct order, also adding the provided state to the array.
+	 * @param BlockStateDictionaryEntry $newState
+	 * @return void
 	 */
 	private function sortWith(BlockStateDictionaryEntry $newState): void {
 		// To sort the block palette we first have to split the palette up in to groups of states. We only want to sort

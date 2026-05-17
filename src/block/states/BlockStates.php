@@ -1,33 +1,46 @@
 <?php
 declare(strict_types=1);
 
-namespace customiesdevs\customies\block\permutations;
+namespace customiesdevs\customies\block\states;
 
 use pocketmine\data\bedrock\block\convert\BlockStateReader;
 use pocketmine\data\bedrock\block\convert\BlockStateWriter;
 
-interface Permutable {
+interface BlockStates {
 
 	/**
-	 * Returns an array of the different block properties the block has. When the block is registered, it is registered
-	 * with all the possible combinations of all the block properties returned.
-	 * @return BlockProperty[]
+	 * Adds a state to the block.
+	 * @param BlockState $trait
+	 * @return void
 	 */
-	public function getBlockProperties(): array;
+	public function addState(BlockState $trait): void;
 
 	/**
-	 * Returns an array of the permutations the block has. They contain molang queries that can use the block properties
-	 * to control the components based on different states server-side.
-	 * @return Permutation[]
+	 * Checks if the block has a state by name.
+	 * @param string $name
+	 * @return bool
 	 */
-	public function getPermutations(): array;
+	public function hasState(string $name): bool;
+
+	/**
+	 * Retrieves a state by its name.
+	 * @param string $name
+	 * @return BlockState|null
+	 */
+	public function getState(string $name): ?BlockState;
+
+	/**
+	 * Returns all registered block states.
+	 * @return BlockState[]
+	 */
+	public function getStates(): array;
 
 	/**
 	 * Returns an array of the current block property values in the same order as those in getBlockProperties(). It is
 	 * used to convert the current properties in to a meta value that can be stored on disk in the world.
 	 * @return mixed[]
 	 */
-	public function getCurrentBlockProperties(): array;
+	public function getCurrentStates(): array;
 
 	/**
 	 * Serializes the block state to the given BlockStateWriter.

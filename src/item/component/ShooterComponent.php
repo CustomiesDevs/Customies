@@ -25,7 +25,15 @@ final class ShooterComponent implements ItemComponent {
 	 * @param float $maxDrawDuration Draw Duration. Default is set to 0
 	 * @param bool $scalePowerByDrawDuration Scale power by draw duration? Default is set to false
 	 */
-	public function __construct(string $item, bool $useOffhand = false, bool $searchInventory = false, bool $useInCreative = false, bool $chargeOnDraw = false, float $maxDrawDuration = 0.0, bool $scalePowerByDrawDuration = false) {
+	public function __construct(
+		string $item,
+		bool $useOffhand = false, 
+		bool $searchInventory = false, 
+		bool $useInCreative = false, 
+		bool $chargeOnDraw = false, 
+		float $maxDrawDuration = 0.0, 
+		bool $scalePowerByDrawDuration = false
+	) {
 		$this->item = $item;
 		$this->useOffhand = $useOffhand;
 		$this->searchInventory = $searchInventory;
@@ -36,14 +44,16 @@ final class ShooterComponent implements ItemComponent {
 	}
 
 	public function getName(): string {
-		return "minecraft:shooter";
+		return 'minecraft:shooter';
 	}
 
 	public function getValue(): array {
 		return [
 			"ammunition" => [
 				[
-					"item" => $this->item,
+					"item" => [
+						"name" => $this->item
+					],
 					"use_offhand" => $this->useOffhand,
 					"search_inventory" => $this->searchInventory,
 					"use_in_creative" => $this->useInCreative
@@ -55,7 +65,7 @@ final class ShooterComponent implements ItemComponent {
 		];
 	}
 
-	public function isProperty(): bool {
-		return false;
+	public function getPropertyMapping(): ?array {
+		return null;
 	}
 }

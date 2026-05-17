@@ -16,14 +16,16 @@ final class GlintComponent implements ItemComponent {
 	}
 
 	public function getName(): string {
-		return "foil";
+		return 'minecraft:glint';
 	}
 
-	public function getValue(): bool {
-		return $this->glint;
+	public function getValue(): array {
+		return [
+			"value" => $this->glint
+		];
 	}
 
-	public function isProperty(): bool {
-		return true;
+	public function getPropertyMapping(): ?array {
+		return ['foil' => $this->glint];
 	}
 }

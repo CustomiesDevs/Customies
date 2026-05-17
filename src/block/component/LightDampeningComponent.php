@@ -4,7 +4,7 @@ namespace customiesdevs\customies\block\component;
 
 use pocketmine\nbt\tag\CompoundTag;
 
-class LightDampeningComponent implements BlockComponent {
+final class LightDampeningComponent implements BlockComponent {
 
 	private int $dampening;
 
@@ -17,7 +17,7 @@ class LightDampeningComponent implements BlockComponent {
 	}
 
 	public function getName(): string {
-		return "minecraft:light_dampening";
+		return 'minecraft:light_dampening';
 	}
 
 	public function getValue(): CompoundTag {

@@ -2,9 +2,7 @@
 
 namespace customiesdevs\customies\block\component;
 
-use pocketmine\nbt\tag\CompoundTag;
-
-class FrictionComponent implements BlockComponent {
+final class FrictionComponent implements BlockComponent {
 
 	private float $friction;
 
@@ -18,11 +16,12 @@ class FrictionComponent implements BlockComponent {
 	}
 
 	public function getName(): string {
-		return "minecraft:friction";
+		return 'minecraft:friction';
 	}
 
-	public function getValue(): CompoundTag {
-		return CompoundTag::create()
-			->setFloat("value", $this->friction);
+	public function getValue(): array {
+		return [
+			"value" => $this->friction
+		];
 	}
 }

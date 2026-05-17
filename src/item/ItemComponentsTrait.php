@@ -3,102 +3,70 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies\item;
 
-use customiesdevs\customies\item\component\CanDestroyInCreativeComponent;
-use customiesdevs\customies\item\component\DamageComponent;
 use customiesdevs\customies\item\component\DisplayNameComponent;
-use customiesdevs\customies\item\component\DurabilityComponent;
-use customiesdevs\customies\item\component\FoodComponent;
-use customiesdevs\customies\item\component\FuelComponent;
-use customiesdevs\customies\item\component\HandEquippedComponent;
 use customiesdevs\customies\item\component\IconComponent;
 use customiesdevs\customies\item\component\ItemComponent;
-use customiesdevs\customies\item\component\MaxStackSizeComponent;
-use customiesdevs\customies\item\component\ProjectileComponent;
-use customiesdevs\customies\item\component\ThrowableComponent;
-use customiesdevs\customies\item\component\UseAnimationComponent;
-use customiesdevs\customies\item\component\WearableComponent;
-use pocketmine\entity\Consumable;
-use pocketmine\inventory\ArmorInventory;
-use pocketmine\item\Armor;
-use pocketmine\item\Durable;
-use pocketmine\item\Food;
-use pocketmine\item\ProjectileItem;
-use pocketmine\item\Sword;
-use pocketmine\item\Tool;
 
 trait ItemComponentsTrait {
 
-	/** @var ItemComponent[] */
+	/**
+	 * Registered item components indexed by component name.
+	 * 
+	 * @var array<string, ItemComponent>
+	 */
 	private array $components;
 
+	/**
+	 * Adds a component to the item.
+	 * 
+	 * @param ItemComponent $component The component to add
+	 */
 	public function addComponent(ItemComponent $component): void {
 		$this->components[$component->getName()] = $component;
 	}
 
+	/**
+	 * Checks if the item has a component by its name.
+	 * 
+	 * @param string $name The name of the component
+	 * @return bool True if the component exists, false otherwise
+	 */
 	public function hasComponent(string $name): bool {
 		return isset($this->components[$name]);
 	}
 
 	/**
-	 * @return ItemComponent[]
+	 * Retrieves a component by its name.
+	 * 
+	 * @param string $name The name of the component
+	 * @return ItemComponent|null The component if found, null otherwise
+	 */
+	public function getComponent(string $name): ?ItemComponent {
+		return $this->components[$name] ?? null;
+	}
+
+	/**
+	 * Returns all components of the item.
+	 *
+	 * @return ItemComponent[] Array of all components
 	 */
 	public function getComponents(): array {
 		return $this->components;
 	}
 
 	/**
-	 * Initializes the item with default components that are required for the item to function correctly.
+	 * @todo
+	 * Initializes common item components.
+	 * 
+	 * @param string $texture The texture identifier for the icon
+	 * @param string $name The display name of the item
 	 */
-	protected function initComponent(string $texture): void {
+	protected function initComponent(string $texture, string $name): void {
+		// Only initialize if no components are set yet
+		if($this->getComponents() !== []){
+			return;
+		}
 		$this->addComponent(new IconComponent($texture));
-		$this->addComponent(new CanDestroyInCreativeComponent());
-		$this->addComponent(new MaxStackSizeComponent($this->getMaxStackSize()));
-
-		if($this instanceof Armor) {
-			$slot = match ($this->getArmorSlot()) {
-				ArmorInventory::SLOT_HEAD => WearableComponent::SLOT_ARMOR_HEAD,
-				ArmorInventory::SLOT_CHEST => WearableComponent::SLOT_ARMOR_CHEST,
-				ArmorInventory::SLOT_LEGS => WearableComponent::SLOT_ARMOR_LEGS,
-				ArmorInventory::SLOT_FEET => WearableComponent::SLOT_ARMOR_FEET,
-				default => WearableComponent::SLOT_ARMOR
-			};
-			$this->addComponent(new WearableComponent($slot, $this->getDefensePoints()));
-		}
-
-		if($this instanceof Consumable) {
-			if(($food = $this instanceof Food)) {
-				$this->addComponent(new FoodComponent(!$this->requiresHunger()));
-			}
-			$this->addComponent(new UseAnimationComponent($food ? UseAnimationComponent::ANIMATION_EAT : UseAnimationComponent::ANIMATION_DRINK));
-			$this->setUseDuration(20);
-		}
-
-		if($this instanceof Durable) {
-			$this->addComponent(new DurabilityComponent($this->getMaxDurability()));
-		}
-
-		if($this instanceof ProjectileItem) {
-			$this->addComponent(new ProjectileComponent(1.25, "projectile"));
-			$this->addComponent(new ThrowableComponent(true));
-		}
-
-		if($this->getName() !== "Unknown") {
-			$this->addComponent(new DisplayNameComponent($this->getName()));
-		}
-
-		if($this->getFuelTime() > 0) {
-			$this->addComponent(new FuelComponent($this->getFuelTime()));
-		}
-
-		if($this->getAttackPoints() > 0) {
-			$this->addComponent(new DamageComponent($this->getAttackPoints()));
-		}
-
-		if($this instanceof Tool) {
-			$this->addComponent(new HandEquippedComponent());
-			if ($this instanceof Sword) {
-				$this->addComponent(new CanDestroyInCreativeComponent(false));
-			}
-		}
+		$this->addComponent(new DisplayNameComponent($name));
 	}
 }

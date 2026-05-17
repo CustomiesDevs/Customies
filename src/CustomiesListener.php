@@ -13,29 +13,31 @@ use pocketmine\network\mcpe\protocol\types\Experiments;
 use function count;
 
 final class CustomiesListener implements Listener {
+
 	/** @var BlockPaletteEntry[] */
 	private array $cachedBlockPalette = [];
 	private Experiments $experiments;
 
 	public function __construct() {
 		$this->experiments = new Experiments([
-			// "data_driven_items" is required for custom blocks to render in-game. With this disabled, they will be
-			// shown as the UPDATE texture block.
+			// "data_driven_items" is required for custom blocks to render in-game.
+			// With this disabled, custom blocks will appear as the UPDATE texture block.
 			"data_driven_items" => true,
+			"upcoming_creator_features" => true
 		], true);
 	}
 
 	public function onDataPacketSend(DataPacketSendEvent $event): void {
 		foreach($event->getPackets() as $packet){
-			if($packet instanceof StartGamePacket) {
-				if(count($this->cachedBlockPalette) === 0) {
+			if($packet instanceof StartGamePacket){
+				if(count($this->cachedBlockPalette) === 0){
 					// Wait for the data to be needed before it is actually cached. Allows for all blocks and items to be
 					// registered before they are cached for the rest of the runtime.
 					$this->cachedBlockPalette = CustomiesBlockFactory::getInstance()->getBlockPaletteEntries();
 				}
 				$packet->levelSettings->experiments = $this->experiments;
 				$packet->blockPalette = $this->cachedBlockPalette;
-			} elseif($packet instanceof ResourcePackStackPacket) {
+			}elseif($packet instanceof ResourcePackStackPacket) {
 				$packet->experiments = $this->experiments;
 			}
 		}

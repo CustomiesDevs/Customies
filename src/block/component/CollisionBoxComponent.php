@@ -1,46 +1,78 @@
 <?php
+declare(strict_types=1);
 
 namespace customiesdevs\customies\block\component;
 
-use pocketmine\math\Vector3;
-use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\nbt\tag\FloatTag;
-use pocketmine\nbt\tag\ListTag;
+use customiesdevs\customies\block\properties\Box;
 
-class CollisionBoxComponent implements BlockComponent {
+final class CollisionBoxComponent implements BlockComponent {
 
-	private bool $useCollisionBox;
-	private Vector3 $origin;
-	private Vector3 $size;
+	private bool $enabled;
+	/** @var Box[] */
+	private array $boxes = [];
 
 	/**
-	 * Defines the area of the block that collides with entities. If set to true, default values are used. If set to false, the block's collision with entities is disabled. If this component is omitted, default values are used.
-	 * @param Vector3 $origin Minimal position of the bounds of the collision box. "origin" is specified as [x, y, z] and must be in the range (-8, 0, -8) to (8, 16, 8), inclusive.
-	 * @param Vector3 $size Size of each side of the collision box. Size is specified as [x, y, z]. "origin" + "size" must be in the range (-8, 0, -8) to (8, 16, 8), inclusive.
-	 * @param bool $useCollisionBox If collision should be enabled, default is set to `true`.
+	 * Defines the area of the block that collides with entities.
+	 * @param bool $enabled If collision should be enabled
 	 */
-	public function __construct(bool $useCollisionBox = true, Vector3 $origin = new Vector3(-8.0, 0.0, -8.0), Vector3 $size = new Vector3(16.0, 16.0, 16.0)) {
-		$this->useCollisionBox = $useCollisionBox;
-		$this->origin = $origin;
-		$this->size = $size;
+	public function __construct(bool $enabled = true) {
+		$this->enabled = $enabled;
 	}
 
 	public function getName(): string {
-		return "minecraft:collision_box";
+		return 'minecraft:collision_box';
 	}
 
-	public function getValue(): CompoundTag {
-		return CompoundTag::create()
-			->setByte("enabled", $this->useCollisionBox ? 1 : 0)
-			->setTag("origin", new ListTag([
-				new FloatTag($this->origin->getX()),
-				new FloatTag($this->origin->getY()),
-				new FloatTag($this->origin->getZ())
-			]))
-			->setTag("size", new ListTag([
-				new FloatTag($this->size->getX()),
-				new FloatTag($this->size->getY()),
-				new FloatTag($this->size->getZ())
-			]));
+	public function getValue(): array {
+		$boxes = [];
+		foreach($this->boxes as $box){
+			$boxes[] = $box->toNbtArray();
+		}
+		// if no boxes are defined we add a default full block box
+		if($this->enabled && empty($boxes)){
+			$boxes[] = Box::defaultBox()->toNbtArray();
+		}
+		// no collision
+		if(!$this->enabled){
+			$boxes[] = [];
+		}
+		return [
+			"boxes" => $boxes,
+			"enabled" => $this->enabled
+		];
+	}
+
+	/**
+	 * Adds a single collision box.
+	 * @param Box $box
+	 * The collision box to add.
+	 * @return $this
+	 */
+	public function addBox(Box $box): self {
+		if(count($this->boxes) === 1){
+			$this->boxes = [];
+		}
+		$this->boxes[] = $box;
+		return $this;
+	}
+
+	/**
+	 * Adds multiple collision boxes.
+	 * @param Box[] $boxes
+	 * An array of collision boxes to add.
+	 * @return $this
+	 * @throws \InvalidArgumentException If any element in the array is not an instance of Box.
+	 */
+	public function addBoxes(array $boxes): self {
+		if(count($this->boxes) === 1){
+			$this->boxes = [];
+		}
+		foreach($boxes as $box){
+			if(!$box instanceof Box){
+				throw new \InvalidArgumentException("All boxes must be instances of " . Box::class);
+			}
+			$this->boxes[] = $box;
+		}
+		return $this;
 	}
 }

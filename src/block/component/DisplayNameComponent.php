@@ -2,9 +2,7 @@
 
 namespace customiesdevs\customies\block\component;
 
-use pocketmine\nbt\tag\CompoundTag;
-
-class DisplayNameComponent implements BlockComponent {
+final class DisplayNameComponent implements BlockComponent {
 
 	private string $displayName;
 
@@ -20,11 +18,12 @@ class DisplayNameComponent implements BlockComponent {
 	}
 
 	public function getName(): string {
-		return "minecraft:display_name";
+		return 'minecraft:display_name';
 	}
 
-	public function getValue(): CompoundTag {
-		return CompoundTag::create()
-			->setString("value", $this->displayName);
+	public function getValue(): array {
+		return [
+			"value" => $this->displayName
+		];
 	}
 }

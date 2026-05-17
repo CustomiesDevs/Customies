@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies\block\permutations;
 
+use customiesdevs\customies\block\states\BlockState;
 use Exception;
 use function array_map;
 use function count;
@@ -17,9 +18,9 @@ class Permutations {
 	 * of the block. An exception is thrown if the meta value does not match any combinations of all the block
 	 * properties.
 	 */
-	public static function fromMeta(Permutable $block, int $meta): array {
+	public static function fromMeta(BlockPermutations $block, int $meta): array {
 		$properties = self::getCartesianProduct(
-			array_map(static fn(BlockProperty $blockProperty) => $blockProperty->getValues(), $block->getBlockProperties())
+			array_map(static fn(BlockState $blockProperty) => $blockProperty->getValues(), $block->getStates())
 		)[$meta] ?? null;
 		if($properties === null) {
 			throw new Exception("Unable to calculate permutations from block meta: " . $meta);
@@ -31,12 +32,12 @@ class Permutations {
 	 * Attempts to convert the block in to a meta value based on the possible permutations of the block. An exception is
 	 * thrown if the state of the block is not a possible combination of all the block properties.
 	 */
-	public static function toMeta(Permutable $block): int {
+	public static function toMeta(BlockPermutations $block): int {
 		$properties = self::getCartesianProduct(
-			array_map(static fn(BlockProperty $blockProperty) => $blockProperty->getValues(), $block->getBlockProperties())
+			array_map(static fn(BlockState $blockProperty) => $blockProperty->getValues(), $block->getStates())
 		);
 		foreach($properties as $meta => $permutations){
-			if($permutations === $block->getCurrentBlockProperties()) {
+			if($permutations === $block->getCurrentStates()) {
 				return $meta;
 			}
 		}
@@ -46,8 +47,8 @@ class Permutations {
 	/**
 	 * Returns the number of bits required to represent all the possible permutations of the block.
 	 */
-	public static function getStateBitmask(Permutable $block): int {
-		$possibleValues = array_map(static fn(BlockProperty $blockProperty) => $blockProperty->getValues(), $block->getBlockProperties());
+	public static function getStateBitmask(BlockPermutations $block): int {
+		$possibleValues = array_map(static fn(BlockState $blockProperty) => $blockProperty->getValues(), $block->getStates());
 		return count(self::getCartesianProduct($possibleValues)) - 1;
 	}
 
@@ -56,13 +57,20 @@ class Permutations {
 	 * product (https://en.wikipedia.org/wiki/Cartesian_product).
 	 */
 	public static function getCartesianProduct(array $arrays): array {
+		if($arrays === []){
+			return [[]];
+		}
 		$result = [];
 		$count = count($arrays) - 1;
 		$combinations = array_product(array_map(static fn(array $array) => count($array), $arrays));
 		for($i = 0; $i < $combinations; $i++){
-			$result[] = array_map(static fn(array $array) => current($array), $arrays);
+			$row = [];
+			foreach($arrays as $index => $_){
+				$row[] = current($arrays[$index]);
+			}
+			$result[] = $row;
 			for($j = $count; $j >= 0; $j--){
-				if(next($arrays[$j])) {
+				if(next($arrays[$j]) !== false){
 					break;
 				}
 				reset($arrays[$j]);

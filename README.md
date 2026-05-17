@@ -8,12 +8,14 @@ A PocketMine-MP plugin that implements support for custom blocks, items and enti
 
 <a href="https://discord.gg/Tm6wGxWqgh"><img src="https://img.shields.io/discord/989466131305754625?label=discord&color=7289DA&logo=discord" alt="Discord" /></a>
 
-Official Discord community chat for socializing, receiving help with the plugin, and sharing creations. Join in on the
-fun!
+Official Discord community chat for socializing, receiving help with the plugin, and sharing creations. Join in on the fun!
 
 ## Usage
 
 The usage guides have been moved to the [Customies Wiki](https://github.com/CustomiesDevs/Customies/wiki)!
+
+[![Mojang Item Docs](https://img.shields.io/badge/📖-Microsoft_Docs-blue)](https://learn.microsoft.com/en-us/minecraft/creator/reference/content/itemreference/examples/itemcomponentlist?view=minecraft-bedrock-stable)
+[![Mojang Block Docs](https://img.shields.io/badge/📖-Microsoft_Docs-blue)](https://learn.microsoft.com/en-us/minecraft/creator/reference/content/blockreference/examples/blockcomponents/blockcomponentslist?view=minecraft-bedrock-stable)
 
 ## Important Contributors
 

@@ -5,7 +5,7 @@ namespace customiesdevs\customies\item\component;
 
 final class InteractButtonComponent implements ItemComponent {
 
-	private bool|string $interactButton;
+	private string $interactButton;
 
 	/**
 	 * Ineract Button is a boolean or string that determines if the interact button is shown in touch controls, and what text is displayed on the button. When set to 'true', the default 'Use Item' text will be used.
@@ -20,17 +20,17 @@ final class InteractButtonComponent implements ItemComponent {
 	}
 
 	public function getName(): string {
-		return "minecraft:interact_button";
+		return 'minecraft:interact_button';
 	}
 
 	public function getValue(): array {
 		return [
-			"interact_text" => (string) $this->interactButton,
-			"requires_interact" => 1
+			"interact_text" => $this->interactButton,
+			"requires_interact" => true
 		];
 	}
 
-	public function isProperty(): bool {
-		return false;
+	public function getPropertyMapping(): ?array {
+		return null;
 	}
 }

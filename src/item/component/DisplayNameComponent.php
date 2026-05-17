@@ -17,7 +17,7 @@ final class DisplayNameComponent implements ItemComponent {
 	}
 
 	public function getName(): string {
-		return "minecraft:display_name";
+		return 'minecraft:display_name';
 	}
 
 	public function getValue(): array {
@@ -26,7 +26,7 @@ final class DisplayNameComponent implements ItemComponent {
 		];
 	}
 
-	public function isProperty(): bool {
-		return false;
+	public function getPropertyMapping(): ?array {
+		return null;
 	}
 }

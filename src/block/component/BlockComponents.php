@@ -1,6 +1,7 @@
 <?php
+declare(strict_types=1);
 
-namespace customiesdevs\customies\block;
+namespace customiesdevs\customies\block\component;
 
 use customiesdevs\customies\block\component\BlockComponent;
 
@@ -20,6 +21,13 @@ interface BlockComponents {
 	 * @return bool
 	 */
 	public function hasComponent(string $name): bool;
+
+	/**
+	 * Returns the component with the provided name, or null if it does not exist.
+	 * @param string $name
+	 * @return BlockComponent|null
+	 */
+	public function getComponent(string $name): ?BlockComponent;
 
 	/**
 	 * @return BlockComponent[]

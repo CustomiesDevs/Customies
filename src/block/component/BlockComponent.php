@@ -3,19 +3,17 @@ declare(strict_types=1);
 
 namespace customiesdevs\customies\block\component;
 
-use pocketmine\nbt\tag\CompoundTag;
-
 interface BlockComponent {
 
 	/**
-	 * Returns the name of the component
+	 * The component identifier, e.g. "minecraft:collision_box"
 	 * @return string
 	 */
 	public function getName(): string;
 
 	/**
-	 * Returns the value of the component
-	 * @return CompoundTag
+	 * The value of this component, as it would appear in a block JSON.
+	 * @return mixed
 	 */
-	public function getValue(): CompoundTag;
+	public function getValue(): mixed;
 }

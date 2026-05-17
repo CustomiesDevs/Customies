@@ -22,7 +22,7 @@ final class RecordComponent implements ItemComponent {
 	}
 
 	public function getName(): string {
-		return "minecraft:record";
+		return 'minecraft:record';
 	}
 
 	public function getValue(): array {
@@ -33,7 +33,7 @@ final class RecordComponent implements ItemComponent {
 		];
 	}
 
-	public function isProperty(): bool {
-		return false;
+	public function getPropertyMapping(): ?array {
+		return null;
 	}
 }

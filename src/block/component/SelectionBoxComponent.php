@@ -3,11 +3,8 @@
 namespace customiesdevs\customies\block\component;
 
 use pocketmine\math\Vector3;
-use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\nbt\tag\FloatTag;
-use pocketmine\nbt\tag\ListTag;
 
-class SelectionBoxComponent implements BlockComponent {
+final class SelectionBoxComponent implements BlockComponent {
 
 	private bool $useSelectionBox;
 	private Vector3 $origin;
@@ -26,21 +23,22 @@ class SelectionBoxComponent implements BlockComponent {
 	}
 
 	public function getName(): string {
-		return "minecraft:selection_box";
+		return 'minecraft:selection_box';
 	}
 
-	public function getValue(): CompoundTag {
-		return CompoundTag::create()
-			->setByte("enabled", $this->useSelectionBox ? 1 : 0)
-			->setTag("origin", new ListTag([
-				new FloatTag($this->origin->getX()),
-				new FloatTag($this->origin->getY()),
-				new FloatTag($this->origin->getZ())
-			]))
-			->setTag("size", new ListTag([
-				new FloatTag($this->size->getX()),
-				new FloatTag($this->size->getY()),
-				new FloatTag($this->size->getZ())
-			]));
+	public function getValue(): array {
+		return [
+			"enabled" => $this->useSelectionBox,
+			"origin" => [
+				$this->origin->getX(), 
+				$this->origin->getY(), 
+				$this->origin->getZ()
+			],
+			"size" => [
+				$this->size->getX(), 
+				$this->size->getY(), 
+				$this->size->getZ()
+			]
+		];
 	}
 }
